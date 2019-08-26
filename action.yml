@@ -1,0 +1,9 @@
+name: 'Guardian'
+description: 'Run Microsoft Guardian to perform security analysis.'
+author: 'Microsoft'
+inputs:
+  guardian-version:
+    description: 'The version of Guardian to use. Default: latest'
+runs:
+  using: 'node12'
+  main: 'run-guardian.js'
