@@ -6,37 +6,38 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 
 export class GuardianAction {
-	constructor(private core: typeof actionsCore, private exec: typeof actionsExec) { }
-	
-	setupEnvironment(actionDirectory: string) {
-		// set up the input environment variables
-		process.env.GDN_AGENT_ACTIONDIRECTORY = actionDirectory;
 
-		const actionFilePath = `${actionDirectory}/action.yml`
-		console.log(`actionFilePath = ${actionFilePath}`);
+    constructor(private core: typeof actionsCore, private exec: typeof actionsExec) { }
+    
+    setupEnvironment(actionDirectory: string) {
+        // set up the input environment variables
+        process.env.GDN_AGENT_ACTIONDIRECTORY = actionDirectory;
 
-		const actionFile = yaml.safeLoad(fs.readFileSync(actionFilePath, 'utf8'));
+        const actionFilePath = `${actionDirectory}/action.yml`
+        console.log(`actionFilePath = ${actionFilePath}`);
 
-		const actionName = actionFile.name.toUpperCase()
-		console.log(`actionName = ${actionName}`);
+        const actionFile = yaml.safeLoad(fs.readFileSync(actionFilePath, 'utf8'));
 
-		for (const actionInput of actionFile.inputs) {
-			const inputValue = this.core.getInput(`${actionInput.name}`);
-			if (inputValue != null)
-			{
-				const varName = `GDNP_${actionName}_${actionInput.name.toUpperCase()}`;
-				console.log(`Input : ${actionName} = ${inputValue}`);
-				process.env[varName] = inputValue;
-			}
-		}
-	}
+        const actionName = actionFile.name.toUpperCase()
+        console.log(`actionName = ${actionName}`);
 
-	async analyze() {
-		const analyzeCommand = 'analyze'
-		this.run(analyzeCommand);
-	}
+        for (const actionInput of actionFile.inputs) {
+            const inputValue = this.core.getInput(`${actionInput.name}`);
+            if (inputValue != null)
+            {
+                const varName = `GDNP_${actionName}_${actionInput.name.toUpperCase()}`;
+                console.log(`Input : ${varName} = ${inputValue}`);
+                process.env[varName] = inputValue;
+            }
+        }
+    }
 
-	async break() {
+    async analyze() {
+        const analyzeCommand = 'analyze'
+        this.run(analyzeCommand);
+    }
+
+    async break() {
         const breakCommand = 'break';
         this.run(breakCommand);
     }
@@ -51,18 +52,18 @@ export class GuardianAction {
         this.run(publishCommand);
     }
 
-	async run(actionCommand: string) {
+    async run(actionCommand: string) {
 
-		const gdnActionFolder = path.resolve(__dirname);
-		this.core.debug(`dirname = ${__dirname}`);
+        const gdnActionFolder = path.resolve(__dirname);
+        this.core.debug(`dirname = ${__dirname}`);
 
-		this.setupEnvironment(actionDirectory);
+        this.setupEnvironment(actionDirectory);
 
-		try {
-			await this.exec.exec('<toolPath>', '<arguments>')
-		}
-		catch (error) {
-			this.core.setFailed(error.Message);
-		}
-	}
+        try {
+            await this.exec.exec('<toolPath>', '<arguments>')
+        }
+        catch (error) {
+            this.core.setFailed(error.Message);
+        }
+    }
 }
