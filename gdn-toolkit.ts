@@ -2,6 +2,8 @@ import * as path from 'path';
 import * as process from 'process';
 import * as actionsCore from '@actions/core';
 import * as actionsExec from '@actions/exec';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 
 export class GuardianAction {
 	constructor(private core: typeof actionsCore, private exec: typeof actionsExec) { }
@@ -10,14 +12,20 @@ export class GuardianAction {
 		// set up the input environment variables
 		process.env.GDN_AGENT_ACTIONDIRECTORY = actionDirectory;
 
-		let actionYamlFile = require(`${actionDirectory}/action.yml`);
-		console.log(`actionYamlFile = ${actionYamlFile}`);
+		const actionFilePath = `${actionDirectory}/action.yml`
+		console.log(`actionFilePath = ${actionFilePath}`);
 
-		for (let actionInput of actionYamlFile.inputs) {
-			let inputValue = this.core.getInput(`${actionInput.name}`);
+		const actionFile = yaml.safeLoad(fs.readFileSync(actionFilePath, 'utf8'));
+
+		const actionName = actionFile.name.toUpperCase()
+		console.log(`actionName = ${actionName}`);
+
+		for (const actionInput of actionFile.inputs) {
+			const inputValue = this.core.getInput(`${actionInput.name}`);
 			if (inputValue != null)
 			{
-				let varName = "GDN_INPUT_" + actionInput.name.toUpperCase();
+				const varName = `GDNP_${actionName}_${actionInput.name.toUpperCase()}`;
+				console.log(`Input : ${actionName} = ${inputValue}`);
 				process.env[varName] = inputValue;
 			}
 		}
