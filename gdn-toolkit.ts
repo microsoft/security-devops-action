@@ -23,8 +23,7 @@ export class GuardianAction {
 
         for (const actionInput of actionFile.inputs) {
             const inputValue = this.core.getInput(`${actionInput.name}`);
-            if (inputValue != null)
-            {
+            if (inputValue != null) {
                 const varName = `GDNP_${actionName}_${actionInput.name.toUpperCase()}`;
                 const varValue = process.env[varName];
                 if (varValue == null) {
