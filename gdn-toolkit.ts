@@ -30,8 +30,7 @@ export class GuardianAction {
                 if (varValue == null) {
                     console.log(`Input : ${varName}`);
                     process.env[varName] = inputValue;
-                }
-                else {
+                } else {
                     console.log(`Override : ${varName}`);
                 }
             }
