@@ -26,8 +26,14 @@ export class GuardianAction {
             if (inputValue != null)
             {
                 const varName = `GDNP_${actionName}_${actionInput.name.toUpperCase()}`;
-                console.log(`Input : ${varName} = ${inputValue}`);
-                process.env[varName] = inputValue;
+                const varValue = process.env[varName];
+                if (varValue == null) {
+                    console.log(`Input : ${varName}`);
+                    process.env[varName] = inputValue;
+                }
+                else {
+                    console.log(`Override : ${varName}`);
+                }
             }
         }
     }
