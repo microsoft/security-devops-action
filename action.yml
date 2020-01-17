@@ -1,6 +1,9 @@
 name: 'Guardian'
 description: 'Run Microsoft Guardian security analysis.'
 author: 'Microsoft'
+branding:
+  icon: 'shield'
+  color: 'black'
 inputs:
   guardian-version:
     description: 'The version of Guardian to use. Default: latest'
