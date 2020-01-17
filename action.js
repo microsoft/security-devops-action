@@ -1,0 +1,1 @@
+console.write("Guardian GitHub Action");

@@ -12,7 +12,7 @@
     },
     "include": [
 		"gdn-toolkit.ts",
-    	"gdn-action.ts"
+    	"action.ts"
     ],
     "exclude": [
     	"**/node_modules/**/*"

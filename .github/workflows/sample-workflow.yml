@@ -8,9 +8,11 @@ on:
 
 jobs:
   sample:
-    name: Sample Job
+    name: Self test
     runs-on: [self-hosted]
     steps:
-    - name: Hello, Sample!
+    - name: Hello, World!
       run: |
-        echo Hello, Sample!
+        echo Hello, Guardian GitHub!
+    - name: Run Guardian
+      uses: Microsoft/guardian-github@v1
