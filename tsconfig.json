@@ -1,13 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        "rootDir": "."
-    },
-    "include": [
-    	"action.ts"
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": [
+      "es6"
     ],
-    "exclude": [
-    	"node_modules"
-    ]
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ]
 }

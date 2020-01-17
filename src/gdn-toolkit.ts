@@ -61,10 +61,11 @@ export class GuardianAction {
         const gdnActionFolder = path.resolve(__dirname);
         this.core.debug(`dirname = ${__dirname}`);
 
-        this.setupEnvironment(actionDirectory);
+        // this.setupEnvironment(actionDirectory);
 
         try {
-            await this.exec.exec('<toolPath>', '<arguments>')
+            console.log("Hello, Guardian Action!");
+            // await this.exec.exec('<toolPath>', '<arguments>')
         }
         catch (error) {
             this.core.setFailed(error.Message);
