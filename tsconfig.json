@@ -2,19 +2,12 @@
     "compilerOptions": {
         "target": "ES6",
         "module": "commonjs",
-        "moduleResolution": "node",
-        "strict": true,
-        "rootDir": ".",
-        "baseUrl": ".",
-        "paths": {
-        	"gdn-toolkit": [ "gdn-toolkit.ts" ]
-        }
+        "rootDir": "."
     },
     "include": [
-		"gdn-toolkit.ts",
     	"action.ts"
     ],
     "exclude": [
-    	"**/node_modules/**/*"
+    	"node_modules"
     ]
 }
