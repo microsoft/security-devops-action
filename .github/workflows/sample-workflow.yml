@@ -15,4 +15,4 @@ jobs:
       run: |
         echo Hello, Guardian GitHub!
     - name: Run Guardian
-      uses: Microsoft/guardian-github@v1
+      uses: Microsoft/guardian-github@master
