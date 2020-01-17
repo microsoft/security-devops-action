@@ -1,0 +1,16 @@
+# guardian-github action sample
+
+name: Guardian GitHub Action Sample
+runs-on: self-hosted
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sample:
+    name: Sample Job
+    steps:
+    - name: Hello, Sample!
+      run: |
+        echo Hello, Sample!
