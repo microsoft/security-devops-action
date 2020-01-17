@@ -9,4 +9,4 @@ inputs:
     description: 'The version of Guardian to use. Default: latest'
 runs:
   using: 'node12'
-  main: 'action.js'
+  main: 'lib/action.js'
