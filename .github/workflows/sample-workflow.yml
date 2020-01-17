@@ -1,7 +1,7 @@
 # guardian-github action sample
 
 name: Guardian GitHub Action Sample
-runs-on: self-hosted
+runs-on: [self-hosted]
 on:
   push:
     branches:
