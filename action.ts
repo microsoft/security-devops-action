@@ -2,5 +2,5 @@
 // import * as exec from '@actions/exec';
 // import * as gdn from 'gdn-toolkit';
 
-console.write("Guardian GitHub Action");
+console.log("Guardian GitHub Action");
 //new gdn.GuardianAction(core, exec).analyze();
