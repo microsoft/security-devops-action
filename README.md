@@ -1,14 +1,29 @@
+# guardian-github
+
+This action runs [Microsoft Guardian](https://aka.ms/msguardian) for security analysis by:
+
+* Installing the Guardian CLI
+* Installing the latest Microsoft security policy
+* Installing the latest Microsoft and 3rd party security tools
+* Automatic or user-provided configuration of security tools
+* Execution of a full suite of security tools
+* Normalized processing of results into the SARIF format
+* Build breaks and more
+
+# Usage
+
+See [action.yml](action.yml)
+
+Basic:
+```
+steps:
+- uses: actions/checkout@master
+- uses: actions/setup-dotnet@v1
+  with:
+    dotnet-version: '2.2.1' # Guardian CLI version
+- uses: Microsoft/guardian-github@master
+```
 
 # Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Contributions are welcome! See the [Contributor's Guide](docs/contributors.md).
