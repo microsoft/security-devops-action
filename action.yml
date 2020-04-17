@@ -5,8 +5,10 @@ branding:
   icon: 'shield'
   color: 'black'
 inputs:
-  guardian-version:
+  version:
     description: 'The version of Guardian to use. Default: latest'
+  license:
+    description: 'The license for Guardian. This must be kept as a secret in the GitHub repository.'
 runs:
   using: 'node12'
   main: 'lib/action.js'
