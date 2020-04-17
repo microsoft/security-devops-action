@@ -1,6 +1,6 @@
 # guardian-github
 
-This action runs [Microsoft Guardian](https://aka.ms/msguardian) for security analysis by:
+This action runs the [Microsoft Guardian CLI](https://aka.ms/msguardian) for security analysis by:
 
 * Installing the Guardian CLI
 * Installing the latest Microsoft security policy
@@ -14,15 +14,38 @@ This action runs [Microsoft Guardian](https://aka.ms/msguardian) for security an
 
 See [action.yml](action.yml)
 
-Basic:
-```
+## Basic
+
+Run Guardian with the default policy and recommended tools that are applicable.
+
+```yaml
 steps:
 - uses: actions/checkout@master
 - uses: actions/setup-dotnet@v1
   with:
-    dotnet-version: '2.2.1' # Guardian CLI version
-- uses: Microsoft/guardian-github@master
+    dotnet-version: '3.1.2'
+- name: Run Guardian
+  uses: Microsoft/guardian-github@master
+- name: Upload results to Security tab
+  uses: Anthophila/codeql-action/codeql/upload-sarif@master
+  with:
+    sarif_file: $(GuardianExportedFilePath)
 ```
+
+## Upload Results to the Security tab
+
+To upload results to the Security tab of your repo, run the `Anthophila/codeql-action/codeql/upload-sarif` action immediately after running Guardian. Guardian sets the environment variable `GuardianExportedFilePath` to the path of a single SARIF file that can be uploaded to this API.
+
+```yaml
+- name: Upload results to Security tab
+  uses: Anthophila/codeql-action/codeql/upload-sarif@master
+  with:
+    sarif_file: $(GuardianExportedFilePath)
+```
+
+# License
+
+The scripts and documentation in this project are released under the [MIT License](LICENSE)
 
 # Contributing
 
