@@ -1,8 +1,6 @@
 # guardian-github
 
-<p align="left">
-  <a href="https://github.com/Microsoft/guardian-github"><img alt="GitHub Actions status" src="https://github.com/Microsoft/guardian-github/workflows/Guardian&20GitHub%20Action%20Sample/badge.svg"></a>
-</p>
+![Guardian GitHub Action Sample](https://github.com/microsoft/guardian-github/workflows/Guardian%20GitHub%20Action%20Sample/badge.svg)
 
 This action runs the [Microsoft Guardian CLI](https://aka.ms/msguardian) for security analysis by:
 
