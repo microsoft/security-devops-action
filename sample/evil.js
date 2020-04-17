@@ -1,1 +1,2 @@
-eval("console.log(\"Hello, security vulnerabilities!\");");
+let injection = "Hello, security vulnerabilities!";
+eval(`console.log(\"${injection}\");`);
