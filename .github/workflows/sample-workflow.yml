@@ -1,6 +1,6 @@
 # guardian-github action sample
 
-name: Guardian GitHub Action Sample
+name: Microsoft Security Code Analysis Action Sample
 on:
   push:
     branches:
