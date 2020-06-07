@@ -47,8 +47,8 @@ export class GuardianAction {
     }
 
     async export() {
-        const exportCommand = 'export';
-        this.run(exportCommand);
+        const reportCommand = 'export';
+        this.run(reportCommand);
     }
 
     async publish() {

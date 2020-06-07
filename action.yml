@@ -1,5 +1,5 @@
-name: 'Guardian'
-description: 'Run Microsoft Guardian security analysis.'
+name: 'security-code-analysis-action'
+description: 'Run Microsoft Security Code Analysis'
 author: 'Microsoft'
 branding:
   icon: 'shield'

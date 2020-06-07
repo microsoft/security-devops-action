@@ -1,6 +1,6 @@
-# guardian-github
+# microsoft/security-code-analysis-action
 
-![Guardian GitHub Action Sample](https://github.com/microsoft/guardian-github/workflows/Guardian%20GitHub%20Action%20Sample/badge.svg)
+![Microsoft Security Code Analysis Action Sample](https://github.com/microsoft/security-code-analysis-action/workflows/Microsoft%20Security%20Code%20Analysis%20Action%20Sample/badge.svg)
 
 This action runs the [Microsoft Guardian CLI](https://aka.ms/msguardian) for security analysis by:
 
@@ -18,7 +18,7 @@ See [action.yml](action.yml)
 
 ## Basic
 
-Run Guardian with the default policy and recommended tools that are applicable.
+Run Guardian with the default policy and recommended tools.
 
 ```yaml
 steps:
