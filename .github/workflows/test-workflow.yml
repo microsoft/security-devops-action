@@ -1,10 +1,10 @@
 # guardian-github action sample
 
-name: Microsoft Security Code Analysis Action Sample
+name: Microsoft Security Code Analysis Action Test
 on:
   push:
     branches:
-      - master
+      - test
 
 jobs:
   sample:
@@ -15,4 +15,4 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Run Microsoft Security Code Analysis
-      uses: Microsoft/security-code-analysis-action@master
+      uses: Microsoft/security-code-analysis-action@test
