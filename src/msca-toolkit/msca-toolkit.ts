@@ -5,58 +5,50 @@ import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { MscaInstaller } from './msca-installer'
-import * as mscaVariables from './msca-variables'
 
 export class MscaAction {
-    integrationCliVersion: string = '1.*';
-
+    cliVersion: string = '0.*';
     constructor() { }
 
-    async setupEnvironment(actionDirectory: string) {
-
-        // Setup Integration Variables
-        mscaVariables.setup(actionDirectory);
+    async setupEnvironment() {
 
         console.log('------------------------------------------------------------------------------');
 
-        if (!process.env.MSCAI_DIRECTORY && !process.env.MSCAI_FILEPATH) {
-            let integrationCliVersion = this.resolveIntegrationCliVersion();
+        if (!process.env.MSCA_FILEPATH) {
+            let cliVersion = this.resolveCliVersion();
             let mscaInstaller = new MscaInstaller();
-            await mscaInstaller.install(integrationCliVersion);
+            await mscaInstaller.install(cliVersion);
         }
 
         console.log('------------------------------------------------------------------------------');
     }
 
-    resolveIntegrationCliVersion() : string {
-        let integrationCliVersion = this.integrationCliVersion;
+    resolveCliVersion() : string {
+        let cliVersion = this.cliVersion;
 
-        if (process.env.MSCAI_VERSION) {
-            integrationCliVersion = process.env.MSCAI_VERSION;
+        if (process.env.MSCA_VERSION) {
+            cliVersion = process.env.MSCA_VERSION;
         }
 
-        return integrationCliVersion;
+        return cliVersion;
+    }
+
+    isNullOrWhiteSpace(value: string) {
+        return !value || !value.trim();
     }
 
     async run(args: array) {
 
-        const actionDirectory = path.resolve(__dirname);
-        core.debug(`dirname = ${__dirname}`);
+        await this.setupEnvironment();
 
-        await this.setupEnvironment(actionDirectory);
-
-        let integrationCliFilePath = process.env.MSCAI_FILEPATH;
+        let integrationCliFilePath = process.env.MSCA_FILEPATH;
         core.debug(`integrationCliFilePath = ${integrationCliFilePath}`);
 
         if (args == null) {
-            args = []
+            args = ['run'];
         }
 
-        args.push('run')
-
-        if (failTask) {
-            args.push('--logger-actions')
-        }
+        args.push('--logger-actions');
 
         if (core.isDebug()) {
             args.push('--logger-level');
