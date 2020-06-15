@@ -30,11 +30,11 @@ export class MscaInstaller {
         core.debug(`mscaDirectory = ${mscaDirectory}`);
         this.ensureDirectory(mscaDirectory);
 
-        let mscaiPackagesDirectory = path.join(mscaDirectory, 'mscai');
-        core.debug(`mscaiPackagesDirectory = ${mscaiPackagesDirectory}`);
-        this.ensureDirectory(mscaiPackagesDirectory);
+        let mscaPackagesDirectory = path.join(mscaDirectory, 'versions');
+        core.debug(`mscaPackagesDirectory = ${mscaPackagesDirectory}`);
+        this.ensureDirectory(mscaPackagesDirectory);
 
-        let mscaiVersionsDirectory = path.join(mscaiPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
+        let mscaiVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
         core.debug(`mscaiVersionsDirectory = ${mscaiVersionsDirectory}`);
 
         if (this.isInstalled(mscaiVersionsDirectory, integrationCliVersion)) {
@@ -48,18 +48,18 @@ export class MscaInstaller {
         do {
             failed = false;
 
-            const mscaActionFolder = path.resolve(__dirname);
-            core.debug(`mscaActionFolder = ${__dirname}`);
+            const mscaToolkitDirectory = path.resolve(__dirname);
+            core.debug(`mscaToolkitDirectory = ${__dirname}`);
 
-            const mscaProjectFile = path.join(mscaActionFolder, 'msca-toolkit.proj');
+            const mscaProjectFile = path.join(mscaToolkitDirectory, 'msca-toolkit.proj');
             core.debug(`mscaProjectFile = ${mscaProjectFile}`);
 
             let args = [
                 'restore',
                 mscaProjectFile,
-                `/p:MicrosoftSecurityCodeAnalysisIntegrationCliVersion=${integrationCliVersion}`,
+                `/p:PackageName=${integrationCliVersion}`,
                 '--packages',
-                mscaiPackagesDirectory,
+                mscaPackagesDirectory,
                 '--source',
                 'https://api.nuget.org/v3/index.json'
             ];
