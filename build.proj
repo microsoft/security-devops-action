@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <TypeScriptCompileBlocked Condition=" '$(TypeScriptCompileBlocked)' == '' ">false</TypeScriptCompileBlocked>
+        <TypeScriptToolsVersion Condition=" '$(TypeScriptToolsVersion)' == '' ">3.8</TypeScriptToolsVersion>
+        <TypeScriptConfigFileName Condition=" '$(TypeScriptConfigFileName)' == '' ">tsconfig.json</TypeScriptConfigFileName>
+        <TypeScriptConfigFilePath>$(MSBuildProjectDirectory)/$(TypeScriptConfigFileName)</TypeScriptConfigFilePath>
+        <TscYieldDuringToolExecution>false</TscYieldDuringToolExecution>
+        <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
+        <TypeScriptSourceMap>false</TypeScriptSourceMap>
+    </PropertyGroup>
+
+    <!-- TypeScript Compiler imports -->
+    <Import
+        Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets"
+        Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+
+    <ItemGroup>
+        <ConfigFiles Include="$(TypeScriptConfigFilePath)" />
+    </ItemGroup>
+
+    <!-- Override the TypeScript FindConfigFiles Target so that default tsconfig.json is not picked up -->
+    <Target Name="FindConfigFiles"></Target>
+
+    <Target Name="Build"></Target>
+
+</Project>

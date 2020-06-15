@@ -13,9 +13,9 @@ export function setup(actionDirectory: string) {
     core.debug(`actionName = ${actionName}`);
 
     for (const taskInput of actionFile.inputs) {
-        const inputValue = core.debug.getInput(`${taskInput.name}`);
+        const inputValue = core.getInput(`${taskInput.name}`);
         if (inputValue != null) {
-            const varName = `MSCA_${actionName}_${taskInput.name.toUpperCase()}`;
+            const varName = `MSCAI_${actionName}_${taskInput.name.toUpperCase()}`;
             const varValue = process.env[varName];
             if (varValue == null) {
                 core.debug(`Input : ${varName}`);

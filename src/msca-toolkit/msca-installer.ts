@@ -4,7 +4,7 @@ import * as process from 'process';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-export class MicrosoftSecurityCodeAnalysisCliInstaller {
+export class MscaInstaller {
 
     async install(integrationCliVersion: string) {
         console.log('Installing Microsot Security Code Analysis Integration Cli...');
