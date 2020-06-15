@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
-import * as tl from 'azure-pipelines-task-lib/task';
-import { GuardianAccessor } from './msca-access'
-import { GuardianNuGetConfigCreator } from './msca-nuget'
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 export class MicrosoftSecurityCodeAnalysisCliInstaller {
 
@@ -20,7 +19,7 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
 
             // Set the mscai file path
             let mscaiFilePath = path.join(process.env.MSCAI_DIRECTORY, 'mscai');
-            tl.debug(`mscaiFilePath = ${mscaiFilePath}`);
+            core.debug(`mscaiFilePath = ${mscaiFilePath}`);
 
             process.env.MSCAI_FILEPATH = mscaiFilePath;
             return;
@@ -28,15 +27,15 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
 
         // initialize the _msca directory
         let mscaDirectory = path.join(process.env.AGENT_ROOTDIRECTORY, '_msca');
-        tl.debug(`mscaDirectory = ${mscaDirectory}`);
+        core.debug(`mscaDirectory = ${mscaDirectory}`);
         this.ensureDirectory(mscaDirectory);
 
         let mscaiPackagesDirectory = path.join(mscaDirectory, 'mscai');
-        tl.debug(`mscaiPackagesDirectory = ${mscaiPackagesDirectory}`);
+        core.debug(`mscaiPackagesDirectory = ${mscaiPackagesDirectory}`);
         this.ensureDirectory(mscaiPackagesDirectory);
 
         let mscaiVersionsDirectory = path.join(mscaiPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
-        tl.debug(`mscaiVersionsDirectory = ${mscaiVersionsDirectory}`);
+        core.debug(`mscaiVersionsDirectory = ${mscaiVersionsDirectory}`);
 
         if (this.isInstalled(mscaiVersionsDirectory, integrationCliVersion)) {
             return;
@@ -49,32 +48,32 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
             failed = false;
 
             const mscaActionFolder = path.resolve(__dirname);
-            tl.debug(`mscaActionFolder = ${__dirname}`);
+            core.debug(`mscaActionFolder = ${__dirname}`);
 
-            const mmscaiProjectFile = path.join(mscaActionFolder, 'msca-task-lib.proj');
-            tl.debug(`mmscaiProjectFile = ${mmscaiProjectFile}`);
+            const mscaProjectFile = path.join(mscaActionFolder, 'msca-toolkit.proj');
+            core.debug(`mscaProjectFile = ${mscaProjectFile}`);
 
-            let tool = tl.tool('dotnet')
-                .arg('restore')
-                .arg(mmscaiProjectFile)
-                .arg(`/p:MicrosoftSecurityCodeAnalysisIntegrationCliVersion=${integrationCliVersion}`)
-                .arg("--packages")
-                .arg(mscaiPackagesDirectory)
-                .arg("--source")
-                .arg("https://api.nuget.org/v3/index.json");
+            let args = [
+                'restore',
+                mscaProjectFile,
+                `/p:MicrosoftSecurityCodeAnalysisIntegrationCliVersion=${integrationCliVersion}`,
+                '--packages',
+                mscaiPackagesDirectory
+                '--source',
+                'https://api.nuget.org/v3/index.json'
+            ];
+
+            let tool = exec.exec('dotnet', args);
 
            try {
                 await tool.exec();
             } catch (error) {
-                tl.debug(error);
+                core.debug(error);
                 failed = true;
                 attempts += 1;
                 if (attempts > accessTokens.length) {
                     break;
                 }
-            } finally {
-                // delete the nuget config file
-                fs.unlinkSync(nugetConfigPath);
             }
         } while (failed);
 
@@ -93,14 +92,14 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
         let installed = false;
 
         if (integrationCliVersion.includes("*")) {
-            tl.debug(`Pipeline version contains a latest quantifier: ${integrationCliVersion}. Continuing with install...`);
+            core.debug(`Integration Cli version contains a latest quantifier: ${integrationCliVersion}. Continuing with install...`);
             return installed;
         }
 
-        this.setmscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
+        this.setMscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
         
         if (fs.existsSync(process.env.MSCAI_DIRECTORY)) {
-            console.log(`Guardian Pipeline v${integrationCliVersion} already installed.`);
+            console.log(`Integration Cli v${integrationCliVersion} already installed.`);
             installed = true;
         }
 
@@ -113,9 +112,9 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
         if (integrationCliVersion.includes("*")) {
             // find the latest directory
             let mscaiPackageDirectory = this.findLatestVersionDirectory(mscaiVersionsDirectory);
-            this.setmscaiVariables(mscaiPackageDirectory);
+            this.setMscaiVariables(mscaiPackageDirectory);
         } else {
-            this.setmscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
+            this.setMscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
         }
 
         if (!fs.existsSync(process.env.MSCAI_DIRECTORY)) {
@@ -131,7 +130,7 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
         let latestPreReleaseFlag = null;
 
         // Get all of the directories in the versions directory
-        tl.debug(`Searching for all version folders in: ${mscaiVersionsDirectory}`);
+        core.debug(`Searching for all version folders in: ${mscaiVersionsDirectory}`);
         let dirs = this.getDirectories(mscaiVersionsDirectory);
 
         // Evaluate each directory
@@ -139,28 +138,28 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
             let dir = dirs[dirIndex];
 
             if (dir == null || dir == "") {
-                tl.debug(`Skipping null or empty directory: ${dir}`);
+                core.debug(`Skipping null or empty directory: ${dir}`);
                 continue;
             }
 
-            tl.debug(`Evaluating mscai directory: ${dir}`);
+            core.debug(`Evaluating mscai directory: ${dir}`);
             // If we reuse the same RegExp object, it will return null every other call
             const dirRegex = new RegExp(/^(\d+\.?){1,6}(\-\w+)?$/g);
             if (dirRegex.exec(dir) == null) {
-                tl.debug(`Skipping invalid version directory: ${dir}`);
+                core.debug(`Skipping invalid version directory: ${dir}`);
                 continue;
             }
 
             let fullVersionParts = dir.split("-");
 
             if (fullVersionParts == null || fullVersionParts.length < 0 || fullVersionParts.length > 2) {
-                tl.debug(`Skipping invalid version directory: ${dir}`);
+                core.debug(`Skipping invalid version directory: ${dir}`);
             }
 
             let dirIsPreRelease = fullVersionParts.length > 1;
 
             if (!isPreRelease && dirIsPreRelease) {
-                tl.debug(`Skipping pre-release version directory: ${dir}`);
+                core.debug(`Skipping pre-release version directory: ${dir}`);
                 continue;
             }
 
@@ -222,7 +221,7 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
             }
 
             if (isLatest) {
-                tl.debug(`Setting latest version directory: ${dir}`);
+                core.debug(`Setting latest version directory: ${dir}`);
                 latestDirectory = path.join(mscaiVersionsDirectory, dir);
                 latestVersionParts = versionParts;
                 latestIsPreRelease = dirIsPreRelease;
@@ -230,7 +229,7 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
             }
         }
 
-        tl.debug(`latestDirectory = ${latestDirectory}`);
+        core.debug(`latestDirectory = ${latestDirectory}`);
 
         return latestDirectory;
     }
@@ -246,22 +245,22 @@ export class MicrosoftSecurityCodeAnalysisCliInstaller {
         return fs.statSync(path.join(directory, p)).isDirectory();
     }
 
-    setmscaiVariablesWithVersion(
+    setMscaiVariablesWithVersion(
         mscaiVersionsDirectory: string,
         integrationCliVersion: string) : void {
 
         let mscaiPackageDirectory = path.join(mscaiVersionsDirectory, integrationCliVersion)
-        tl.debug(`mscaiPackageDirectory = ${mscaiPackageDirectory}`);
+        core.debug(`mscaiPackageDirectory = ${mscaiPackageDirectory}`);
 
-        this.setmscaiVariables(mscaiPackageDirectory);
+        this.setMscaiVariables(mscaiPackageDirectory);
     }
 
-    setmscaiVariables(mscaiPackageDirectory: string) : void {
+    setMscaiVariables(mscaiPackageDirectory: string) : void {
         let mscaiDirectory = path.join(mscaiPackageDirectory, 'tools');
-        tl.debug(`mscaiDirectory = ${mscaiDirectory}`);
+        core.debug(`mscaiDirectory = ${mscaiDirectory}`);
 
         let mscaiFilePath = path.join(mscaiDirectory, 'mscai');
-        tl.debug(`mscaiFilePath = ${mscaiFilePath}`);
+        core.debug(`mscaiFilePath = ${mscaiFilePath}`);
 
         process.env.MSCAI_DIRECTORY = mscaiDirectory;
         process.env.MSCAI_FILEPATH = mscaiFilePath;
