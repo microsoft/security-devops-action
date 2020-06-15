@@ -4,7 +4,7 @@ export function setup(actionDirectory: string) {
     // set up the input environment variables
     process.env.MSCA_AGENT_ACTIONDIRECTORY = actionDirectory;
 
-    const actionFilePath = `${actionDirectory}/task.json`;
+    const actionFilePath = `${actionDirectory}/action.yml`;
     core.debug(`actionFilePath = ${actionFilePath}`);
     
     const actionFile = require(actionFilePath);
@@ -12,10 +12,10 @@ export function setup(actionDirectory: string) {
     const actionName = actionFile.name.toUpperCase();
     core.debug(`actionName = ${actionName}`);
 
-    for (const taskInput of actionFile.inputs) {
-        const inputValue = core.getInput(`${taskInput.name}`);
+    for (const actionInput of actionFile.inputs) {
+        const inputValue = core.getInput(`${actionInput.name}`);
         if (inputValue != null) {
-            const varName = `MSCAI_${actionName}_${taskInput.name.toUpperCase()}`;
+            const varName = `MSCAI_${actionName}_${actionInput.name.toUpperCase()}`;
             const varValue = process.env[varName];
             if (varValue == null) {
                 core.debug(`Input : ${varName}`);

@@ -38,27 +38,7 @@ export class MscaAction {
         return integrationCliVersion;
     }
 
-    async analyze() {
-        this.command('analyze');
-    }
-
-    async break() {
-        this.command('break');
-    }
-
-    async export() {
-        this.command('export');
-    }
-
-    async publish() {
-        this.command('publish');
-    }
-
-    async run() {
-        this.command('run');
-    }
-
-    async command(actionCommand: string, failTask: boolean = true) {
+    async run(args: array) {
 
         const actionDirectory = path.resolve(__dirname);
         core.debug(`dirname = ${__dirname}`);
@@ -68,7 +48,11 @@ export class MscaAction {
         let integrationCliFilePath = process.env.MSCAI_FILEPATH;
         core.debug(`integrationCliFilePath = ${integrationCliFilePath}`);
 
-        let args = [actionCommand]
+        if (args == null) {
+            args = []
+        }
+
+        args.push('run')
 
         if (failTask) {
             args.push('--logger-actions')
