@@ -5,10 +5,10 @@ branding:
   icon: 'shield'
   color: 'black'
 inputs:
-  version:
-    description: 'The version of Guardian to use. Default: latest'
-  license:
-    description: 'The license for Guardian. This must be kept as a secret in the GitHub repository.'
+  config:
+    description: A file path to a .gdnconfig file.
+  policy:
+    description: The name of the well known policy to use. Defaults to GitHub.
 runs:
   using: 'node12'
   main: 'lib/action.js'
