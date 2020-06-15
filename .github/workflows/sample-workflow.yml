@@ -5,14 +5,12 @@ on:
   push:
     branches:
       - master
+      - test
 
 jobs:
   sample:
     name: Self test
     runs-on: [self-hosted]
     steps:
-    - name: Hello, World!
-      run: |
-        echo Hello, Guardian GitHub!
-    - name: Run Guardian
-      uses: Microsoft/guardian-github@master
+    - name: Run Microsoft Security Code Analysis
+      uses: Microsoft/security-code-analysis-action@master
