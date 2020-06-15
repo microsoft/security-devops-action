@@ -41,8 +41,8 @@ export class MscaAction {
 
         await this.setupEnvironment();
 
-        let integrationCliFilePath = process.env.MSCA_FILEPATH;
-        core.debug(`integrationCliFilePath = ${integrationCliFilePath}`);
+        let cliFilePath = process.env.MSCA_FILEPATH;
+        core.debug(`cliFilePath = ${cliFilePath}`);
 
         if (args == null) {
             args = ['run'];
@@ -58,7 +58,7 @@ export class MscaAction {
         core.debug('Running Microsoft Security Code Analysis...');
 
         try {
-            await exec.exec(integrationCliFilePath, args)
+            await exec.exec(cliFilePath, args)
         }
         catch (error) {
             core.setFailed(error.Message);
