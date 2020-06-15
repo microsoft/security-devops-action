@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import { MscaInstaller } from './msca-installer'
 import * as mscaVariables from './msca-variables'
 
 export class MscaAction {
@@ -38,29 +39,26 @@ export class MscaAction {
     }
 
     async analyze() {
-        this.run('analyze');
+        this.command('analyze');
     }
 
     async break() {
-        const breakCommand = ;
-        this.run('break');
+        this.command('break');
     }
 
     async export() {
-        const reportCommand = ;
-        this.run('export');
+        this.command('export');
     }
 
     async publish() {
-        this.run('publish');
+        this.command('publish');
     }
 
     async run() {
-        const runCommand = 'run';
-        this.run('run');
+        this.command('run');
     }
 
-    async run(actionCommand: string, failTask: boolean = true) {
+    async command(actionCommand: string, failTask: boolean = true) {
 
         const actionDirectory = path.resolve(__dirname);
         core.debug(`dirname = ${__dirname}`);
@@ -70,7 +68,7 @@ export class MscaAction {
         let integrationCliFilePath = process.env.MSCAI_FILEPATH;
         core.debug(`integrationCliFilePath = ${integrationCliFilePath}`);
 
-        let args = ['run']
+        let args = [actionCommand]
 
         if (failTask) {
             args.push('--logger-actions')

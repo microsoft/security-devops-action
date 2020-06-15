@@ -9,6 +9,8 @@
         <TscYieldDuringToolExecution>false</TscYieldDuringToolExecution>
         <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
         <TypeScriptSourceMap>false</TypeScriptSourceMap>
+
+        <NpmInstall Condition=" '$(NpmInstall)' == ''">false</NpmInstall>
     </PropertyGroup>
 
     <!-- TypeScript Compiler imports -->
@@ -23,6 +25,17 @@
     <!-- Override the TypeScript FindConfigFiles Target so that default tsconfig.json is not picked up -->
     <Target Name="FindConfigFiles"></Target>
 
-    <Target Name="Build"></Target>
+    <Target
+        Name="NpmInstall"
+        Inputs="$(MSBuildProjectDirectory)"
+        Outputs="$(MSBuildProjectDirectory)\node_modules"
+        Condition=" '$(NpmInstall)' == 'true' ">
+        <Message Text="Installing npm dependencies in: $(MSBuildProjectDirectory)..." />
+        <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    </Target>
+
+    <Target Name="Build" DependsOnTargets="NpmInstall;$(CompileDependsOn)">
+        <Message Text="TypeScriptConfigFilePath = $(TypeScriptConfigFilePath)..." />
+    </Target>
 
 </Project>

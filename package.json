@@ -8,9 +8,9 @@
     "author": "Microsoft Corporation",
     "license": "",
     "dependencies": {
-        "@actions/core": "^1.0.0",
-        "@actions/exec": "^1.0.0",
-        "js-yaml": "^3.13.1"
+        "@actions/core": "1.2.4",
+        "@actions/exec": "1.0.4",
+        "js-yaml": "3.13.1"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.44",

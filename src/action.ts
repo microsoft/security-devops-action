@@ -1,3 +1,3 @@
-import * as gdn from './msca-toolkit/msca-tookit';
+import { MscaAction } from './msca-toolkit/msca-toolkit';
 
-new gdn.MscaAction().analyze();
+new MscaAction().run();
