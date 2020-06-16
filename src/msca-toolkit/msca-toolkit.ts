@@ -37,9 +37,24 @@ export class MscaAction {
         return !value || !value.trim();
     }
 
+    async init() {
+
+        let cliFilePath = process.env.MSCA_FILEPATH;
+        core.debug(`cliFilePath = ${cliFilePath}`);
+
+        try {
+            await exec.exec(cliFilePath, ['init', '--force']);
+        }
+        catch (error) {
+            core.debug(error.Message);
+        }
+    }
+
     async run(args: array) {
 
         await this.setupEnvironment();
+
+        await this.init();
 
         let cliFilePath = process.env.MSCA_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
@@ -55,10 +70,19 @@ export class MscaAction {
             args.push('trace');
         }
 
+        let sarifFile = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msca.sarif');
+        core.debug(`sarifFile = ${sarifFile}`);
+
+        // Write it as a GitHub Action variable for follow up tasks to consume
+        core.exportVariable('MSCA_SARIF_FILE', sarifFile);
+
+        args.push('--export-breaking-results-to-file');
+        args.push(`"${sarifFile}"`);
+
         core.debug('Running Microsoft Security Code Analysis...');
 
         try {
-            await exec.exec(cliFilePath, args)
+            await exec.exec(cliFilePath, args);
         }
         catch (error) {
             core.setFailed(error.Message);
