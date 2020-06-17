@@ -11,11 +11,12 @@ jobs:
     name: Self test
     runs-on: [self-hosted]
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
     # - uses: actions/setup-dotnet@v1
     #   with:
     #     dotnet-version: '3.1.2'
-    - name: Checkout repository
-      uses: actions/checkout@v2
 
     - name: Run Microsoft Security Code Analysis
       uses: Microsoft/security-code-analysis-action@master
