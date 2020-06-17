@@ -50,7 +50,7 @@ export class MscaAction {
         }
     }
 
-    async run(args: string[]) {
+    async run(inputArgs: string[]) {
 
         await this.setupEnvironment();
 
@@ -59,8 +59,14 @@ export class MscaAction {
         let cliFilePath: string = process.env.MSCA_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
 
-        if (args == null) {
-            args = ['run'];
+        let args = ['run'];
+
+        if (inputArgs != null)
+        {
+            for (let i = 0; i < inputArgs.length; i++)
+            {
+                args.push(inputArgs[i]);
+            }
         }
 
         args.push('--logger-actions');
