@@ -42,7 +42,7 @@ To upload results to the Security tab of your repo, run the `Anthophila/codeql-a
 - name: Upload results to Security tab
   uses: Anthophila/codeql-action/codeql/upload-sarif@master
   with:
-    sarif_file: $(GuardianExportedFilePath)
+    sarif_file: $(MSCA_SARIF_FILE)
 ```
 
 # License
