@@ -26,7 +26,7 @@ export class MscaInstaller {
         }      
 
         // initialize the _msca directory
-        let mscaDirectory = path.join(process.env.AGENT_ROOTDIRECTORY, '_msca');
+        let mscaDirectory = path.resolve(path.join(process.env.GITHUB_WORKSPACE, '../../_msca'));
         core.debug(`mscaDirectory = ${mscaDirectory}`);
         this.ensureDirectory(mscaDirectory);
 
@@ -34,7 +34,7 @@ export class MscaInstaller {
         core.debug(`mscaPackagesDirectory = ${mscaPackagesDirectory}`);
         this.ensureDirectory(mscaPackagesDirectory);
 
-        let mscaVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
+        let mscaVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.cli');
         core.debug(`mscaVersionsDirectory = ${mscaVersionsDirectory}`);
 
         if (this.isInstalled(mscaVersionsDirectory, cliVersion)) {
