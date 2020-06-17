@@ -6,22 +6,22 @@ import * as exec from '@actions/exec';
 
 export class MscaInstaller {
 
-    async install(integrationCliVersion: string) {
+    async install(cliVersion: string) {
         console.log('Installing Microsot Security Code Analysis Integration Cli...');
 
-        if (process.env.MSCAI_FILEPATH) {
-            console.log(`MSCA Integration Cli File Path overriden by %MSCAI_FILEPATH%: ${process.env.MSCAI_FILEPATH}`);
+        if (process.env.MSCA_FILEPATH) {
+            console.log(`MSCA Integration Cli File Path overriden by %MSCA_FILEPATH%: ${process.env.MSCA_FILEPATH}`);
             return
         }
 
-        if (process.env.MSCAI_DIRECTORY) {
-            console.log(`MSCA Integration Cli Directory overriden by %MSCAI_DIRECTORY%: ${process.env.MSCAI_DIRECTORY}`);
+        if (process.env.MSCA_DIRECTORY) {
+            console.log(`MSCA Integration Cli Directory overriden by %MSCA_DIRECTORY%: ${process.env.MSCA_DIRECTORY}`);
 
             // Set the mscai file path
-            let mscaiFilePath = path.join(process.env.MSCAI_DIRECTORY, 'mscai');
-            core.debug(`mscaiFilePath = ${mscaiFilePath}`);
+            let mscaFilePath = path.join(process.env.MSCA_DIRECTORY, 'guardian');
+            core.debug(`mscaFilePath = ${mscaFilePath}`);
 
-            process.env.MSCAI_FILEPATH = mscaiFilePath;
+            process.env.MSCA_FILEPATH = mscaFilePath;
             return;
         }      
 
@@ -34,10 +34,10 @@ export class MscaInstaller {
         core.debug(`mscaPackagesDirectory = ${mscaPackagesDirectory}`);
         this.ensureDirectory(mscaPackagesDirectory);
 
-        let mscaiVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
-        core.debug(`mscaiVersionsDirectory = ${mscaiVersionsDirectory}`);
+        let mscaVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.integration.cli');
+        core.debug(`mscaVersionsDirectory = ${mscaVersionsDirectory}`);
 
-        if (this.isInstalled(mscaiVersionsDirectory, integrationCliVersion)) {
+        if (this.isInstalled(mscaVersionsDirectory, cliVersion)) {
             return;
         }
 
@@ -57,7 +57,7 @@ export class MscaInstaller {
             let args = [
                 'restore',
                 mscaProjectFile,
-                `/p:PackageName=${integrationCliVersion}`,
+                `/p:PackageVersion=${cliVersion}`,
                 '--packages',
                 mscaPackagesDirectory,
                 '--source',
@@ -76,7 +76,7 @@ export class MscaInstaller {
             }
         } while (failed);
 
-        this.resolvePackageDirectory(mscaiVersionsDirectory, integrationCliVersion);
+        this.resolvePackageDirectory(mscaVersionsDirectory, cliVersion);
     }
 
     ensureDirectory(directory: string) : void {
@@ -86,19 +86,19 @@ export class MscaInstaller {
     }
 
     isInstalled(
-        mscaiVersionsDirectory: string,
-        integrationCliVersion: string) : boolean {
+        mscaVersionsDirectory: string,
+        cliVersion: string) : boolean {
         let installed = false;
 
-        if (integrationCliVersion.includes("*")) {
-            core.debug(`Integration Cli version contains a latest quantifier: ${integrationCliVersion}. Continuing with install...`);
+        if (cliVersion.includes("*")) {
+            core.debug(`Integration Cli version contains a latest quantifier: ${cliVersion}. Continuing with install...`);
             return installed;
         }
 
-        this.setMscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
+        this.setMscaiVariablesWithVersion(mscaVersionsDirectory, cliVersion);
         
-        if (fs.existsSync(process.env.MSCAI_DIRECTORY)) {
-            console.log(`Integration Cli v${integrationCliVersion} already installed.`);
+        if (fs.existsSync(process.env.MSCA_DIRECTORY)) {
+            console.log(`Integration Cli v${cliVersion} already installed.`);
             installed = true;
         }
 
@@ -106,22 +106,22 @@ export class MscaInstaller {
     }
 
     resolvePackageDirectory(
-        mscaiVersionsDirectory: string,
-        integrationCliVersion: string) : void {
-        if (integrationCliVersion.includes("*")) {
+        mscaVersionsDirectory: string,
+        cliVersion: string) : void {
+        if (cliVersion.includes("*")) {
             // find the latest directory
-            let mscaiPackageDirectory = this.findLatestVersionDirectory(mscaiVersionsDirectory);
-            this.setMscaiVariables(mscaiPackageDirectory);
+            let mscaPackageDirectory = this.findLatestVersionDirectory(mscaVersionsDirectory);
+            this.setMscaiVariables(mscaPackageDirectory);
         } else {
-            this.setMscaiVariablesWithVersion(mscaiVersionsDirectory, integrationCliVersion);
+            this.setMscaiVariablesWithVersion(mscaVersionsDirectory, cliVersion);
         }
 
-        if (!fs.existsSync(process.env.MSCAI_DIRECTORY)) {
-            throw `Microsoft Security Code Analysis Integration Cli v${integrationCliVersion} was not found after installation.`
+        if (!fs.existsSync(process.env.MSCA_DIRECTORY)) {
+            throw `Microsoft Security Code Analysis Integration Cli v${cliVersion} was not found after installation.`
         }
     }
 
-    findLatestVersionDirectory(mscaiVersionsDirectory: string, isPreRelease: boolean = false) : string {
+    findLatestVersionDirectory(mscaVersionsDirectory: string, isPreRelease: boolean = false) : string {
 
         let latestDirectory = null;
         let latestVersionParts = null;
@@ -129,8 +129,8 @@ export class MscaInstaller {
         let latestPreReleaseFlag = null;
 
         // Get all of the directories in the versions directory
-        core.debug(`Searching for all version folders in: ${mscaiVersionsDirectory}`);
-        let dirs = this.getDirectories(mscaiVersionsDirectory);
+        core.debug(`Searching for all version folders in: ${mscaVersionsDirectory}`);
+        let dirs = this.getDirectories(mscaVersionsDirectory);
 
         // Evaluate each directory
         for (let dirIndex = 0; dirIndex < dirs.length; dirIndex++) {
@@ -221,7 +221,7 @@ export class MscaInstaller {
 
             if (isLatest) {
                 core.debug(`Setting latest version directory: ${dir}`);
-                latestDirectory = path.join(mscaiVersionsDirectory, dir);
+                latestDirectory = path.join(mscaVersionsDirectory, dir);
                 latestVersionParts = versionParts;
                 latestIsPreRelease = dirIsPreRelease;
                 latestPreReleaseFlag = dirPreReleaseFlag;
@@ -245,23 +245,23 @@ export class MscaInstaller {
     }
 
     setMscaiVariablesWithVersion(
-        mscaiVersionsDirectory: string,
-        integrationCliVersion: string) : void {
+        mscaVersionsDirectory: string,
+        cliVersion: string) : void {
 
-        let mscaiPackageDirectory = path.join(mscaiVersionsDirectory, integrationCliVersion)
-        core.debug(`mscaiPackageDirectory = ${mscaiPackageDirectory}`);
+        let mscaPackageDirectory = path.join(mscaVersionsDirectory, cliVersion)
+        core.debug(`mscaPackageDirectory = ${mscaPackageDirectory}`);
 
-        this.setMscaiVariables(mscaiPackageDirectory);
+        this.setMscaiVariables(mscaPackageDirectory);
     }
 
-    setMscaiVariables(mscaiPackageDirectory: string) : void {
-        let mscaiDirectory = path.join(mscaiPackageDirectory, 'tools');
-        core.debug(`mscaiDirectory = ${mscaiDirectory}`);
+    setMscaiVariables(mscaPackageDirectory: string) : void {
+        let mscaDirectory = path.join(mscaPackageDirectory, 'tools');
+        core.debug(`mscaDirectory = ${mscaDirectory}`);
 
-        let mscaiFilePath = path.join(mscaiDirectory, 'mscai');
-        core.debug(`mscaiFilePath = ${mscaiFilePath}`);
+        let mscaFilePath = path.join(mscaDirectory, 'guardian');
+        core.debug(`mscaFilePath = ${mscaFilePath}`);
 
-        process.env.MSCAI_DIRECTORY = mscaiDirectory;
-        process.env.MSCAI_FILEPATH = mscaiFilePath;
+        process.env.MSCA_DIRECTORY = mscaDirectory;
+        process.env.MSCA_FILEPATH = mscaFilePath;
     }
 }
