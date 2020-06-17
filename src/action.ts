@@ -8,13 +8,13 @@ let args = [];
 let config = core.getInput('config');
 if (!action.isNullOrWhiteSpace(config)) {
 	args.push('-c');
-	args.push(config));
+	args.push(config);
 }
 
 let policy = core.getInput('policy');
 if (!action.isNullOrWhiteSpace(policy)) {
 	args.push('-p');
-	args.push(policy));
+	args.push(policy);
 }
 
 action.run('run', args);
