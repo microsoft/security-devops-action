@@ -57,7 +57,7 @@ export class MscaInstaller {
             let args = [
                 'restore',
                 mscaProjectFile,
-                `/p:PackageVersion=${cliVersion}`,
+                `/p:MscaPackageVersion=${cliVersion}`,
                 '--packages',
                 mscaPackagesDirectory,
                 '--source',
