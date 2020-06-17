@@ -11,6 +11,9 @@ jobs:
     name: Self test
     runs-on: [self-hosted]
     steps:
+    # - uses: actions/setup-dotnet@v1
+    #   with:
+    #     dotnet-version: '3.1.2'
     - name: Checkout repository
       uses: actions/checkout@v2
 
