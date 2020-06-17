@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework Condition=" '$(TargetFramework)' == '' ">netstandard2.1</TargetFramework>
-        <PackageName Condition=" '$(PackageName)' == '' "">Microsoft.Security.CodeAnalysis.Cli</PackageName>
+        <PackageName Condition=" '$(PackageName)' == '' ">Microsoft.Security.CodeAnalysis.Cli</PackageName>
         <PackageVersion Condition=" '$(PackageVersion)' == '' ">1.*</PackageVersion>
     </PropertyGroup>
 
@@ -10,4 +10,4 @@
         <PackageReference Include="$(PackageName)" Version="$(PackageVersion)" />
     </ItemGroup>
 
-</Project>
+</Project>t
