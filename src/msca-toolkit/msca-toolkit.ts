@@ -33,13 +33,13 @@ export class MscaAction {
         return cliVersion;
     }
 
-    isNullOrWhiteSpace(value: string) {
+    isNullOrWhiteSpace(value: string) : boolean {
         return !value || !value.trim();
     }
 
     async init() {
 
-        let cliFilePath = process.env.MSCA_FILEPATH;
+        let cliFilePath: string = process.env.MSCA_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
 
         try {
@@ -50,13 +50,13 @@ export class MscaAction {
         }
     }
 
-    async run(args: array) {
+    async run(args: string[]) {
 
         await this.setupEnvironment();
 
         await this.init();
 
-        let cliFilePath = process.env.MSCA_FILEPATH;
+        let cliFilePath: string = process.env.MSCA_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
 
         if (args == null) {
@@ -70,7 +70,7 @@ export class MscaAction {
             args.push('trace');
         }
 
-        let sarifFile = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msca.sarif');
+        let sarifFile : string = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msca.sarif');
         core.debug(`sarifFile = ${sarifFile}`);
 
         // Write it as a GitHub Action variable for follow up tasks to consume

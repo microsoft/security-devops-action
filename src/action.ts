@@ -3,7 +3,7 @@ import { MscaAction } from './msca-toolkit/msca-toolkit';
 
 let action = new MscaAction();
 
-let args = [];
+let args: string[] = [];
 
 let config = core.getInput('config');
 if (!action.isNullOrWhiteSpace(config)) {
@@ -17,4 +17,4 @@ if (!action.isNullOrWhiteSpace(policy)) {
 	args.push(policy);
 }
 
-action.run('run', args);
+action.run(args);

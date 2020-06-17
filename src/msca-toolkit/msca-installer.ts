@@ -172,7 +172,7 @@ export class MscaInstaller {
             let versionParts = dir.split(".");
 
             // If the latestDirectory isn't set yet, the folder is the latest directory
-            let isLatest = latestDirectory == nul || latestVersionParts == null;
+            let isLatest = latestDirectory == null || latestVersionParts == null;
 
             if (!isLatest) {
                 // Evaluate the directory's version against the latest directory
