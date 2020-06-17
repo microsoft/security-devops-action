@@ -7,15 +7,15 @@ import * as exec from '@actions/exec';
 export class MscaInstaller {
 
     async install(cliVersion: string) {
-        console.log('Installing Microsot Security Code Analysis Integration Cli...');
+        console.log('Installing Microsot Security Code Analysis Cli...');
 
         if (process.env.MSCA_FILEPATH) {
-            console.log(`MSCA Integration Cli File Path overriden by %MSCA_FILEPATH%: ${process.env.MSCA_FILEPATH}`);
+            console.log(`MSCA Cli File Path overriden by %MSCA_FILEPATH%: ${process.env.MSCA_FILEPATH}`);
             return
         }
 
         if (process.env.MSCA_DIRECTORY) {
-            console.log(`MSCA Integration Cli Directory overriden by %MSCA_DIRECTORY%: ${process.env.MSCA_DIRECTORY}`);
+            console.log(`MSCA Cli Directory overriden by %MSCA_DIRECTORY%: ${process.env.MSCA_DIRECTORY}`);
 
             // Set the mscai file path
             let mscaFilePath = path.join(process.env.MSCA_DIRECTORY, 'guardian');
@@ -91,14 +91,14 @@ export class MscaInstaller {
         let installed = false;
 
         if (cliVersion.includes("*")) {
-            core.debug(`Integration Cli version contains a latest quantifier: ${cliVersion}. Continuing with install...`);
+            core.debug(`MSCA Cli version contains a latest quantifier: ${cliVersion}. Continuing with install...`);
             return installed;
         }
 
         this.setMscaiVariablesWithVersion(mscaVersionsDirectory, cliVersion);
         
         if (fs.existsSync(process.env.MSCA_DIRECTORY)) {
-            console.log(`Integration Cli v${cliVersion} already installed.`);
+            console.log(`MSCA  Cli v${cliVersion} already installed.`);
             installed = true;
         }
 
@@ -117,7 +117,7 @@ export class MscaInstaller {
         }
 
         if (!fs.existsSync(process.env.MSCA_DIRECTORY)) {
-            throw `Microsoft Security Code Analysis Integration Cli v${cliVersion} was not found after installation.`
+            throw `Microsoft Security Code Analysis Cli v${cliVersion} was not found after installation.`
         }
     }
 
