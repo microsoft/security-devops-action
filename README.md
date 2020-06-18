@@ -25,13 +25,13 @@ steps:
 - uses: actions/checkout@master
 - uses: actions/setup-dotnet@v1
   with:
-    dotnet-version: '3.1.2'
+    dotnet-version: '3.1.201'
 - name: Run Microsoft Security Code Analysis
   uses: Microsoft/security-code-analysis-action@master
 - name: Upload results to Security tab
   uses: Anthophila/codeql-action/codeql/upload-sarif@master
   with:
-    sarif_file: $(MSCA_SARIF_FILE)
+    sarif_file: '$(MSCA_SARIF_FILE)'
 ```
 
 ## Upload Results to the Security tab

@@ -21,4 +21,4 @@ jobs:
     - name: Upload results to Security tab
       uses: Anthophila/codeql-action/codeql/upload-sarif@master
       with:
-        sarif_file: $(MSCA_SARIF_FILE)
+        sarif_file: '$(MSCA_SARIF_FILE)'
