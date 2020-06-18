@@ -32,7 +32,7 @@ steps:
 - name: Upload results to Security tab
   uses: Anthophila/codeql-action/codeql/upload-sarif@master
   with:
-    sarif_file: {{ steps.msca.outputs.sarifFile }}
+    sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
@@ -43,7 +43,7 @@ To upload results to the Security tab of your repo, run the `Anthophila/codeql-a
 - name: Upload results to Security tab
   uses: Anthophila/codeql-action/codeql/upload-sarif@master
   with:
-    sarif_file: $MSCA_SARIF_FILE
+    sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
 
 # License
