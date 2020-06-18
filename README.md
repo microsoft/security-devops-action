@@ -22,17 +22,17 @@ Run Guardian with the default policy and recommended tools.
 
 ```yaml
 steps:
-- uses: actions/checkout@master
+- uses: actions/checkout@v2
 - uses: actions/setup-dotnet@v1
   with:
     dotnet-version: '3.1.201'
 - name: Run Microsoft Security Code Analysis
   uses: Microsoft/security-code-analysis-action@master
+  id: msca
 - name: Upload results to Security tab
   uses: Anthophila/codeql-action/codeql/upload-sarif@master
   with:
-    sarif_file: $MSCA_SARIF_FILE
-
+    sarif_file: {{ steps.msca.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab

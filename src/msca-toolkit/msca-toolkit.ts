@@ -81,6 +81,7 @@ export class MscaAction {
 
         // Write it as a GitHub Action variable for follow up tasks to consume
         core.exportVariable('MSCA_SARIF_FILE', sarifFile);
+        core.setOutput('sarifFile', sarifFile);
 
         args.push('--export-breaking-results-to-file');
         args.push(`${sarifFile}`);
