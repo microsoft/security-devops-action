@@ -83,7 +83,7 @@ export class MscaAction {
         core.exportVariable('MSCA_SARIF_FILE', sarifFile);
 
         args.push('--export-breaking-results-to-file');
-        args.push(`"${sarifFile}"`);
+        args.push(`${sarifFile}`);
 
         core.debug('Running Microsoft Security Code Analysis...');
 
