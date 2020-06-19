@@ -19,6 +19,6 @@ jobs:
       uses: Microsoft/security-code-analysis-action@master
       id: msca
     - name: Upload results to Security tab
-      uses: Anthophila/codeql-action/codeql/upload-sarif@master
+      uses: github/codeql-action/codeql/upload-sarif@master
       with:
         sarif_file: ${{ steps.msca.outputs.sarifFile }}
