@@ -10,6 +10,9 @@ inputs:
   policy:
     description: The name of the well known policy to use. Defaults to GitHub.
     default: 'github'
+outputs:
+  sarifFile:
+    description: A file path to a SARIF results file.
 runs:
   using: 'node12'
   main: 'lib/action.js'

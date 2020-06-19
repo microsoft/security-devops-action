@@ -2,6 +2,12 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
+        <RepoDirectory Condition=" '$(RepoDirectory)' == '' ">$(MSBuildThisFileDirectory)</RepoDirectory>
+        <MscaToolkitDirectory Condition=" '$(MscaToolkitDirectory)' == '' ">$(MSBuildThisFileDirectory)/src/msca-toolkit</MscaToolkitDirectory>
+        <MscaToolkitProjFilePath  Condition=" '$(MscaToolkitProjFilePath)' == '' ">$(MscaToolkitDirectory)/msca-toolkit.proj</MscaToolkitProjFilePath>
+    </PropertyGroup>
+
+    <PropertyGroup Label="TypeScript">
         <TypeScriptCompileBlocked Condition=" '$(TypeScriptCompileBlocked)' == '' ">false</TypeScriptCompileBlocked>
         <TypeScriptToolsVersion Condition=" '$(TypeScriptToolsVersion)' == '' ">3.8</TypeScriptToolsVersion>
         <TypeScriptConfigFileName Condition=" '$(TypeScriptConfigFileName)' == '' ">tsconfig.json</TypeScriptConfigFileName>
@@ -9,7 +15,9 @@
         <TscYieldDuringToolExecution>false</TscYieldDuringToolExecution>
         <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
         <TypeScriptSourceMap>false</TypeScriptSourceMap>
+    </PropertyGroup>
 
+    <PropertyGroup Label="Npm">
         <NpmInstall Condition=" '$(NpmInstall)' == ''">false</NpmInstall>
     </PropertyGroup>
 
@@ -36,6 +44,7 @@
 
     <Target Name="Build" DependsOnTargets="NpmInstall;$(CompileDependsOn)">
         <Message Text="TypeScriptConfigFilePath = $(TypeScriptConfigFilePath)..." />
+        <Copy SourceFiles="$(MscaToolkitProjFilePath)" DestinationFolder="$(RepoDirectory)/lib/msca-toolkit" />
     </Target>
 
 </Project>

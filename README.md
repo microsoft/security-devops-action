@@ -2,9 +2,9 @@
 
 ![Microsoft Security Code Analysis Action Sample](https://github.com/microsoft/security-code-analysis-action/workflows/Microsoft%20Security%20Code%20Analysis%20Action%20Sample/badge.svg)
 
-This action runs the [Microsoft Guardian CLI](https://aka.ms/msguardian) for security analysis by:
+This action runs the [Microsoft Security Code Analysis  CLI](https://aka.ms/mscadocs) for security analysis by:
 
-* Installing the Guardian CLI
+* Installing the Microsoft Security Code Analysis CLI
 * Installing the latest Microsoft security policy
 * Installing the latest Microsoft and 3rd party security tools
 * Automatic or user-provided configuration of security tools
@@ -22,27 +22,28 @@ Run Guardian with the default policy and recommended tools.
 
 ```yaml
 steps:
-- uses: actions/checkout@master
+- uses: actions/checkout@v2
 - uses: actions/setup-dotnet@v1
   with:
-    dotnet-version: '3.1.2'
-- name: Run Guardian
-  uses: Microsoft/guardian-github@master
+    dotnet-version: '3.1.201'
+- name: Run Microsoft Security Code Analysis
+  uses: Microsoft/security-code-analysis-action@master
+  id: msca
 - name: Upload results to Security tab
   uses: github/codeql-action/upload-sarif@v1
   with:
-    sarif_file: $(GuardianExportedFilePath)
+    sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
 
-To upload results to the Security tab of your repo, run the `github/codeql-action/upload-sarif` action immediately after running Guardian. Guardian sets the environment variable `GuardianExportedFilePath` to the path of a single SARIF file that can be uploaded to this API.
+To upload results to the Security tab of your repo, run the `github/codeql-action/upload-sarif` action immediately after running MSCA. MSCA sets the action output variable `sarifFile` to the path of a single SARIF file that can be uploaded to this API.
 
 ```yaml
 - name: Upload results to Security tab
   uses: github/codeql-action/upload-sarif@v1
   with:
-    sarif_file: $(GuardianExportedFilePath)
+    sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
 
 # License

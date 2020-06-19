@@ -33,19 +33,40 @@ export class MscaAction {
         return cliVersion;
     }
 
-    isNullOrWhiteSpace(value: string) {
+    isNullOrWhiteSpace(value: string) : boolean {
         return !value || !value.trim();
     }
 
-    async run(args: array) {
+    async init() {
+
+        let cliFilePath: string = process.env.MSCA_FILEPATH;
+        core.debug(`cliFilePath = ${cliFilePath}`);
+
+        try {
+            await exec.exec(cliFilePath, ['init', '--force']);
+        }
+        catch (error) {
+            core.debug(error.Message);
+        }
+    }
+
+    async run(inputArgs: string[]) {
 
         await this.setupEnvironment();
 
-        let cliFilePath = process.env.MSCA_FILEPATH;
+        await this.init();
+
+        let cliFilePath: string = process.env.MSCA_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
 
-        if (args == null) {
-            args = ['run'];
+        let args = ['run'];
+
+        if (inputArgs != null)
+        {
+            for (let i = 0; i < inputArgs.length; i++)
+            {
+                args.push(inputArgs[i]);
+            }
         }
 
         args.push('--logger-actions');
@@ -55,10 +76,20 @@ export class MscaAction {
             args.push('trace');
         }
 
+        let sarifFile : string = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msca.sarif');
+        core.debug(`sarifFile = ${sarifFile}`);
+
+        // Write it as a GitHub Action variable for follow up tasks to consume
+        core.exportVariable('MSCA_SARIF_FILE', sarifFile);
+        core.setOutput('sarifFile', sarifFile);
+
+        args.push('--export-breaking-results-to-file');
+        args.push(`${sarifFile}`);
+
         core.debug('Running Microsoft Security Code Analysis...');
 
         try {
-            await exec.exec(cliFilePath, args)
+            await exec.exec(cliFilePath, args);
         }
         catch (error) {
             core.setFailed(error.Message);
