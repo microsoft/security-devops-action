@@ -69,6 +69,8 @@ export class MscaAction {
             }
         }
 
+        args.push('--not-break-on-detections');
+
         args.push('--logger-actions');
 
         if (core.isDebug()) {
