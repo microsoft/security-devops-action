@@ -30,18 +30,18 @@ steps:
   uses: Microsoft/security-code-analysis-action@master
   id: msca
 - name: Upload results to Security tab
-  uses: Anthophila/codeql-action/codeql/upload-sarif@master
+  uses: github/codeql-action/upload-sarif@v1
   with:
     sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
 
-To upload results to the Security tab of your repo, run the `Anthophila/codeql-action/codeql/upload-sarif` action immediately after running MSCA. MSCA sets the environment variable `MSCA_SARIF_FILE` to the path of a single SARIF file that can be uploaded to this API.
+To upload results to the Security tab of your repo, run the `github/codeql-action/upload-sarif` action immediately after running MSCA. MSCA sets the action output variable `sarifFile` to the path of a single SARIF file that can be uploaded to this API.
 
 ```yaml
 - name: Upload results to Security tab
-  uses: Anthophila/codeql-action/codeql/upload-sarif@master
+  uses: github/codeql-action/upload-sarif@v1
   with:
     sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
