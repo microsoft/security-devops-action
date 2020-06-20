@@ -1,6 +1,6 @@
 # guardian-github action sample
 
-name: Microsoft Security Code Analysis Action Sample
+name: MSCA ubuntu-latest
 on:
   push:
     branches:
