@@ -1,7 +1,7 @@
 {
-    "name": "gdn-github-actions",
+    "name": "microsoft-security-code-analysis-action",
     "version": "1.0.0",
-    "description": "Node dependencies for Guardian GitHub Actions.",
+    "description": "Node dependencies for the Microsoft Security Code Analysis GitHub Action.",
     "scripts": {
         "test": "mocha"
     },

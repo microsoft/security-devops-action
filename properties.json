@@ -1,6 +1,0 @@
-{
-	"name": "Guardian",
-	"description": "Run Microsoft Guardian to perform security analysis.",
-	"iconName": "guardian-shield",
-	"categories": ["Automation", "SDLC"]
-}
