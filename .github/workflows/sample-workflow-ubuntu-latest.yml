@@ -1,0 +1,24 @@
+# guardian-github action sample
+
+name: Microsoft Security Code Analysis Action Sample
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sample:
+    name: Security Code Analysis
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.201'
+    - name: Run Microsoft Security Code Analysis
+      uses: Microsoft/security-code-analysis-action@master
+      id: msca
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{ steps.msca.outputs.sarifFile }}
