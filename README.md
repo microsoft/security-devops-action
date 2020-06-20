@@ -1,7 +1,7 @@
 # microsoft/security-code-analysis-action
 
 ![MSCA windows-latest](https://github.com/microsoft/security-code-analysis-action/workflows/MSCA%20windows-latest/badge.svg)  
-![MSCA ubuntu-latest](https://github.com/microsoft/security-code-analysis-action/workflows/MSCA%20windows-latest/badge.svg)
+![MSCA ubuntu-latest](https://github.com/microsoft/security-code-analysis-action/workflows/MSCA%20ubuntu-latest/badge.svg)
 
 This action runs the [Microsoft Security Code Analysis  CLI](https://aka.ms/mscadocs) for security analysis by:
 
