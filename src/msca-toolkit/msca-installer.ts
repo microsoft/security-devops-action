@@ -121,7 +121,9 @@ export class MscaInstaller {
         }
     }
 
-    findLatestVersionDirectory(mscaVersionsDirectory: string, isPreRelease: boolean = false) : string {
+    findLatestVersionDirectory(
+        mscaVersionsDirectory: string,
+        isPreRelease: boolean = false) : string {
 
         let latestDirectory = null;
         let latestVersionParts = null;
