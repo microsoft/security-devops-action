@@ -1,0 +1,90 @@
+{
+  "version": "1.0.0",
+  "suppressionSets": {
+    "default": {
+      "name": "default",
+      "createdDate": "2020-06-22 22:21:08Z",
+      "lastUpdatedDate": "2020-06-22 22:21:08Z"
+    }
+  },
+  "results": {
+    "b55100af590384314d06fdb4f25f1b6e86e07aaf69010e8321c240cc3a7b324c": {
+      "signature": "b55100af590384314d06fdb4f25f1b6e86e07aaf69010e8321c240cc3a7b324c",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    },
+    "5609febb6d784c6ad6aabb0e4624c2e7f8ed212468ef12256e9d1f6c865241a1": {
+      "signature": "5609febb6d784c6ad6aabb0e4624c2e7f8ed212468ef12256e9d1f6c865241a1",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    },
+    "133408373b8725daf83aa009ca35add815e4deaadd56be6cfe0d8046b2710b91": {
+      "signature": "133408373b8725daf83aa009ca35add815e4deaadd56be6cfe0d8046b2710b91",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    },
+    "060c07f7a16a8a8c365e4ff1c079e4754ad6c19ff617729953dcea28fb363758": {
+      "signature": "060c07f7a16a8a8c365e4ff1c079e4754ad6c19ff617729953dcea28fb363758",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    },
+    "4da68ea9226ffbb2659163b8035d7d7ab26492c1009f9696606e32e6d919d874": {
+      "signature": "4da68ea9226ffbb2659163b8035d7d7ab26492c1009f9696606e32e6d919d874",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    },
+    "00e68c75c3d4c2a4e875be3b3b166ef4b70916316648b6e0e38fd3f81b40ed86": {
+      "signature": "00e68c75c3d4c2a4e875be3b3b166ef4b70916316648b6e0e38fd3f81b40ed86",
+      "target": "lib/msca-toolkit/msca-installer.js",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "ESLint",
+      "ruleId": "security/detect-non-literal-fs-filename",
+      "justification": null,
+      "createdDate": "2020-06-22 22:21:08Z",
+      "expirationDate": null,
+      "type": "External"
+    }
+  }
+}
