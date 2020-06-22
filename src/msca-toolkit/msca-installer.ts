@@ -49,7 +49,7 @@ export class MscaInstaller {
             failed = false;
 
             const mscaToolkitDirectory = path.resolve(__dirname);
-            core.debug(`mscaToolkitDirectory = ${__dirname}`);
+            core.debug(`mscaToolkitDirectory = ${mscaToolkitDirectory}`);
 
             const mscaProjectFile = path.join(mscaToolkitDirectory, 'msca-toolkit.proj');
             core.debug(`mscaProjectFile = ${mscaProjectFile}`);
