@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Microsoft.Security.CodeAnalysis.Policy.GitHub</id>
+    <version>1.1.0</version>
+    <description>Microsoft Security Code Analysis Policy for GitHub.</description>
+    <authors>Microsoft</authors>
+    <projectUrl>https://aka.ms/mscadocs</projectUrl>
+    <language>en-US</language>
+    <license type="expression">MS-PL</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags />
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <releaseNotes>
+      ## v1.1.0 - 06/18/2020
+      GitHub Policy Release - requiredTools
+    </releaseNotes>
+  </metadata>
+</package>
