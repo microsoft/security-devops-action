@@ -62,13 +62,31 @@
   },
   "requiredTools": [
     {
-      "toolName": "Bandit"
+      "toolName": "Bandit",
+      "platform": "Windows"
     },
     {
-      "toolName": "BinSkim"
+      "toolName": "Bandit",
+      "guardianToolName": "bandit-linux",
+      "platform": "Linux"
     },
     {
-      "toolName": "eslint"
+      "toolName": "BinSkim",
+      "platform": "Windows"
+    },
+    {
+      "toolName": "BinSkim",
+      "guardianToolName": "binskim-linux",
+      "platform": "Linux"
+    },
+    {
+      "toolName": "eslint",
+      "platform": "Windows"
+    },
+    {
+      "toolName": "eslint",
+      "guardianToolName": "eslint-linux",
+      "platform": "Linux"
     }
   ],
   "properties": {},
