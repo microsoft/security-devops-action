@@ -13,18 +13,7 @@ if (!action.isNullOrWhiteSpace(config)) {
 }
 
 let policy = core.getInput('policy');
-if (action.isNullOrWhiteSpace(policy)) {
-    // Use the local policy file
-    const actionDirectory = path.resolve(__dirname);
-    core.debug(`actionDirectory = ${actionDirectory}`);
-
-    const policyFilePath = path.resolve(path.join(actionDirectory, '../', 'policy', 'github.gdnpolicy'));
-    core.debug(`policyFilePath = ${policyFilePath}`);
-
-    args.push('--policy-file-path');
-    args.push(policyFilePath);
-} else {
-    // Use the defined policy
+if (!action.isNullOrWhiteSpace(policy)) {
     args.push('-p');
     args.push(policy);
 }
