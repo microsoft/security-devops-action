@@ -13,6 +13,10 @@ This action runs the [Microsoft Security Code Analysis  CLI](https://aka.ms/msca
 * Normalized processing of results into the SARIF format
 * Build breaks and more
 
+# Limitations
+
+The MSCA action is currently in beta and runs on the `windows-latest` queue, as well as Windows self hosted agents. `ubuntu-latest` support coming soon.
+
 # Usage
 
 See [action.yml](action.yml)
@@ -46,6 +50,23 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
   with:
     sarif_file: ${{ steps.msca.outputs.sarifFile }}
 ```
+
+# Open Source Tools
+
+| Name | Language |
+| --- | --- |
+| [Bandit](https://github.com/PyCQA/bandit) | python |
+| [BinSkim](https://github.com/Microsoft/binskim) | binary - Windows, ELF |
+| [ESlint](https://github.com/eslint/eslint) | JavaScript |
+
+# More Information
+
+Please see the [wiki tab](https://github.com/github/ossar-action/wiki) for more information and the [Frequently Asked Questions (FAQ)](https://github.com/github/ossar-action/wiki/FAQ) page.
+
+# Report Issues
+
+Please [file a GitHub issue](https://github.com/github/ossar-action/issues/new) in this repo. To help us investigate the issue, please include a description of the problem, a link to your workflow run (if public), and/or logs from the OSSAR's action output.
+
 
 # License
 
