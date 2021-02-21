@@ -8,8 +8,11 @@
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": false,
+    "esModuleInterop": true,
     "noImplicitAny": false,
-    "esModuleInterop": true
+    "removeComments": true,
+    "sourceMap": false
+
   },
   "include": [
     "src/**/*"

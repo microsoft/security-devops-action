@@ -8,9 +8,8 @@
     "author": "Microsoft Corporation",
     "license": "",
     "dependencies": {
-        "@actions/core": "1.2.4",
+        "@actions/core": "1.2.6",
         "@actions/exec": "1.0.4",
-        "js-yaml": "3.13.1",
         "msca-actions-toolkit": "^1.0.0"
     },
     "devDependencies": {
