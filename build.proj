@@ -3,48 +3,34 @@
 
     <PropertyGroup>
         <RepoDirectory Condition=" '$(RepoDirectory)' == '' ">$(MSBuildThisFileDirectory)</RepoDirectory>
-        <MscaToolkitDirectory Condition=" '$(MscaToolkitDirectory)' == '' ">$(MSBuildThisFileDirectory)/src/msca-toolkit</MscaToolkitDirectory>
-        <MscaToolkitProjFilePath  Condition=" '$(MscaToolkitProjFilePath)' == '' ">$(MscaToolkitDirectory)/msca-toolkit.proj</MscaToolkitProjFilePath>
-    </PropertyGroup>
-
-    <PropertyGroup Label="TypeScript">
-        <TypeScriptCompileBlocked Condition=" '$(TypeScriptCompileBlocked)' == '' ">false</TypeScriptCompileBlocked>
-        <TypeScriptToolsVersion Condition=" '$(TypeScriptToolsVersion)' == '' ">3.8</TypeScriptToolsVersion>
-        <TypeScriptConfigFileName Condition=" '$(TypeScriptConfigFileName)' == '' ">tsconfig.json</TypeScriptConfigFileName>
-        <TypeScriptConfigFilePath>$(MSBuildProjectDirectory)/$(TypeScriptConfigFileName)</TypeScriptConfigFilePath>
-        <TscYieldDuringToolExecution>false</TscYieldDuringToolExecution>
-        <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
-        <TypeScriptSourceMap>false</TypeScriptSourceMap>
-    </PropertyGroup>
-
-    <PropertyGroup Label="Npm">
+        <SrcDirectory Condition=" '$(SrcDirectory)' == '' ">$(RepoDirectory)/src</SrcDirectory>
+        <LibDirectory Condition=" '$(LibDirectory)' == '' ">$(RepoDirectory)/lib</LibDirectory>
         <NpmInstall Condition=" '$(NpmInstall)' == ''">false</NpmInstall>
+        <NpmProduction Condition=" '$(NpmProduction)' == ''">true</NpmInstall>
     </PropertyGroup>
-
-    <!-- TypeScript Compiler imports -->
-    <Import
-        Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets"
-        Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
-
-    <ItemGroup>
-        <ConfigFiles Include="$(TypeScriptConfigFilePath)" />
-    </ItemGroup>
-
-    <!-- Override the TypeScript FindConfigFiles Target so that default tsconfig.json is not picked up -->
-    <Target Name="FindConfigFiles"></Target>
 
     <Target
         Name="NpmInstall"
-        Inputs="$(MSBuildProjectDirectory)"
-        Outputs="$(MSBuildProjectDirectory)\node_modules"
+        Inputs="$(RepoDirectory)"
+        Outputs="$(RepoDirectory)\node_modules"
         Condition=" '$(NpmInstall)' == 'true' ">
-        <Message Text="Installing npm dependencies in: $(MSBuildProjectDirectory)..." />
-        <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+        <Message Text="Installing npm dependencies in: $(RepoDirectory)..." />
+        <Exec Command="npm install" WorkingDirectory="$(RepoDirectory)" />
     </Target>
 
-    <Target Name="Build" DependsOnTargets="NpmInstall;$(CompileDependsOn)">
-        <Message Text="TypeScriptConfigFilePath = $(TypeScriptConfigFilePath)..." />
-        <Copy SourceFiles="$(MscaToolkitProjFilePath)" DestinationFolder="$(RepoDirectory)/lib/msca-toolkit" />
+    <Target Name="Compile">
+        <Message Text="Compiling msca-azdevops-toolkit..." />
+        <Exec Command="tsc" WorkingDirectory="$(RepoDirectory)" />
     </Target>
+
+    <Target Name="NpmProduction" Condition=" '$(NpmProduction)' == 'true' ">
+        <Message Text="Deleting the node_modules directory at: $(RepoDirectory)/node_modules" />
+        <RemoveDir Directory="$(RepoDirectory)/node_modules" />
+
+        <Message Text="Installing npm production-only dependencies in: $(RepoDirectory)..." />
+        <Exec Command="npm install" WorkingDirectory="$(RepoDirectory)" />
+    </Target>
+
+    <Target Name="Build" DependsOnTargets="NpmInstall;Compile;NpmProduction" />
 
 </Project>

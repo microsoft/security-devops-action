@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
-import { MscaAction } from './msca-toolkit/msca-toolkit';
+import { MscaClient } from 'msca-actions-toolkit';
 import * as path from 'path';
 
-let action = new MscaAction();
+let action = new MscaClient();
 
 let args: string[] = [];
 

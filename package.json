@@ -10,7 +10,8 @@
     "dependencies": {
         "@actions/core": "1.2.4",
         "@actions/exec": "1.0.4",
-        "js-yaml": "3.13.1"
+        "js-yaml": "3.13.1",
+        "msca-actions-toolkit": "^1.0.0"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.44",

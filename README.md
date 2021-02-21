@@ -3,11 +3,11 @@
 ![MSCA windows-latest](https://github.com/microsoft/security-code-analysis-action/workflows/MSCA%20windows-latest/badge.svg)  
 ![MSCA ubuntu-latest](https://github.com/microsoft/security-code-analysis-action/workflows/MSCA%20ubuntu-latest/badge.svg)
 
-This action runs the [Microsoft Security Code Analysis  CLI](https://aka.ms/mscadocs) for security analysis by:
+This action runs the [Microsoft Security Code Analysis  CLI](https://aka.ms/mscadocs) for security analysis:
 
-* Installing the Microsoft Security Code Analysis CLI
-* Installing the latest Microsoft security policy
-* Installing the latest Microsoft and 3rd party security tools
+* Installs the Microsoft Security Code Analysis CLI
+* Installs the latest Microsoft security policy
+* Installs the latest Microsoft and 3rd party security tools
 * Automatic or user-provided configuration of security tools
 * Execution of a full suite of security tools
 * Normalized processing of results into the SARIF format
