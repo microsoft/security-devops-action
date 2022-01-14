@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,20 +27,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MsdoClient = void 0;
 const path = __importStar(require("path"));
 const process = __importStar(require("process"));
 const core = __importStar(require("@actions/core"));
 const exec = __importStar(require("@actions/exec"));
-const msca_installer_1 = require("./msca-installer");
-class MscaClient {
+const msdo_installer_1 = require("./msdo-installer");
+class MsdoClient {
     constructor() {
         this.cliVersion = '0.*';
     }
@@ -29,18 +42,18 @@ class MscaClient {
         return __awaiter(this, void 0, void 0, function* () {
             process.env.DOTNET_NOLOGO = 'true';
             console.log('------------------------------------------------------------------------------');
-            if (!process.env.MSCA_FILEPATH) {
+            if (!process.env.MSDO_FILEPATH) {
                 let cliVersion = this.resolveCliVersion();
-                let mscaInstaller = new msca_installer_1.MscaInstaller();
-                yield mscaInstaller.install(cliVersion);
+                let msdoInstaller = new msdo_installer_1.MsdoInstaller();
+                yield msdoInstaller.install(cliVersion);
             }
             console.log('------------------------------------------------------------------------------');
         });
     }
     resolveCliVersion() {
         let cliVersion = this.cliVersion;
-        if (process.env.MSCA_VERSION) {
-            cliVersion = process.env.MSCA_VERSION;
+        if (process.env.MSDO_VERSION) {
+            cliVersion = process.env.MSDO_VERSION;
         }
         return cliVersion;
     }
@@ -48,7 +61,7 @@ class MscaClient {
         return !value || !value.trim();
     }
     getCliFilePath() {
-        let cliFilePath = process.env.MSCA_FILEPATH;
+        let cliFilePath = process.env.MSDO_FILEPATH;
         core.debug(`cliFilePath = ${cliFilePath}`);
         return cliFilePath;
     }
@@ -70,7 +83,7 @@ class MscaClient {
             try {
                 yield this.setupEnvironment();
                 yield this.init();
-                cliFilePath = process.env.MSCA_FILEPATH;
+                cliFilePath = process.env.MSDO_FILEPATH;
                 core.debug(`cliFilePath = ${cliFilePath}`);
                 if (inputArgs != null) {
                     for (let i = 0; i < inputArgs.length; i++) {
@@ -82,21 +95,21 @@ class MscaClient {
                     args.push('--logger-level');
                     args.push('trace');
                 }
-                let sarifFile = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msca.sarif');
+                let sarifFile = path.join(process.env.GITHUB_WORKSPACE, '.gdn', 'msdo.sarif');
                 core.debug(`sarifFile = ${sarifFile}`);
-                core.exportVariable('MSCA_SARIF_FILE', sarifFile);
+                core.exportVariable('MSDO_SARIF_FILE', sarifFile);
                 core.setOutput('sarifFile', sarifFile);
                 args.push('--export-breaking-results-to-file');
                 args.push(`${sarifFile}`);
             }
             catch (error) {
-                error('Exception occurred while initializing MSCA:');
+                error('Exception occurred while initializing MSDO:');
                 error(error);
                 core.setFailed(error);
                 return;
             }
             try {
-                core.debug('Running Microsoft Security Code Analysis...');
+                core.debug('Running Microsoft Security DevOps...');
                 yield exec.exec(cliFilePath, args);
             }
             catch (error) {
@@ -107,4 +120,4 @@ class MscaClient {
         });
     }
 }
-exports.MscaClient = MscaClient;
+exports.MsdoClient = MsdoClient;

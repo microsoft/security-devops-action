@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,43 +27,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MsdoInstaller = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const process = __importStar(require("process"));
 const core = __importStar(require("@actions/core"));
 const exec = __importStar(require("@actions/exec"));
-class MscaInstaller {
+class MsdoInstaller {
     install(cliVersion) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Installing Microsoft Security Code Analysis Cli...');
-            if (process.env.MSCA_FILEPATH) {
-                console.log(`MSCA CLI File Path overriden by %MSCA_FILEPATH%: ${process.env.MSCA_FILEPATH}`);
+            console.log('Installing Microsoft Security DevOps Cli...');
+            if (process.env.MSDO_FILEPATH) {
+                console.log(`MSDO CLI File Path overriden by %MSDO_FILEPATH%: ${process.env.MSDO_FILEPATH}`);
                 return;
             }
-            if (process.env.MSCA_DIRECTORY) {
-                console.log(`MSCA CLI Directory overriden by %MSCA_DIRECTORY%: ${process.env.MSCA_DIRECTORY}`);
-                let mscaFilePath = path.join(process.env.MSCA_DIRECTORY, 'guardian');
-                core.debug(`mscaFilePath = ${mscaFilePath}`);
-                process.env.MSCA_FILEPATH = mscaFilePath;
+            if (process.env.MSDO_DIRECTORY) {
+                console.log(`MSDO CLI Directory overriden by %MSDO_DIRECTORY%: ${process.env.MSDO_DIRECTORY}`);
+                let msdoFilePath = path.join(process.env.MSDO_DIRECTORY, 'guardian');
+                core.debug(`msdoFilePath = ${msdoFilePath}`);
+                process.env.MSDO_FILEPATH = msdoFilePath;
                 return;
             }
-            let mscaDirectory = path.resolve(path.join(process.env.GITHUB_WORKSPACE, '../../_msca'));
-            core.debug(`mscaDirectory = ${mscaDirectory}`);
-            this.ensureDirectory(mscaDirectory);
-            let mscaPackagesDirectory = path.join(mscaDirectory, 'versions');
-            core.debug(`mscaPackagesDirectory = ${mscaPackagesDirectory}`);
-            this.ensureDirectory(mscaPackagesDirectory);
-            let mscaVersionsDirectory = path.join(mscaPackagesDirectory, 'microsoft.security.codeanalysis.cli');
-            core.debug(`mscaVersionsDirectory = ${mscaVersionsDirectory}`);
-            if (this.isInstalled(mscaVersionsDirectory, cliVersion)) {
+            let msdoDirectory = path.resolve(path.join(process.env.GITHUB_WORKSPACE, '../../_msdo'));
+            core.debug(`msdoDirectory = ${msdoDirectory}`);
+            this.ensureDirectory(msdoDirectory);
+            let msdoPackagesDirectory = path.join(msdoDirectory, 'versions');
+            core.debug(`msdoPackagesDirectory = ${msdoPackagesDirectory}`);
+            this.ensureDirectory(msdoPackagesDirectory);
+            let msdoVersionsDirectory = path.join(msdoPackagesDirectory, 'microsoft.security.codeanalysis.cli');
+            core.debug(`msdoVersionsDirectory = ${msdoVersionsDirectory}`);
+            if (this.isInstalled(msdoVersionsDirectory, cliVersion)) {
                 return;
             }
             let failed = false;
@@ -52,16 +65,16 @@ class MscaInstaller {
             let maxAttempts = 2;
             do {
                 failed = false;
-                const mscaToolkitDirectory = path.resolve(__dirname);
-                core.debug(`mscaToolkitDirectory = ${mscaToolkitDirectory}`);
-                const mscaProjectFile = path.join(mscaToolkitDirectory, 'msca-toolkit.proj');
-                core.debug(`mscaProjectFile = ${mscaProjectFile}`);
+                const msdoToolkitDirectory = path.resolve(__dirname);
+                core.debug(`msdoToolkitDirectory = ${msdoToolkitDirectory}`);
+                const msdoProjectFile = path.join(msdoToolkitDirectory, 'msdo-toolkit.proj');
+                core.debug(`msdoProjectFile = ${msdoProjectFile}`);
                 let args = [
                     'restore',
-                    mscaProjectFile,
-                    `/p:MscaPackageVersion=${cliVersion}`,
+                    msdoProjectFile,
+                    `/p:MsdoPackageVersion=${cliVersion}`,
                     '--packages',
-                    mscaPackagesDirectory,
+                    msdoPackagesDirectory,
                     '--source',
                     'https://api.nuget.org/v3/index.json'
                 ];
@@ -77,7 +90,7 @@ class MscaInstaller {
                     }
                 }
             } while (failed);
-            this.resolvePackageDirectory(mscaVersionsDirectory, cliVersion);
+            this.resolvePackageDirectory(msdoVersionsDirectory, cliVersion);
         });
     }
     ensureDirectory(directory) {
@@ -88,12 +101,12 @@ class MscaInstaller {
     isInstalled(versionsDirectory, cliVersion) {
         let installed = false;
         if (cliVersion.includes("*")) {
-            core.debug(`MSCA CLI version contains a latest quantifier: ${cliVersion}. Continuing with install...`);
+            core.debug(`MSDO CLI version contains a latest quantifier: ${cliVersion}. Continuing with install...`);
             return installed;
         }
         this.setVariablesWithVersion(versionsDirectory, cliVersion);
-        if (fs.existsSync(process.env.MSCA_DIRECTORY)) {
-            console.log(`MSCA CLI v${cliVersion} already installed.`);
+        if (fs.existsSync(process.env.MSDO_DIRECTORY)) {
+            console.log(`MSDO CLI v${cliVersion} already installed.`);
             installed = true;
         }
         return installed;
@@ -106,8 +119,8 @@ class MscaInstaller {
         else {
             this.setVariablesWithVersion(versionDirectory, cliVersion);
         }
-        if (!fs.existsSync(process.env.MSCA_DIRECTORY)) {
-            throw `MSCA CLI v${cliVersion} was not found after installation.`;
+        if (!fs.existsSync(process.env.MSDO_DIRECTORY)) {
+            throw `MSDO CLI v${cliVersion} was not found after installation.`;
         }
     }
     findLatestVersionDirectory(versionsDirectory, isPreRelease = false) {
@@ -123,7 +136,7 @@ class MscaInstaller {
                 core.debug(`Skipping null or empty directory: ${dir}`);
                 continue;
             }
-            core.debug(`Evaluating MSCA directory: ${dir}`);
+            core.debug(`Evaluating MSDO directory: ${dir}`);
             const dirRegex = new RegExp(/^(\d+\.?){1,6}(\-\w+)?$/g);
             if (dirRegex.exec(dir) == null) {
                 core.debug(`Skipping invalid version directory: ${dir}`);
@@ -201,12 +214,12 @@ class MscaInstaller {
         this.setVariables(packageDirectory);
     }
     setVariables(packageDirectory) {
-        let mscaDirectory = path.join(packageDirectory, 'tools');
-        core.debug(`mscaDirectory = ${mscaDirectory}`);
-        let mscaFilePath = path.join(mscaDirectory, 'guardian');
-        core.debug(`mscaFilePath = ${mscaFilePath}`);
-        process.env.MSCA_DIRECTORY = mscaDirectory;
-        process.env.MSCA_FILEPATH = mscaFilePath;
+        let msdoDirectory = path.join(packageDirectory, 'tools');
+        core.debug(`msdoDirectory = ${msdoDirectory}`);
+        let msdoFilePath = path.join(msdoDirectory, 'guardian');
+        core.debug(`msdoFilePath = ${msdoFilePath}`);
+        process.env.MSDO_DIRECTORY = msdoDirectory;
+        process.env.MSDO_FILEPATH = msdoFilePath;
     }
 }
-exports.MscaInstaller = MscaInstaller;
+exports.MsdoInstaller = MsdoInstaller;
