@@ -22,8 +22,8 @@
     </Target>
 
     <Target Name="Build" DependsOnTargets="Clean;NpmInstall">
-        <Message Text="Compiling Micorsoft/security-devops-action." />
-        <Exec Command="tsc" WorkingDirectory="$(RepoDirectory)" />
+        <Message Text="Compiling microsoft/security-devops-action." />
+        <Exec Command="npx tsc" WorkingDirectory="$(RepoDirectory)" />
     </Target>
 
 </Project>
