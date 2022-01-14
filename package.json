@@ -10,7 +10,7 @@
     "dependencies": {
         "@actions/core": "1.2.6",
         "@actions/exec": "1.0.4",
-        "microsoft-security-devops-actions-toolkit": "^1.1.0"
+        "microsoft-security-devops-actions-toolkit": "^1.1.1"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.44",

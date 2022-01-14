@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework Condition=" '$(TargetFramework)' == '' ">netcoreapp3.1</TargetFramework>
-    <MsdoPackageName Condition=" '$(MsdoPackageName)' == '' ">Microsoft.Security.DevOps.Cli</MsdoPackageName>
+    <MsdoPackageName Condition=" '$(MsdoPackageName)' == '' ">Microsoft.Security.CodeAnalysis.Cli</MsdoPackageName>
     <MsdoPackageVersion Condition=" '$(MsdoPackageVersion)' == '' ">0.*</MsdoPackageVersion>
   </PropertyGroup>
 
