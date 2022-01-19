@@ -1,0 +1,330 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/serverfarms",
+      "name": "serverFarm",
+      "location": "[parameters('location')]"
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiAppNoHttps",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiApp_HttpsFalse",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": false
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiApp_HttpsTrue",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "name": "FunctionAppNoHttps",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp,linux",
+      "name": "FunctionApp_HttpsFalse",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": false
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "name": "FunctionApp_HttpsTrue",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app,linux",
+      "name": "WebAppNoHttps",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "WebApp_HttpsFalse",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": false
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "WebApp_HttpsTrue",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'serverFarm')]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiApp_RestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiApp_NoSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites/config",
+      "name": "SitesConfig/RestrictedCORSAccess_web",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "ApiApp_NoSitesConfig",
+        "WebApp_NoSitesConfig",
+        "FunctionApp_NoSitesConfig"
+      ],
+      "properties": {
+        "cors": {
+          "allowedOrigins": [
+            "someIP"
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "api",
+      "name": "ApiApp_UnrestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP",
+              "*"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites/config",
+      "name": "SitesConfig/UnrestrictedCORSAccess_web",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "ApiApp_NoSitesConfig",
+        "WebApp_NoSitesConfig",
+        "FunctionApp_NoSitesConfig"
+      ],
+      "properties": {
+        "cors": {
+          "allowedOrigins": [
+            "*"
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "WebApp_RestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "WebApp_NoKind_RestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "WebApp_UnrestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP",
+              "*"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "WebApp_NoSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "name": "FunctionApp_RestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "name": "FunctionApp_UnrestrictedCORSAccess_EmbeddedSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true,
+        "siteConfig": {
+          "cors": {
+            "allowedOrigins": [
+              "someIP",
+              "*"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "name": "FunctionApp_NoSitesConfig",
+      "location": "[parameters('location')]",
+      "properties": {
+        "httpsOnly": true
+      }
+    }
+  ]
+}
