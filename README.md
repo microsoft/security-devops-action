@@ -54,7 +54,7 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 # Open Source Tools
 
 | Name | Language | License |
-| --- | --- |
+| --- | --- | --- |
 | [Bandit](https://github.com/PyCQA/bandit) | python | [Apache License 2.0](https://github.com/PyCQA/bandit/blob/master/LICENSE) |
 | [BinSkim](https://github.com/Microsoft/binskim) | binary - Windows, ELF | [MIT License](https://github.com/microsoft/binskim/blob/main/LICENSE) |
 | [ESlint](https://github.com/eslint/eslint) | JavaScript | [MIT License](https://github.com/eslint/eslint/blob/main/LICENSE) |
