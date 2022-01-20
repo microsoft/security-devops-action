@@ -14,10 +14,12 @@ async function run() {
     }
 
     let policy = core.getInput('policy');
-    if (!client.isNullOrWhiteSpace(policy)) {
-        args.push('-p');
-        args.push(policy);
+    if (client.isNullOrWhiteSpace(policy)) {
+        policy = "GitHub";
     }
+
+    args.push('-p');
+    args.push(policy);
 
     await client.run(args);
 }

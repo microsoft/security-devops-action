@@ -55,10 +55,11 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 
 | Name | Language |
 | --- | --- |
-| ARMory | ARM templates |
 | [Bandit](https://github.com/PyCQA/bandit) | python |
 | [BinSkim](https://github.com/Microsoft/binskim) | binary - Windows, ELF |
 | [ESlint](https://github.com/eslint/eslint) | JavaScript |
+| [Template Analyzer](https://github.com/Azure/template-analyzer) | Infrastructure-as-code (IaC), ARM templates |
+| [Terrascan] | |
 | [Trivy](https://github.com/aquasecurity/trivy) | container images, file systems, and git repositories |
 
 # More Information
@@ -68,7 +69,6 @@ Please see the [wiki tab](https://github.com/microsoft/security-devops-action/wi
 # Report Issues
 
 Please [file a GitHub issue](https://github.com/microsoft/security-devops-action/issues/new) in this repo. To help us investigate the issue, please include a description of the problem, a link to your workflow run (if public), and/or logs from the MSDO action's output.
-
 
 # License
 
