@@ -1,4 +1,4 @@
-# microsoft/security-devops-action
+# microsoft/security-devops-action (Preview)
 
 ![Microsoft Security DevOps windows-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20windows-latest/badge.svg)  
 ![Microsoft Security DevOps ubuntu-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20ubuntu-latest/badge.svg)
@@ -34,7 +34,7 @@ steps:
       3.1.x
       5.0.x
 - name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@main
+  uses: microsoft/security-devops-action@preview
   id: msdo
 - name: Upload results to Security tab
   uses: github/codeql-action/upload-sarif@v1
