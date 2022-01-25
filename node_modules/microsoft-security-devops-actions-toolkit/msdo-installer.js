@@ -55,7 +55,7 @@ class MsdoInstaller {
             let msdoPackagesDirectory = path.join(msdoDirectory, 'versions');
             core.debug(`msdoPackagesDirectory = ${msdoPackagesDirectory}`);
             this.ensureDirectory(msdoPackagesDirectory);
-            let msdoVersionsDirectory = path.join(msdoPackagesDirectory, 'microsoft.security.codeanalysis.cli');
+            let msdoVersionsDirectory = path.join(msdoPackagesDirectory, 'microsoft.security.devops.cli');
             core.debug(`msdoVersionsDirectory = ${msdoVersionsDirectory}`);
             if (this.isInstalled(msdoVersionsDirectory, cliVersion)) {
                 return;
