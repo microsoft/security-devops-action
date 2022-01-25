@@ -30,7 +30,7 @@ steps:
 - uses: actions/checkout@v2
 - uses: actions/setup-dotnet@v1
   with:
-    dotnet-version: '3.1.201'
+    dotnet-version: '6.0.x'
 - name: Run Microsoft Security DevOps
   uses: microsoft/security-devops-action@main
   id: msdo

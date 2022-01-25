@@ -20,15 +20,15 @@ jobs:
       # Install dotnet, used by MSDO
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.1.201'
+        dotnet-version: '6.0.x'
 
-      # Run static analysis tools
+      # Run analyzers
     - name: Run Microsoft Security DevOps Analysis
       uses: microsoft/security-devops-action@main
       id: msdo
 
-      # Upload results to the Security tab
-    - name: Upload results to Security tab
+      # Upload alerts to the Security tab
+    - name: Upload alerts to Security tab
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
