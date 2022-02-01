@@ -1,6 +1,6 @@
 {
     "name": "microsoft-security-devops-actions-toolkit",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Microsoft Security DevOps for GitHub Actions toolkit.",
     "author": "Microsoft Corporation",
     "license": "MIT",
