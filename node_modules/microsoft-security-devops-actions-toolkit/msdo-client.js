@@ -105,8 +105,8 @@ class MsdoClient {
                 args.push('github');
             }
             catch (error) {
-                error('Exception occurred while initializing MSDO:');
-                error(error);
+                core.error('Exception occurred while initializing MSDO:');
+                core.error(error);
                 core.setFailed(error);
                 return;
             }
@@ -115,7 +115,6 @@ class MsdoClient {
                 yield exec.exec(cliFilePath, args);
             }
             catch (error) {
-                error(error);
                 core.setFailed(error);
                 return;
             }
