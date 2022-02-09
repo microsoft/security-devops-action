@@ -10,6 +10,12 @@ inputs:
   policy:
     description: The name of the well known policy to use. Defaults to Microsoft.
     default: Microsoft
+  categories:
+    description: The name of the well known policy to use. Defaults to Microsoft.
+    default: Microsoft
+  languages:
+    description: The name of the well known policy to use. Defaults to Microsoft.
+    default: Microsoft
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.

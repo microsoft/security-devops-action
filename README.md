@@ -23,7 +23,7 @@ See [action.yml](action.yml)
 
 ## Basic
 
-Run Microsoft Security DevOps (MSDO) with the default policy and recommended tools.
+Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
 
 ```yaml
 steps:
@@ -33,6 +33,7 @@ steps:
     dotnet-version: |
       3.1.x
       5.0.x
+      6.0.x
 - name: Run Microsoft Security DevOps
   uses: microsoft/security-devops-action@preview
   id: msdo
