@@ -11,11 +11,9 @@ inputs:
     description: The name of the well known policy to use. Defaults to Microsoft.
     default: Microsoft
   categories:
-    description: The name of the well known policy to use. Defaults to Microsoft.
-    default: Microsoft
+    description: A comma separated list of analyzer categories to run. Values secrets, code, artifacts, IaC, containers. Example IaC,secrets. Defaults to all.
   languages:
-    description: The name of the well known policy to use. Defaults to Microsoft.
-    default: Microsoft
+    description: A comma separated list of languages to analyze. Example javascript, typescript. Defaults to all.
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.
