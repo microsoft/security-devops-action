@@ -8,8 +8,8 @@ inputs:
   config:
     description: A file path to a .gdnconfig file.
   policy:
-    description: The name of the well known policy to use. Defaults to Microsoft.
-    default: Microsoft
+    description: The name of the well known policy to use. Defaults to GitHub.
+    default: GitHub
   categories:
     description: A comma separated list of analyzer categories to run. Values secrets, code, artifacts, IaC, containers. Example IaC,secrets. Defaults to all.
   languages:
