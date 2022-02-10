@@ -28,9 +28,9 @@ async function run() {
     }
 
     let languages: string = core.getInput('languages');
-    if (!client.isNullOrWhiteSpace(categories)) {
+    if (!client.isNullOrWhiteSpace(languages)) {
         args.push('--languages');
-        args.push(categories)
+        args.push(languages)
     }
 
     await client.run(args);
