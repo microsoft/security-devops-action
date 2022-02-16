@@ -33,6 +33,8 @@ async function run() {
         args.push(languages)
     }
 
+    args.push('--github');
+
     await client.run(args);
 }
 
