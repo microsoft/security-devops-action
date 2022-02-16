@@ -1,6 +1,6 @@
 {
     "name": "microsoft-security-devops-action",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "description": "Node dependencies for the microsoft/security-devops-action.",
     "scripts": {
         "test": "mocha"
