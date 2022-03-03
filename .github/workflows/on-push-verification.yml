@@ -34,3 +34,10 @@ jobs:
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
+      # Upload alerts file as a workflow artifact
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact
+      with:  
+        name: alerts
+        path: ${{ steps.msdo.outputs.sarifFile }}
