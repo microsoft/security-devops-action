@@ -35,7 +35,7 @@ async function run() {
 
     args.push('--github');
 
-    await client.run(args);
+    await client.run(args, 'microsoft/security-devops-action');
 }
 
 run().catch((error) => core.setFailed(error));

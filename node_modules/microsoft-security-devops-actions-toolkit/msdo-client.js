@@ -76,7 +76,7 @@ class MsdoClient {
             }
         });
     }
-    run(inputArgs) {
+    run(inputArgs, telemetryEnvironment = 'github') {
         return __awaiter(this, void 0, void 0, function* () {
             let cliFilePath = null;
             let args = [];
@@ -102,7 +102,7 @@ class MsdoClient {
                 args.push('--export-breaking-results-to-file');
                 args.push(`${sarifFile}`);
                 args.push('--telemetry-environment');
-                args.push('github');
+                args.push(telemetryEnvironment);
             }
             catch (error) {
                 core.error('Exception occurred while initializing MSDO:');
