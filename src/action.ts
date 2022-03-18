@@ -21,10 +21,16 @@ async function run() {
     args.push('-p');
     args.push(policy);
 
-    let categories: string = core.getInput('categories');
-    if (!client.isNullOrWhiteSpace(categories)) {
+    let categoriesString: string = core.getInput('categories');
+    if (!client.isNullOrWhiteSpace(categoriesString)) {
+        let categories = categoriesString.split(',');
         args.push('--categories');
-        args.push(categories)
+        for (let i = 0; i < categories.length; i++) {
+            let category = categories[i];
+            if (!client.isNullOrWhiteSpace(category)) {
+                args.push(category.trim());
+            }
+        }
     }
 
     let languages: string = core.getInput('languages');
