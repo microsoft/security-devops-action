@@ -23,8 +23,8 @@ async function run() {
 
     let categoriesString: string = core.getInput('categories');
     if (!client.isNullOrWhiteSpace(categoriesString)) {
-        let categories = categoriesString.split(',');
         args.push('--categories');
+        let categories = categoriesString.split(',');
         for (let i = 0; i < categories.length; i++) {
             let category = categories[i];
             if (!client.isNullOrWhiteSpace(category)) {
@@ -33,10 +33,16 @@ async function run() {
         }
     }
 
-    let languages: string = core.getInput('languages');
-    if (!client.isNullOrWhiteSpace(languages)) {
+    let languagesString: string = core.getInput('languages');
+    if (!client.isNullOrWhiteSpace(languagesString)) {
+        let languages = languagesString.split(',');
         args.push('--languages');
-        args.push(languages)
+        for (let i = 0; i < languages.length; i++) {
+            let language = languages[i];
+            if (!client.isNullOrWhiteSpace(language)) {
+                args.push(language.trim());
+            }
+        }
     }
 
     args.push('--github');
