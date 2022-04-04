@@ -47,6 +47,7 @@ class MsdoClient {
                 let msdoInstaller = new msdo_installer_1.MsdoInstaller();
                 yield msdoInstaller.install(cliVersion);
             }
+            process.env.GDN_SETTINGS_FOLDERS = `Install=${process.env.MSDO_PACKAGES_DIRECTORY}`;
             console.log('------------------------------------------------------------------------------');
         });
     }
