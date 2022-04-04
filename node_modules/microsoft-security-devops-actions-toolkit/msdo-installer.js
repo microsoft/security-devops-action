@@ -49,13 +49,20 @@ class MsdoInstaller {
                 process.env.MSDO_FILEPATH = msdoFilePath;
                 return;
             }
-            let msdoDirectory = path.resolve(path.join(process.env.GITHUB_WORKSPACE, '../../_msdo'));
-            core.debug(`msdoDirectory = ${msdoDirectory}`);
-            this.ensureDirectory(msdoDirectory);
-            let msdoPackagesDirectory = path.join(msdoDirectory, 'versions');
-            core.debug(`msdoPackagesDirectory = ${msdoPackagesDirectory}`);
-            this.ensureDirectory(msdoPackagesDirectory);
-            let msdoVersionsDirectory = path.join(msdoPackagesDirectory, 'microsoft.security.devops.cli');
+            let agentDirectory = path.resolve(path.join(process.env.GITHUB_WORKSPACE, '../../_msdo'));
+            core.debug(`agentDirectory = ${agentDirectory}`);
+            this.ensureDirectory(agentDirectory);
+            let agentPackagesDirectory = process.env.MSDO_PACKAGES_DIRECTORY;
+            if (!agentPackagesDirectory) {
+                agentPackagesDirectory = path.join(agentDirectory, 'packages');
+                core.debug(`agentPackagesDirectory = ${agentPackagesDirectory}`);
+                this.ensureDirectory(agentPackagesDirectory);
+                process.env.MSDO_PACKAGES_DIRECTORY = agentPackagesDirectory;
+            }
+            let agentVersionsDirectory = path.join(agentDirectory, 'versions');
+            core.debug(`agentVersionsDirectory = ${agentVersionsDirectory}`);
+            this.ensureDirectory(agentVersionsDirectory);
+            let msdoVersionsDirectory = path.join(agentVersionsDirectory, 'microsoft.security.devops.cli');
             core.debug(`msdoVersionsDirectory = ${msdoVersionsDirectory}`);
             if (this.isInstalled(msdoVersionsDirectory, cliVersion)) {
                 return;
@@ -74,7 +81,7 @@ class MsdoInstaller {
                     msdoProjectFile,
                     `/p:MsdoPackageVersion=${cliVersion}`,
                     '--packages',
-                    msdoPackagesDirectory,
+                    msdoVersionsDirectory,
                     '--source',
                     'https://api.nuget.org/v3/index.json'
                 ];
