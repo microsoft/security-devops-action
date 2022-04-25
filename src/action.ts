@@ -48,7 +48,7 @@ async function run() {
     let toolsString: string = core.getInput('tools');
     if (!client.isNullOrWhiteSpace(toolsString)) {
         let tools = toolsString.split(',');
-        args.push('--tools');
+        args.push('--tool');
         for (let i = 0; i < tools.length; i++) {
             let tool = tools[i];
             if (!client.isNullOrWhiteSpace(tool)) {
