@@ -14,6 +14,8 @@ inputs:
     description: A comma separated list of analyzer categories to run. Values secrets, code, artifacts, IaC, containers. Example IaC,secrets. Defaults to all.
   languages:
     description: A comma separated list of languages to analyze. Example javascript, typescript. Defaults to all.
+  tools:
+    description: A comma separated list of analyzer tools to run. Example bandit, binskim, eslint, template-analyzer, terrascan, trivy.
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.
