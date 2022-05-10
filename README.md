@@ -30,20 +30,26 @@ See [action.yml](action.yml)
 Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
 
 ```yaml
-steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-dotnet@v1
-  with:
-    dotnet-version: |
-      5.0.x
-      6.0.x
-- name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@preview
-  id: msdo
-- name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v1
-  with:
-    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+jobs:
+  msdo:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          5.0.x
+          6.0.x
+    - name: Run Microsoft Security DevOps
+      uses: microsoft/security-devops-action@preview
+      id: msdo
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
