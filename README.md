@@ -31,8 +31,8 @@ Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended
 
 ```yaml
 steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-dotnet@v1
+- uses: actions/checkout@v3
+- uses: actions/setup-dotnet@v3
   with:
     dotnet-version: |
       5.0.x
