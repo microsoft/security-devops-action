@@ -41,7 +41,7 @@ steps:
   uses: microsoft/security-devops-action@preview
   id: msdo
 - name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v1
+  uses: github/codeql-action/upload-sarif@v2
   with:
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
@@ -52,7 +52,7 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 
 ```yaml
 - name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v1
+  uses: github/codeql-action/upload-sarif@v2
   with:
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
