@@ -16,10 +16,10 @@ jobs:
     steps:
       
       # Checkout your code repository to scan
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
       # Install dotnet, used by MSDO
-    - uses: actions/setup-dotnet@v1
+    - uses: actions/setup-dotnet@v3
       with:
         dotnet-version: |
           3.1.x
