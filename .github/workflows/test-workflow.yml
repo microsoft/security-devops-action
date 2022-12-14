@@ -1,0 +1,48 @@
+# test-workflow
+# docs are in the repo
+
+name: Microsoft Security DevOps self-hosted
+on: push
+
+jobs:
+  sample:
+    name: Microsoft Security DevOps
+
+    # MSDOruns on windows-latest.
+    # ubuntu-latest and macos-latest supporting coming soon
+    runs-on: self-hosted
+
+    steps:
+
+      # Checkout your code repository to scan
+    - uses: actions/checkout@v2
+
+    # Ensure a compatible version of dotnet is installed.
+    # The [Microsoft Security DevOps CLI](https://aka.ms/msdodocs) is built with dotnet v3.1.201.
+    # A version greater than or equal to v3.1.201 of dotnet must be installed on the agent in order to run this action.
+    # GitHub hosted runners already have a compatible version of dotnet installed and this step may be skipped.
+    # For self-hosted runners, ensure dotnet version 3.1.201 or later is installed by including this action:
+    # - uses: actions/setup-dotnet@v1
+    #   with:
+    #     dotnet-version: '3.1.x'
+
+    # Run open source static analysis tools
+    - name: Run MSDO
+      uses: microsoft/security-devops-action@v1
+      id: msdo
+
+    # - name: Run MSDO
+    #   uses: davidknise/security-devops-action@main
+    #   id: msdolocal
+
+      # Upload results to the Security tab
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
+    #   # Upload results to the Security tab
+    # - name: Upload results to Security tab
+    #   uses: github/codeql-action/upload-sarif@v1
+    #   with:
+    #     sarif_file: ${{ steps.msdolocal.outputs.sarifFile }}
