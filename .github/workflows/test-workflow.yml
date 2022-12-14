@@ -15,7 +15,7 @@ jobs:
     steps:
 
       # Checkout your code repository to scan
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     # Ensure a compatible version of dotnet is installed.
     # The [Microsoft Security DevOps CLI](https://aka.ms/msdodocs) is built with dotnet v3.1.201.
@@ -27,8 +27,8 @@ jobs:
     #     dotnet-version: '3.1.x'
 
     # Run open source static analysis tools
-    - name: Run MSDO
-      uses: microsoft/security-devops-action@v1
+    - name: Run Microsoft Security DevOps Analysis
+      uses: microsoft/security-devops-action@preview
       id: msdo
 
     # - name: Run MSDO
