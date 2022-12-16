@@ -1,7 +1,7 @@
 # test-workflow
 # docs are in the repo
 
-name: Microsoft Security DevOps self-hosted
+name: chrisnielsen test
 on: push
 
 jobs:
@@ -30,6 +30,8 @@ jobs:
     - name: Run Microsoft Security DevOps Analysis
       uses: microsoft/security-devops-action@preview
       id: msdo
+      with:
+        categories: 'sbom'
 
     # - name: Run MSDO
     #   uses: davidknise/security-devops-action@main
