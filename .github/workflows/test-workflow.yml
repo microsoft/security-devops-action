@@ -32,6 +32,7 @@ jobs:
       id: msdo
       with:
         categories: 'sbom'
+        tools: 'sbomtool'
 
     # - name: Run MSDO
     #   uses: davidknise/security-devops-action@main
