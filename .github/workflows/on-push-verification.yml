@@ -3,6 +3,9 @@
 name: MSDO on-push-verification windows-latest
 on: push
 
+permissions:
+  security-events: write
+
 jobs:
   sample:
     name: Microsoft Security DevOps Analysis
