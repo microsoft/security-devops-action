@@ -1,7 +1,7 @@
 # test-workflow
 # docs are in the repo
 
-name: chrisnielsen test
+name: chrisnielsen test2
 on: push
 
 jobs:
