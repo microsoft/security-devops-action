@@ -31,8 +31,7 @@ jobs:
       uses: microsoft/security-devops-action@preview
       id: msdo
       with:
-        categories: 'sbom'
-        tools: 'sbomtool'
+        tools: 'credscan'
 
     # - name: Run MSDO
     #   uses: davidknise/security-devops-action@main
