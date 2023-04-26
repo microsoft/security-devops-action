@@ -31,7 +31,9 @@ jobs:
       uses: microsoft/security-devops-action@preview
       id: msdo
       with:
-        tools: 'credscan'
+        tools: 'trivy'
+      env:
+        trivy_target: "contosorepository"
 
     # - name: Run MSDO
     #   uses: davidknise/security-devops-action@main
