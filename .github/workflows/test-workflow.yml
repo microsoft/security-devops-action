@@ -27,9 +27,11 @@ jobs:
     #     dotnet-version: '3.1.x'
 
     - name: 'Docker stuff'
-      runs:
-        using: 'docker'
-        image: '**/Dockerfile'
+      uses: docker/build-push-action@v4
+      with:
+        context: ./samples
+        push: false
+        tags: contosofakeimage
 
     # Run open source static analysis tools
     - name: Run Microsoft Security DevOps Analysis
@@ -38,7 +40,7 @@ jobs:
       with:
         tools: 'trivy'
       env:
-        trivy_target: "contosorepository"
+        trivy_target: "contosofakeimage"
 
     # - name: Run MSDO
     #   uses: davidknise/security-devops-action@main
