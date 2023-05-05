@@ -26,6 +26,11 @@ jobs:
     #   with:
     #     dotnet-version: '3.1.x'
 
+    - name: 'Docker stuff'
+    runs:
+      using: 'docker'
+      image: '**/Dockerfile'
+
     # Run open source static analysis tools
     - name: Run Microsoft Security DevOps Analysis
       uses: microsoft/security-devops-action@preview
