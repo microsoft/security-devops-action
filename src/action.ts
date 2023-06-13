@@ -1,10 +1,7 @@
 import * as core from '@actions/core';
-import { MsdoClient } from 'microsoft-security-devops-actions-toolkit';
-import * as path from 'path';
+import client from '@microsoft/security-devops-actions-toolkit';
 
 async function run() {
-    let client = new MsdoClient();
-
     let args: string[] = ['run'];
 
     let config: string = core.getInput('config');
