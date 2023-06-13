@@ -17,10 +17,6 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 * Normalized processing of results into the SARIF format
 * Build breaks and more
 
-# Limitations
-
-The Microsoft Security DevOps action is currently in beta and runs on the `windows-latest` queue, as well as Windows self hosted agents. `ubuntu-latest` support coming soon.
-
 # Usage
 
 See [action.yml](action.yml)
@@ -32,11 +28,6 @@ Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended
 ```yaml
 steps:
 - uses: actions/checkout@v3
-- uses: actions/setup-dotnet@v3
-  with:
-    dotnet-version: |
-      5.0.x
-      6.0.x
 - name: Run Microsoft Security DevOps
   uses: microsoft/security-devops-action@preview
   id: msdo
