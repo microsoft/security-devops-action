@@ -6,7 +6,7 @@
         "test": "mocha"
     },
     "author": "Microsoft Corporation",
-    "license": "",
+    "license": "MIT",
     "dependencies": {
         "@actions/core": "1.10.0",
         "@actions/exec": "1.1.1",
