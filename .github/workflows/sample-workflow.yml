@@ -1,4 +1,4 @@
-name: MSDO windows-latest
+name: MSDO ubuntu-latest
 on:
   push:
     branches:
@@ -6,12 +6,15 @@ on:
 
 jobs:
   sample:
-    name: Microsoft Security DevOps Analysis
+    name: MSDO on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
 
     steps:
-
+      
       # Checkout your code repository to scan
     - uses: actions/checkout@v3
 
