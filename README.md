@@ -27,14 +27,12 @@ Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended
 
 ```yaml
 steps:
+
 - uses: actions/checkout@v3
+
 - name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@preview
+  uses: microsoft/security-devops-action@v1
   id: msdo
-- name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v2
-  with:
-    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab

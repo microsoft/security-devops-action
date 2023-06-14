@@ -1,13 +1,19 @@
 # pull request action verification
 
-name: MSDO on-push-verification windows-latest
-on: push
+name: microsoft/security-devops-action sample
+on:
+  push:
+    branches:
+      - '*'
 
 jobs:
   sample:
-    name: Microsoft Security DevOps Analysis
+    name: MSDO on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
 
     steps:
 
