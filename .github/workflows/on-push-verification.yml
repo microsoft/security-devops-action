@@ -1,6 +1,6 @@
 # pull request action verification
 
-name: microsoft/security-devops-action sample
+name: MSDO On Push Verification
 on:
   push:
     branches:
