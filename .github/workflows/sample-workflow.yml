@@ -1,4 +1,4 @@
-name: MSDO ubuntu-latest
+name: MSDO Sample Workflow
 on:
   push:
     branches:
