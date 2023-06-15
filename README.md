@@ -4,8 +4,7 @@ Microsoft Security DevOps (MSDO) is a command line application which integrates 
 
 Run locally. Run remotely.
 
-![Microsoft Security DevOps windows-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20windows-latest/badge.svg)  
-![Microsoft Security DevOps ubuntu-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20ubuntu-latest/badge.svg)
+![Microsoft Security DevOps](https://github.com/microsoft/security-devops-action/workflows/MSDO%20Sample%20Workflow/badge.svg)  
 
 This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) for security analysis:
 
