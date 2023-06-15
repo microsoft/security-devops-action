@@ -4,8 +4,7 @@ Microsoft Security DevOps (MSDO) is a command line application which integrates 
 
 Run locally. Run remotely.
 
-![Microsoft Security DevOps windows-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20windows-latest/badge.svg)  
-![Microsoft Security DevOps ubuntu-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20ubuntu-latest/badge.svg)
+![Microsoft Security DevOps](https://github.com/microsoft/security-devops-action/workflows/MSDO%20Sample%20Workflow/badge.svg)  
 
 This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) for security analysis:
 
@@ -17,10 +16,6 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 * Normalized processing of results into the SARIF format
 * Build breaks and more
 
-# Limitations
-
-The Microsoft Security DevOps action is currently in beta and runs on the `windows-latest` queue, as well as Windows self hosted agents. `ubuntu-latest` support coming soon.
-
 # Usage
 
 See [action.yml](action.yml)
@@ -31,19 +26,12 @@ Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended
 
 ```yaml
 steps:
+
 - uses: actions/checkout@v3
-- uses: actions/setup-dotnet@v3
-  with:
-    dotnet-version: |
-      5.0.x
-      6.0.x
+
 - name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@preview
+  uses: microsoft/security-devops-action@v1
   id: msdo
-- name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v2
-  with:
-    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
