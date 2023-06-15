@@ -4,6 +4,9 @@ on:
     branches:
       - main
 
+permissions:
+  security-events: write
+
 jobs:
   sample:
     name: MSDO on ${{ matrix.os }}
