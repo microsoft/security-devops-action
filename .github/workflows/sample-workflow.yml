@@ -1,4 +1,4 @@
-name: MSDO ubuntu-latest
+name: MSDO Sample Workflow
 on:
   push:
     branches:
@@ -9,28 +9,21 @@ permissions:
 
 jobs:
   sample:
-    name: Microsoft Security DevOps Analysis
+    name: MSDO on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-    # MSDO runs on windows-latest.
-    # ubuntu-latest and macos-latest supporting coming soon
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
 
     steps:
       
       # Checkout your code repository to scan
     - uses: actions/checkout@v3
 
-      # Install dotnet, used by MSDO
-    - uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: |
-          3.1.x
-          5.0.x
-          6.0.x
-
       # Run analyzers
     - name: Run Microsoft Security DevOps Analysis
-      uses: microsoft/security-devops-action@preview
+      uses: microsoft/security-devops-action@v1
       id: msdo
 
       # Upload alerts to the Security tab

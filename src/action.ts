@@ -1,20 +1,18 @@
 import * as core from '@actions/core';
-import { MsdoClient } from 'microsoft-security-devops-actions-toolkit';
-import * as path from 'path';
+import * as client from '@microsoft/security-devops-actions-toolkit/msdo-client';
+import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
 async function run() {
-    let client = new MsdoClient();
-
     let args: string[] = ['run'];
 
     let config: string = core.getInput('config');
-    if (!client.isNullOrWhiteSpace(config)) {
+    if (!common.isNullOrWhiteSpace(config)) {
         args.push('-c');
         args.push(config);
     }
 
     let policy: string = core.getInput('policy');
-    if (client.isNullOrWhiteSpace(policy)) {
+    if (common.isNullOrWhiteSpace(policy)) {
         policy = "GitHub";
     }
 
@@ -22,36 +20,36 @@ async function run() {
     args.push(policy);
 
     let categoriesString: string = core.getInput('categories');
-    if (!client.isNullOrWhiteSpace(categoriesString)) {
+    if (!common.isNullOrWhiteSpace(categoriesString)) {
         args.push('--categories');
         let categories = categoriesString.split(',');
         for (let i = 0; i < categories.length; i++) {
             let category = categories[i];
-            if (!client.isNullOrWhiteSpace(category)) {
+            if (!common.isNullOrWhiteSpace(category)) {
                 args.push(category.trim());
             }
         }
     }
 
     let languagesString: string = core.getInput('languages');
-    if (!client.isNullOrWhiteSpace(languagesString)) {
+    if (!common.isNullOrWhiteSpace(languagesString)) {
         let languages = languagesString.split(',');
         args.push('--languages');
         for (let i = 0; i < languages.length; i++) {
             let language = languages[i];
-            if (!client.isNullOrWhiteSpace(language)) {
+            if (!common.isNullOrWhiteSpace(language)) {
                 args.push(language.trim());
             }
         }
     }
 
     let toolsString: string = core.getInput('tools');
-    if (!client.isNullOrWhiteSpace(toolsString)) {
+    if (!common.isNullOrWhiteSpace(toolsString)) {
         let tools = toolsString.split(',');
         args.push('--tool');
         for (let i = 0; i < tools.length; i++) {
             let tool = tools[i];
-            if (!client.isNullOrWhiteSpace(tool)) {
+            if (!common.isNullOrWhiteSpace(tool)) {
                 args.push(tool.trim());
             }
         }
