@@ -25,6 +25,9 @@ See [action.yml](action.yml)
 Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
 
 ```yaml
+permissions:
+  security-events: write
+
 steps:
 
 - uses: actions/checkout@v3
