@@ -22,3 +22,5 @@ outputs:
 runs:
   using: 'node16'
   main: 'lib/action.js'
+  pre: 'lib/pre.js'
+  post: 'lib/post.js' 
