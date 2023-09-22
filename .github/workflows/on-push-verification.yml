@@ -1,28 +1,27 @@
 # pull request action verification
 
-name: MSDO on-push-verification windows-latest
-on: push
+name: MSDO On Push Verification
+on:
+  push:
+    branches:
+      - '*'
+
+permissions:
+  security-events: write
 
 jobs:
   sample:
-    name: Microsoft Security DevOps Analysis
+    name: MSDO on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-    # MSDO runs on windows-latest.
-    # ubuntu-latest and macos-latest supporting coming soon
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
 
     steps:
 
       # Checkout your code repository to scan
     - uses: actions/checkout@v3
-
-      # Install dotnet, used by MSDO
-    - uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: |
-          3.1.x
-          5.0.x
-          6.0.x
 
       # Run analyzers
     - name: Run Microsoft Security DevOps Analysis

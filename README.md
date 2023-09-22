@@ -4,8 +4,7 @@ Microsoft Security DevOps (MSDO) is a command line application which integrates 
 
 Run locally. Run remotely.
 
-![Microsoft Security DevOps windows-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20windows-latest/badge.svg)  
-![Microsoft Security DevOps ubuntu-latest](https://github.com/microsoft/security-devops-action/workflows/MSDO%20ubuntu-latest/badge.svg)
+![Microsoft Security DevOps](https://github.com/microsoft/security-devops-action/workflows/MSDO%20Sample%20Workflow/badge.svg)  
 
 This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) for security analysis:
 
@@ -17,10 +16,6 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 * Normalized processing of results into the SARIF format
 * Build breaks and more
 
-# Limitations
-
-The Microsoft Security DevOps action is currently in beta and runs on the `windows-latest` queue, as well as Windows self hosted agents. `ubuntu-latest` support coming soon.
-
 # Usage
 
 See [action.yml](action.yml)
@@ -30,20 +25,16 @@ See [action.yml](action.yml)
 Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
 
 ```yaml
+permissions:
+  security-events: write
+
 steps:
+
 - uses: actions/checkout@v3
-- uses: actions/setup-dotnet@v3
-  with:
-    dotnet-version: |
-      5.0.x
-      6.0.x
+
 - name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@preview
+  uses: microsoft/security-devops-action@v1
   id: msdo
-- name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v2
-  with:
-    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
 ## Upload Results to the Security tab
@@ -57,10 +48,11 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
-# Open Source Tools
+# Tools
 
 | Name | Language | License |
 | --- | --- | --- |
+| [AntiMalware](https://www.microsoft.com/en-us/windows/comprehensive-security) | code, artifacts | - |
 | [Bandit](https://github.com/PyCQA/bandit) | python | [Apache License 2.0](https://github.com/PyCQA/bandit/blob/master/LICENSE) |
 | [BinSkim](https://github.com/Microsoft/binskim) | binary - Windows, ELF | [MIT License](https://github.com/microsoft/binskim/blob/main/LICENSE) |
 | [ESlint](https://github.com/eslint/eslint) | JavaScript | [MIT License](https://github.com/eslint/eslint/blob/main/LICENSE) |
