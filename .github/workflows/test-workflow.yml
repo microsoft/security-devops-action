@@ -4,6 +4,9 @@
 name: chrisnielsen test with new CLI
 on: push
 
+env:
+  GDN_DEBUG_DROP: 'true'
+
 jobs:
   sample:
     name: Microsoft Security DevOps
