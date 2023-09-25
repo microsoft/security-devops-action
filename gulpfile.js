@@ -29,7 +29,7 @@ function sideload(cb) {
             throw new Error(`The node_modules directory for the toolkit does not exist. please run npm install before continuing: ${toolkitNodeModulesDir}`);
         }
 
-        if (process.env.SECURITY_DEVOPS_ACTION_BUILD_SIDELOAD_BUILD === 'true') {
+        if (process.env.SECURITY_DEVOPS_ACTION_BUILD_SIDELOAD_BUILD !== 'false') {
             console.log('Building sideload project: npm run build');
             const output = execSync('npm run build', { cwd: toolkitSrcDir, encoding: 'utf8' });
             console.log(output);
@@ -38,8 +38,10 @@ function sideload(cb) {
         console.log(`Clearing the existing toolkit directory: ${toolkitNodeModulesDir}`);
         clearDir(toolkitNodeModulesDir);
 
+        const toolkitDistDir = path.join(toolkitSrcDir, 'dist');
+
         console.log("Copying sideload build...");
-        copyFiles(toolkitSrcDir, toolkitNodeModulesDir);
+        copyFiles(toolkitDistDir, toolkitNodeModulesDir);
 
         fs.writeFileSync(
             path.join(toolkitNodeModulesDir, '.sideloaded'),
