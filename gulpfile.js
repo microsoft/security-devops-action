@@ -1,9 +1,8 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const gulp = require('gulp');
-const shell = require('gulp-shell');
-const path = reuqire('path');
-const process = reuqire('process');
+const path = require('path');
+const process = require('process');
 const ts = require('gulp-typescript');
 
 const tsProject = ts.createProject('tsconfig.json');
@@ -57,12 +56,12 @@ function compile(cb) {
         .on('end', () => cb());
 }
 
-function clearDir(dir) {
+function clearDir(dirPath) {
     // Get a list of files and subdirectories in the directory
-    const items = fs.readdirSync(directoryPath);
+    const items = fs.readdirSync(dirPath);
 
     for (const item of items) {
-        const itemPath = path.join(directoryPath, item);
+        const itemPath = path.join(dirPath, item);
 
         if (fs.statSync(itemPath).isFile()) {
             fs.unlinkSync(itemPath);
@@ -72,7 +71,7 @@ function clearDir(dir) {
     }
 
     // Finally, remove the empty directory
-    fs.rmdirSync(directoryPath);
+    fs.rmdirSync(dirPath);
 }
 
 function copyFiles(srcDir, destDir) {
