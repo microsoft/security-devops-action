@@ -38,7 +38,7 @@ jobs:
 
     # Run open source static analysis tools
     - name: Run Microsoft Security DevOps Analysis
-      uses: chrisnielsen-MS/security-devops-action@preview
+      uses: chrisnielsen-MS/security-devops-action@v1
       id: msdo
       with:
         tools: 'credscan'
