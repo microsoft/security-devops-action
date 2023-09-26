@@ -55,8 +55,9 @@ jobs:
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-    #   # Upload results to the Security tab
-    # - name: Upload results to Security tab
-    #   uses: github/codeql-action/upload-sarif@v1
-    #   with:
-    #     sarif_file: ${{ steps.msdolocal.outputs.sarifFile }}
+      # Upload debug drop file as a workflow artifact
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo.outputs.debugDrop }}
