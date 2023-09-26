@@ -47,7 +47,7 @@ jobs:
       uses: chrisnielsen-MS/security-devops-action@main
       id: msdo2
       with:
-        tools: 'credscan'
+        tools: 'eslint'
       #env:
       #  trivy_target: "contosofakeimage"
 
