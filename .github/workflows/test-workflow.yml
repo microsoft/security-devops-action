@@ -42,6 +42,12 @@ jobs:
       id: msdo
       with:
         tools: 'credscan'
+
+    - name: Run Microsoft Security DevOps Analysis
+      uses: chrisnielsen-MS/security-devops-action@main
+      id: msdo2
+      with:
+        tools: 'credscan'
       #env:
       #  trivy_target: "contosofakeimage"
 
@@ -59,5 +65,11 @@ jobs:
     - name: Upload alerts file as a workflow artifact
       uses: actions/upload-artifact@v3
       with:  
-        name: alerts
+        name: debugDrop
         path: ${{ steps.msdo.outputs.debugDrop }}
+
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: debugDrop2
+        path: ${{ steps.msdo2.outputs.debugDrop }}
