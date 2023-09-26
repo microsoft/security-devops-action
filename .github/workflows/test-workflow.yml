@@ -43,6 +43,13 @@ jobs:
       with:
         tools: 'credscan'
 
+      # Upload debug drop file as a workflow artifact
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: debugDrop
+        path: ${{ steps.msdo.outputs.debugDrop }}
+
     - name: Run Microsoft Security DevOps Analysis
       uses: chrisnielsen-MS/security-devops-action@main
       id: msdo2
@@ -61,12 +68,7 @@ jobs:
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-      # Upload debug drop file as a workflow artifact
-    - name: Upload alerts file as a workflow artifact
-      uses: actions/upload-artifact@v3
-      with:  
-        name: debugDrop
-        path: ${{ steps.msdo.outputs.debugDrop }}
+
 
     - name: Upload alerts file as a workflow artifact
       uses: actions/upload-artifact@v3
