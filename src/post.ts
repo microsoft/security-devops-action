@@ -45,7 +45,7 @@ async function run() {
 
     core.debug("Finished data collection, starting API calls.");
 
-    sendReport(data);
+    await sendReport(data);
 }
 
 async function sendReport(data: Object): Promise<Object> {
@@ -59,11 +59,12 @@ async function sendReport(data: Object): Promise<Object> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + bearerToken
-            }
+            },
+            data: data
         };
         core.debug(`${options['method'].toUpperCase()} ${url}`);
 
-        const req = https.request(url, options, async (res) => {
+        const req = https.request(url, options, (res) => {
             let resData = '';
             res.on('data', (chunk) => {
                 resData += chunk.toString();
