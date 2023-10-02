@@ -46,7 +46,7 @@ async function run() {
     let apiTime = new Date().getMilliseconds();
     console.log("Finished data collection, starting API calls.");
     
-    let url: string = "https://larohratestfd-gsffakahdhdyafhx.z01.azurefd.net/oidc/HelloFunction";
+    let url: string = "";
 
 
     // fetch(url, {
