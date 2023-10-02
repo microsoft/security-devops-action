@@ -1,6 +1,6 @@
+import * as https from "https";
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as https from "https";
 
 async function run() {
     let startTime = core.getState('PreJobStartTime');
@@ -43,43 +43,26 @@ async function run() {
         dockerImages: dockerImages.toString()
     };
 
-    let apiTime = new Date().getMilliseconds();
-    console.log("Finished data collection, starting API calls.");
-    
-    let url: string = "";
+    core.debug("Finished data collection, starting API calls.");
 
-
-    // fetch(url, {
-    //     method: 'POST',
-    //     body: JSON.stringify(data),
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer ' + bearerToken
-    //     } 
-    // })
-    // .then((res) => {
-    //     console.log(res);
-    //     return res.text();
-    // })
-    // .then((text) => {
-    //     console.log(text);
-    //     console.log("API calls finished. Time taken: " + (new Date().getMilliseconds() - apiTime) + "ms");
-    // })
-    // .catch((err: any) => console.error('error:' + err));
+    sendReport(data);
 }
 
 async function sendReport(data: Object): Promise<Object> {
     return new Promise(async (resolve, reject) => {
-        let url: string = "https://larohratestfd-gsffakahdhdyafhx.z01.azurefd.net/oidc/HelloFunction";
+        let apiTime = new Date().getMilliseconds();
+        var bearerToken = await core.getIDToken();
+        let url: string = "";
         let options = {
             method: 'POST',
             timeout: 2500,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + bearerToken
             }
         };
-        var bearerToken = await core.getIDToken();
         core.debug(`${options['method'].toUpperCase()} ${url}`);
+
         const req = https.request(url, options, async (res) => {
             let resData = '';
             res.on('data', (chunk) => {
@@ -87,6 +70,7 @@ async function sendReport(data: Object): Promise<Object> {
             });
 
             res.on('end', () => {
+                core.debug("API calls finished. Time taken: " + (new Date().getMilliseconds() - apiTime) + "ms");
                 resolve(resData);
             });
         });
