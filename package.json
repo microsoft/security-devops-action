@@ -5,7 +5,8 @@
     "scripts": {
         "build": "npx gulp",
         "buildTests": "npx gulp buildTests",
-        "test": "npx mocha **/*.tests.js"
+        "test": "npx mocha **/*.tests.js",
+        "buildAndTest": "npx gulp buildTests & npx mocha **/*.tests.js"
     },
     "author": "Microsoft Corporation",
     "license": "MIT",

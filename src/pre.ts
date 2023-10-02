@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 
-async function run() {
+export async function run() {
     const startTime = new Date().toISOString();
     core.saveState('PreJobStartTime', startTime);
 }

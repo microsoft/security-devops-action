@@ -50,8 +50,10 @@ describe('prejob run', () => {
         saveStateStub.restore();
     });
     it('should save the current time as PreJobStartTime', () => __awaiter(void 0, void 0, void 0, function* () {
-        dateSub.returns('2023-01-23T45:12:34.567Z');
-        yield (0, pre_1.prejobRun)();
+        dateSub.returns({
+            toISOString: () => '2023-01-23T45:12:34.567Z'
+        });
+        yield (0, pre_1.run)();
         (0, chai_1.expect)(saveStateStub).to.have.been.calledWith('PreJobStartTime', '2023-01-23T45:12:34.567Z');
     }));
 });
