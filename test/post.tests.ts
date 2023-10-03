@@ -91,7 +91,7 @@ describe('postjob _sendReport', function() {
             .callsArgWith(2, {
                 on: (event, callback) => {
                     if (event === 'data') {
-                        callback(); // Simulated response data
+                        callback();
                     } else if (event === 'end') {
                         callback();
                     }
@@ -125,30 +125,5 @@ describe('postjob _sendReport', function() {
         //     },
         //     data: data
         // };
-    });
-});
-
-
-describe('_sendReport', () => {
-    it('should send a report and resolve with response data', async () => {
-        // Create a stub for core.getIDToken() to return a mock token
-        const getIDTokenStub = sinon.stub(core, 'getIDToken').resolves('mockToken');
-
-        // Create a stub for https.request to simulate a successful API call
-        const requestStub = sinon.stub(https, 'request')
-        });
-
-        try {
-            const result = await _sendReport({ /* your data here */ });
-
-            // Assertions
-            sinon.assert.calledOnce(getIDTokenStub); // Ensure core.getIDToken() was called once
-            sinon.assert.calledOnce(requestStub); // Ensure https.request() was called once
-            assert.strictEqual(result, 'mockResponseData'); // Ensure the function resolves with the expected response data
-        } finally {
-            // Restore the stubs
-            getIDTokenStub.restore();
-            requestStub.restore();
-        }
     });
 });
