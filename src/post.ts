@@ -4,7 +4,7 @@ import * as exec from '@actions/exec';
 
 const sendReportRetryCount: number = 1;
 
-async function run() {
+export async function run() {
     let startTime = core.getState('PreJobStartTime');
     if (startTime.length <= 0) {
         console.log(`PreJobStartTime not defined, using now-10secs `);
@@ -50,12 +50,12 @@ async function run() {
     await sendReport(data, sendReportRetryCount);
 }
 
-async function sendReport(data: Object, retryCount: number = 0): Promise<Object> {
+export async function sendReport(data: Object, retryCount: number = 0): Promise<void> {
     return new Promise(async (resolve, reject) => {
         do {
             try {
-                let resData = await _sendReport(data);
-                resolve(resData);
+                await _sendReport(data);
+                resolve();
                 break;
             } catch (error) {
                 if (retryCount == 0) {
@@ -69,11 +69,11 @@ async function sendReport(data: Object, retryCount: number = 0): Promise<Object>
     });
 }
 
-async function _sendReport(data: Object): Promise<Object> {
+export async function _sendReport(data: Object): Promise<void> {
     return new Promise(async (resolve, reject) => {
         let apiTime = new Date().getMilliseconds();
         var bearerToken = await core.getIDToken();
-        let url: string = "";
+        let url: string = "https://dfdinfra-afdendpoint2-dogfood-edb5h5g7gyg7h3hq.z01.azurefd.net/github/v1/container-mappings";
         let options = {
             method: 'POST',
             timeout: 2500,
@@ -92,8 +92,9 @@ async function _sendReport(data: Object): Promise<Object> {
             });
 
             res.on('end', () => {
-                core.debug("API calls finished. Time taken: " + (new Date().getMilliseconds() - apiTime) + "ms");
-                resolve(resData);
+                core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
+                core.debug('Response: ' + resData);
+                resolve();
             });
         });
 
@@ -103,21 +104,6 @@ async function _sendReport(data: Object): Promise<Object> {
         
         req.end();
     });
-}
-
-function getOptions(buffer: Buffer): exec.ExecOptions {
-    var options = {
-        listeners: {
-            stdout: (data: Buffer) => {
-                buffer = Buffer.concat([buffer, data]);
-                console.log("Buffer: " + buffer.toString());
-            },
-            stderr: (data: Buffer) => {
-                buffer = Buffer.concat([buffer, data]);
-            }
-        }
-    };
-    return options;
 }
 
 run().catch((error) => {
