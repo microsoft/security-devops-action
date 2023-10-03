@@ -2,6 +2,8 @@ import * as https from "https";
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
+const sendReportRetryCount: number = 1;
+
 async function run() {
     let startTime = core.getState('PreJobStartTime');
     if (startTime.length <= 0) {
@@ -10,7 +12,7 @@ async function run() {
     }
 
     let dockerVer = Buffer.alloc(0);
-    let dokcerEvents = Buffer.alloc(0);
+    let dockerEvents = Buffer.alloc(0);
     let dockerImages = Buffer.alloc(0);
     
     // Initialize the commands 
@@ -24,7 +26,7 @@ async function run() {
     await exec.exec(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, null, {
         listeners: {
             stdout: (data: Buffer) => {
-                dokcerEvents = Buffer.concat([dokcerEvents, data]);
+                dockerEvents = Buffer.concat([dockerEvents, data]);
             }
         }
     });
@@ -39,16 +41,35 @@ async function run() {
     // Post data to URI
     let data = {
         dockerVer: dockerVer.toString(),
-        dokcerEvents: dokcerEvents.toString(),
+        dokcerEvents: dockerEvents.toString(),
         dockerImages: dockerImages.toString()
     };
 
     core.debug("Finished data collection, starting API calls.");
 
-    await sendReport(data);
+    await sendReport(data, sendReportRetryCount);
 }
 
-async function sendReport(data: Object): Promise<Object> {
+async function sendReport(data: Object, retryCount: number = 0): Promise<Object> {
+    return new Promise(async (resolve, reject) => {
+        do {
+            try {
+                let resData = await _sendReport(data);
+                resolve(resData);
+                break;
+            } catch (error) {
+                if (retryCount == 0) {
+                    reject('Failed to send report: ' + error);
+                } else {
+                    retryCount--;
+                    core.debug(`Retrying API call. Retry count: ${retryCount}`);
+                }
+            }
+        } while (retryCount >= 0)
+    });
+}
+
+async function _sendReport(data: Object): Promise<Object> {
     return new Promise(async (resolve, reject) => {
         let apiTime = new Date().getMilliseconds();
         var bearerToken = await core.getIDToken();
