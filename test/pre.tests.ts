@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import sinon from 'sinon';
 import * as core from '@actions/core';
 import { run } from '../lib/pre';
@@ -21,10 +20,8 @@ describe('prejob run', () => {
             toISOString: () => '2023-01-23T45:12:34.567Z'
         });
 
-        // Call the run function
         await run();
 
-        // Assert that core.saveState was called with the expected arguments
-        expect(saveStateStub).to.have.been.calledWith('PreJobStartTime', '2023-01-23T45:12:34.567Z');
+        sinon.assert.calledWithExactly(saveStateStub, 'PreJobStartTime', '2023-01-23T45:12:34.567Z');
     });
 });

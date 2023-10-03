@@ -35,7 +35,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chai_1 = require("chai");
 const sinon_1 = __importDefault(require("sinon"));
 const core = __importStar(require("@actions/core"));
 const pre_1 = require("../lib/pre");
@@ -54,6 +53,6 @@ describe('prejob run', () => {
             toISOString: () => '2023-01-23T45:12:34.567Z'
         });
         yield (0, pre_1.run)();
-        (0, chai_1.expect)(saveStateStub).to.have.been.calledWith('PreJobStartTime', '2023-01-23T45:12:34.567Z');
+        sinon_1.default.assert.calledWithExactly(saveStateStub, 'PreJobStartTime', '2023-01-23T45:12:34.567Z');
     }));
 });
