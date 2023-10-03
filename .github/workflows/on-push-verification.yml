@@ -25,7 +25,7 @@ jobs:
 
       # Run analyzers
     - name: Run Microsoft Security DevOps Analysis
-      uses: ./
+      uses: davidknise/security-devops-action@dev/daknis/container-mapping
       id: msdo
 
       # Upload alerts to the Security tab
