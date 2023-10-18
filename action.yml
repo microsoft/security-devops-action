@@ -6,13 +6,20 @@ branding:
   color: 'black'
 inputs:
   command:
-    description: The command to run. Defaults to all.
-    default: all
+    description: The command to run. Defaults to run.
+    default: run
     options:
       - all
       - run
       - pre-job
       - post-job
+  features:
+    description: The feature to run. Defaults to analyzers.
+    default: analyzers
+    options:
+      - all
+      - analyzers
+      - containerMapping
   config:
     description: A file path to a .gdnconfig file.
   policy:

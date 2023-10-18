@@ -11,10 +11,20 @@ export enum Inputs {
     CommandType = 'command'
 }
 
+/**
+ * Enum for the source of the action's run.
+ */
+export enum SourceType {
+    Main = 'main',
+    Pre = 'pre',
+    Post = 'post'
+}
+
 /*
 * Enum for the possible values for the Inputs.CommandType (specified in task.json)
 */
 export enum CommandType {
+    All = 'all',
     PreJob = 'pre-job',
     PostJob = 'post-job',
     Run = 'run'

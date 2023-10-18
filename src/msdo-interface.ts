@@ -5,7 +5,8 @@ import { CommandType } from "./msdo-helpers";
 */
 export interface IMicrosoftSecurityDevOps {
     readonly succeedOnError: boolean;
-    run(): any;
+    /* param source - The source of the task: main, pre, or post. */
+    run(source: string, command: string): any;
 }
 
 /**

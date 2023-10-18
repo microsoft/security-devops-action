@@ -10,12 +10,10 @@ const sendReportRetryCount: number = 1;
  * Represents the tasks for container mapping that are used to fetch Docker images pushed in a job run.
  */
 export class ContainerMapping implements IMicrosoftSecurityDevOps {
-    private readonly commandType: CommandType;
     readonly succeedOnError: boolean;
 
-    constructor(commandType: CommandType) {
+    constructor() {
         this.succeedOnError = true;
-        this.commandType = commandType;
     }
 
     /*
@@ -131,9 +129,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     /*
     * Run the specified function based on the task type
     */
-    async run(commandType: string = null) {
+    async run(source: string, commandType: string) {
         try {
-            switch (this.commandType) {
+            switch (commandType) {
                 case CommandType.PreJob:
                     this.runPreJob();
                     break;
@@ -141,7 +139,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     await this.runPostJob();
                     break;
                 default:
-                    throw new Error(`Invalid command type for Container Mapping: ${this.commandType}`);
+                    throw new Error(`Invalid command type for Container Mapping: ${commandType}`);
             }
         }
         catch (error) {
