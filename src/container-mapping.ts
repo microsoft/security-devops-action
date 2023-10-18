@@ -57,7 +57,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     public async runPostJob() {
         try {
             writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
-            this._runPostJob();
+            await this._runPostJob();
         }
         catch (error) {
             // Log the error
