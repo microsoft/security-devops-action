@@ -1,9 +1,8 @@
 import * as core from '@actions/core';
 import { MicrosoftSecurityDevOps } from './msdo';
-import { Inputs, SourceType, CommandType, writeToOutStream } from './msdo-helpers';
+import { Inputs, SourceType, CommandType } from './msdo-helpers';
 import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 import { ContainerMapping } from './container-mapping';
-import { runPre } from './pre';
 
 const source = "main";
 
@@ -69,6 +68,6 @@ function _getExecutor(runner: IMicrosoftSecurityDevOpsFactory): IMicrosoftSecuri
 }
 
 function getCommandType(): CommandType {
-    const commandTypeString: string = core.getInput(Inputs.CommandType) || CommandType.Run;
+    const commandTypeString: string = core.getInput(Inputs.CommandType.toString()) || CommandType.Run;
     return commandTypeString as CommandType;
 }
