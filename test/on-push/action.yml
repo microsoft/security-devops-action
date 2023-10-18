@@ -1,18 +1,25 @@
-name: 'security-devops-action-on-push'
-description: 'Run security analyzers (on push validation)'
+name: 'security-devops-action'
+description: 'Run security analyzers.'
 author: 'Microsoft'
 branding:
   icon: 'shield'
   color: 'black'
 inputs:
   command:
-    description: The command to run. Defaults to all.
-    default: all
+    description: The command to run. Defaults to run.
+    default: run
     options:
       - all
       - run
       - pre-job
       - post-job
+  features:
+    description: The feature to run. Defaults to analyzers.
+    default: analyzers
+    options:
+      - all
+      - analyzers
+      - containerMapping
   config:
     description: A file path to a .gdnconfig file.
   policy:
@@ -29,4 +36,4 @@ outputs:
     description: A file path to a SARIF results file.
 runs:
   using: 'node16'
-  main: '../../lib/action.js'
+  main: 'lib/main.js'
