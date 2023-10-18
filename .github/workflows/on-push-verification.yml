@@ -32,7 +32,7 @@ jobs:
     - uses: davidknise/security-devops-action@dev/daknis/container-mapping
       id: msdo
       with:
-        commands: all
+        command: all
 
       # Upload alerts to the Security tab
     - name: Upload alerts to Security tab

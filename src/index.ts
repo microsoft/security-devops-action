@@ -68,6 +68,6 @@ function _getExecutor(runner: IMicrosoftSecurityDevOpsFactory): IMicrosoftSecuri
 }
 
 function getCommandType(): CommandType {
-    const commandTypeString: string = core.getInput(Inputs.CommandType.toString()) || CommandType.Run;
+    const commandTypeString: string = core.getInput(Inputs.Command) || CommandType.Run;
     return commandTypeString as CommandType;
 }
