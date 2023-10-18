@@ -6,9 +6,10 @@ branding:
   color: 'black'
 inputs:
   command:
-    description: The command to run. Defaults to run
-    default: run
+    description: The command to run. Defaults to all.
+    default: all
     options:
+      - all
       - run
       - pre-job
       - post-job

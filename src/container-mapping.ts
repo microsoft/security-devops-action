@@ -1,14 +1,16 @@
 import { CommandType, Constants, getEncodedContent, writeToOutStream } from "./msdo-helpers";
 import { IMicrosoftSecurityDevOps } from "./msdo-interface";
-import core = require('@actions/core');
-import { CommandExecutor, ICommandResult } from "./command-executor";
+import * as https from "https";
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+
+const sendReportRetryCount: number = 1;
 
 /**
  * Represents the tasks for container mapping that are used to fetch Docker images pushed in a job run.
  */
 export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private readonly commandType: CommandType;
-
     readonly succeedOnError: boolean;
 
     constructor(commandType: CommandType) {
@@ -21,76 +23,115 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     */
     private runPreJob() {
         const startTime = new Date().toISOString();
-        tl.setVariable(Constants.PreJobStartTime, startTime);
+        core.saveState('PreJobStartTime', startTime);
+        console.log('PreJobStartTime', startTime);
     }
 
     /*
     * Using the start time, fetch the docker events and docker images in this job run and log the encoded output
     */
     private async runPostJob() {
-        let startTime = tl.getVariable(Constants.PreJobStartTime);
-        if (startTime == undefined) {
-            throw new Error(Constants.PreJobStartTime + " variable not set");
+        let startTime = core.getState('PreJobStartTime');
+        if (startTime.length <= 0) {
+            startTime = new Date(new Date().getTime() - 10000).toISOString();
+            console.log(`PreJobStartTime not defined, using now-10secs`);
         }
+        console.log(`PreJobStartTime: ${startTime}`);
 
+        let reportData = {
+            dockerVer: "",
+            dockerEvents: "",
+            dockerImages: ""
+        };
+        
         // Initialize the commands 
-        let dockerVersionCmd = new CommandExecutor('docker', '--version');
-        let eventsCmd = new CommandExecutor('docker', `events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`);
-        let imagesCmd = new CommandExecutor('docker', 'images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}');
-
-        // Execute all commands in parallel
-        let dvPromise : Promise<ICommandResult> = dockerVersionCmd.execute();
-        let evPromise : Promise<ICommandResult> = eventsCmd.execute();
-        let imPromise : Promise<ICommandResult> = imagesCmd.execute();
-
-        // Wait for Docker version
-        let dockerVersion: ICommandResult = await dvPromise;
-        if (dockerVersion.code != 0) {
-            writeToOutStream(`Error fetching Docker Version: ${dockerVersion.output}`);
-            dockerVersion.output = Constants.Unknown;
-        }
-        const cleanedDockerVersion = CommandExecutor.removeCommandFromOutput(dockerVersion.output);
-        tl.debug(`Docker Version: ${cleanedDockerVersion}`);
-
-        // Wait for Docker events command to verify any images were built on this run
-        let events: ICommandResult = await evPromise;
-        if (events.code != 0) {
-            throw new Error(`Unable to fetch Docker events: ${events.output}`);
-        }
-
-        const cleanedEventsOutput = CommandExecutor.removeCommandFromOutput(events.output);
-        var images: ICommandResult;
-        if (!cleanedEventsOutput) {
-            tl.debug(`No Docker events found`);
-            // Log an issue if no events found to parse from the backend from the ADO timeline
-            // We don't log a message to avoid any warning from popping up in the console output of the task
-            tl.logIssue(tl.IssueType.Warning, "", null, null, null, "NoDockerEvents");
-            // Initialize an empty Command Result for Docker images
-            images = <ICommandResult>{ code: 0, output: "" };
-        }
-        else {
-            // Wait for Docker images command only if events were found
-            images = await imPromise;
-            if (images.code != 0) {
-                throw new Error(`Unable to fetch Docker images: ${images.output}`);
+        await exec.exec('docker --version', null, {
+            listeners: {
+                stdout: (data: Buffer) => {
+                    reportData.dockerVer = reportData.dockerVer.concat(data.toString());
+                }
             }
-        }
+        });
+        await exec.exec(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, null, {
+            listeners: {
+                stdout: (data: Buffer) => {
+                    reportData.dockerEvents = reportData.dockerEvents.concat(data.toString());
+                }
+            }
+        });
+        await exec.exec('docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}', null, {
+            listeners: {
+                stdout: (data: Buffer) => {
+                    reportData.dockerImages = reportData.dockerImages.concat(data.toString());
+                }
+            }
+        });
 
-        writeToOutStream(getEncodedContent(
-            cleanedDockerVersion, 
-            cleanedEventsOutput, 
-            CommandExecutor.removeCommandFromOutput(images.output)));
+        core.debug("Finished data collection, starting API calls.");
+
+        await this.sendReport(reportData, sendReportRetryCount);
+    }
+
+    private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            do {
+                try {
+                    await this._sendReport(data);
+                    resolve();
+                    break;
+                } catch (error) {
+                    if (retryCount == 0) {
+                        reject('Failed to send report: ' + error);
+                    } else {
+                        retryCount--;
+                        core.debug(`Retrying API call. Retry count: ${retryCount}`);
+                    }
+                }
+            } while (retryCount >= 0)
+        });
+    }
+    
+    private async _sendReport(data: Object): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            let apiTime = new Date().getMilliseconds();
+            var bearerToken = await core.getIDToken();
+            let url: string = "https://dfdinfra-afdendpoint2-dogfood-edb5h5g7gyg7h3hq.z01.azurefd.net/github/v1/container-mappings";
+            let options = {
+                method: 'POST',
+                timeout: 2500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + bearerToken
+                },
+                data: data
+            };
+            core.debug(`${options['method'].toUpperCase()} ${url}`);
+    
+            const req = https.request(url, options, (res) => {
+                let resData = '';
+                res.on('data', (chunk) => {
+                    resData += chunk.toString();
+                });
+    
+                res.on('end', () => {
+                    core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
+                    core.debug('Response: ' + resData);
+                    resolve();
+                });
+            });
+    
+            req.on('error', (error) => {
+                reject(new Error(`Error calling url: ${error}`));
+            });
+            
+            req.end();
+        });
     }
 
     /*
     * Run the specified function based on the task type
     */
-    async run() {
-        // Group command adds a collapsible section in the logs - https://learn.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands?view=azure-devops&tabs=bash#formatting-commands
-        writeToOutStream("##[group]This task was injected as part of Microsoft Defender for DevOps enablement- https://go.microsoft.com/fwlink/?linkid=2231419");
-        // This section is used as a delimiter while fetching logs from the REST API in our backend, do not modify
-        writeToOutStream("##[section]:::::");
-
+    async run(commandType: string = null) {
         try {
             switch (this.commandType) {
                 case CommandType.PreJob:
