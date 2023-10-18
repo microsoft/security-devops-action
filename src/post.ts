@@ -13,9 +13,9 @@ export async function run() {
     console.log(`PreJobStartTime: ${startTime}`);
 
     let reportData = {
-        dockerVer: [],
-        dockerEvents: [],
-        dockerImages: []
+        dockerVer: "",
+        dockerEvents: "",
+        dockerImages: ""
     };
     
     // Initialize the commands 

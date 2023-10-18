@@ -5,6 +5,13 @@ branding:
   icon: 'shield'
   color: 'black'
 inputs:
+  command:
+    description: The command to run. Defaults to run
+    default: run
+    options:
+      - run
+      - pre-job
+      - post-job
   config:
     description: A file path to a .gdnconfig file.
   policy:
