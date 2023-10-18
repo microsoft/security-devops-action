@@ -36,6 +36,6 @@ outputs:
     description: A file path to a SARIF results file.
 runs:
   using: 'node16'
-  main: 'lib/main.js'
-  pre: 'lib/pre.js'
-  post: 'lib/post.js' 
+  main: '../../lib/main.js'
+  pre: '../../lib/pre.js'
+  post: '../../lib/post.js' 
