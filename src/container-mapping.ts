@@ -149,7 +149,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
             var bearerToken = await core.getIDToken();
-            let url: string = "https://dfdinfra-afdendpoint2-dogfood-edb5h5g7gyg7h3hq.z01.azurefd.net/github/v1/container-mappings";
+            let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/container-mappings";
             let options = {
                 method: 'POST',
                 timeout: 2500,
