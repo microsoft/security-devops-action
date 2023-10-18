@@ -20,9 +20,21 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * Container mapping pre-job commands wrapped in exception handling.
      */
     public runPreJob() {
-        this.run(this._runPreJob);
+        try {
+            writeToOutStream("::group::Microsoft Defender for DevOps container mapping pre-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            this._runPreJob();
+        }
+        catch (error) {
+            // Log the error
+            writeToOutStream("Error in Container Mapping pre-job: " + error);
+        }
+        finally {
+            // End the collapsible section
+            writeToOutStream("::endgroup::");
+        }
     }
 
+    
     /*
     * Set the start time of the job run.
     */
@@ -43,14 +55,25 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * Container mapping post-job commands wrapped in exception handling.
      */
     public async runPostJob() {
-        this.run(this._runPostJob);
+        try {
+            writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            this._runPostJob();
+        }
+        catch (error) {
+            // Log the error
+            writeToOutStream("Error in Container Mapping post-job: " + error);
+        }
+        finally {
+            // End the collapsible section
+            writeToOutStream("::endgroup::");
+        }
     }
 
     /*
     * Using the start time, fetch the docker events and docker images in this job run and log the encoded output
     * Send the report to Defender for DevOps
     */
-    public async _runPostJob() {
+    private async _runPostJob() {
         let startTime = core.getState('PreJobStartTime');
         if (startTime.length <= 0) {
             startTime = new Date(new Date().getTime() - 10000).toISOString();
@@ -157,22 +180,5 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             
             req.end();
         });
-    }
-
-    /*
-    * Run the specified function based on the task type
-    */
-    private async run(action) {
-        try {
-            action();
-        }
-        catch (error) {
-            // Log the error
-            writeToOutStream("Error in Container Mapping: " + error);
-        }
-        finally {
-            // End the collapsible section
-            writeToOutStream("##[endgroup]");
-        }
     }
 }
