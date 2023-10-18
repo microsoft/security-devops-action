@@ -1,11 +1,13 @@
 import * as core from '@actions/core';
+import { run } from './index';
+import { SourceType } from './msdo-helpers';
 
-export async function run() {
-    const startTime = new Date().toISOString();
-    core.saveState('PreJobStartTime', startTime);
-    console.log('PreJobStartTime', startTime);
+const source = SourceType.Pre;
+
+export async function runPre() {
+    await run(source);
 }
 
-run().catch((error) => {
+runPre().catch((error) => {
     core.debug(error);
 });

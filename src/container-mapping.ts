@@ -16,19 +16,41 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         this.succeedOnError = true;
     }
 
+    /**
+     * Container mapping pre-job commands wrapped in exception handling.
+     */
+    public runPreJob() {
+        this.run(this._runPreJob);
+    }
+
     /*
     * Set the start time of the job run.
     */
-    private runPreJob() {
+    private _runPreJob() {
         const startTime = new Date().toISOString();
         core.saveState('PreJobStartTime', startTime);
         console.log('PreJobStartTime', startTime);
     }
 
+    /**
+     * Placeholder / interface satisfier for main operations
+     */
+    public async runMain() {
+        // No commands
+    }
+
+    /**
+     * Container mapping post-job commands wrapped in exception handling.
+     */
+    public async runPostJob() {
+        this.run(this._runPostJob);
+    }
+
     /*
     * Using the start time, fetch the docker events and docker images in this job run and log the encoded output
+    * Send the report to Defender for DevOps
     */
-    private async runPostJob() {
+    public async _runPostJob() {
         let startTime = core.getState('PreJobStartTime');
         if (startTime.length <= 0) {
             startTime = new Date(new Date().getTime() - 10000).toISOString();
@@ -70,6 +92,12 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         await this.sendReport(reportData, sendReportRetryCount);
     }
 
+    /**
+     * Sends a report to Defender for DevOps and retries on the specified count
+     * @param data the data to send
+     * @param retryCount the number of time to retry
+     * @returns a Promise
+     */
     private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
         return new Promise(async (resolve, reject) => {
             do {
@@ -89,6 +117,11 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         });
     }
     
+    /**
+     * Sends a report to Defender for DevOps
+     * @param data the data to send
+     * @returns a Promise
+     */
     private async _sendReport(data: Object): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
@@ -129,18 +162,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     /*
     * Run the specified function based on the task type
     */
-    async run(source: string, commandType: string) {
+    private async run(action) {
         try {
-            switch (commandType) {
-                case CommandType.PreJob:
-                    this.runPreJob();
-                    break;
-                case CommandType.PostJob:
-                    await this.runPostJob();
-                    break;
-                default:
-                    throw new Error(`Invalid command type for Container Mapping: ${commandType}`);
-            }
+            action();
         }
         catch (error) {
             // Log the error

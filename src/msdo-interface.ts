@@ -6,7 +6,9 @@ import { CommandType } from "./msdo-helpers";
 export interface IMicrosoftSecurityDevOps {
     readonly succeedOnError: boolean;
     /* param source - The source of the task: main, pre, or post. */
-    run(source: string, command: string): any;
+    runPreJob(): any;
+    runMain(): any;
+    runPostJob(): any;
 }
 
 /**
@@ -14,5 +16,5 @@ export interface IMicrosoftSecurityDevOps {
  * This factory enforces the inputs that can be used for creation of the `IMicrosoftSecurityDevOps` instances.
  */
 export interface IMicrosoftSecurityDevOpsFactory {
-    new (commandType: CommandType): IMicrosoftSecurityDevOps;
+    new (): IMicrosoftSecurityDevOps;
 }

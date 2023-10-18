@@ -8,15 +8,23 @@ import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common'
 * Microsoft Security DevOps analyzers runner.
 */
 export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
-    private readonly commandType: CommandType;
     readonly succeedOnError: boolean;
 
-    constructor(commandType: CommandType) {
+    constructor() {
         this.succeedOnError = false;
-        this.commandType = commandType;
     }
 
-    private async runMsdo() {
+    public async runPreJob() {
+        // No pre-job commands yet
+    }
+
+    public async runPostJob() {
+        // No post-job commands yet
+    }
+
+    public async runMain() {
+        core.debug('MicrosoftSecurityDevOps.runMain - Running MSDO...');
+
         let args: string[] = ['run'];
 
         let config: string = core.getInput('config');
@@ -72,18 +80,5 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
         args.push('--github');
 
         await client.run(args, 'microsoft/security-devops-action');
-    }
-
-    /*
-    * Run the specified function based on the task type
-    */
-    async run() {
-        switch (this.commandType) {
-            case CommandType.Run:
-                await this.runMsdo();
-                break;
-            default:
-                throw new Error(`Invalid command type: ${this.commandType}`);
-        }
     }
 }
