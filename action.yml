@@ -39,5 +39,5 @@ runs:
   main: 'lib/main.js'
   pre-if: inputs.command == 'all'
   pre: 'lib/pre.js'
-  pre-if: inputs.command == 'all'
+  post-if: inputs.command == 'all'
   post: 'lib/post.js' 
