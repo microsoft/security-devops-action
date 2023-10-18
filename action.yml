@@ -30,7 +30,5 @@ outputs:
 runs:
   using: 'node16'
   main: 'lib/main.js'
-  pre-if: inputs.command == 'all'
   pre: 'lib/pre.js'
-  post-if: inputs.command == 'all'
   post: 'lib/post.js' 
