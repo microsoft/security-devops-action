@@ -26,15 +26,13 @@ jobs:
 
       # Run analyzers
     # - uses: ./
-    #   id: msdo2
-    #   with:
-    #     commands: all
+    #   id: msdo
 
       # Run analyzers
     - uses: davidknise/security-devops-action@dev/daknis/container-mapping
       id: msdo
       with:
-        commands: all
+        command: all
 
       # Upload alerts to the Security tab
     - name: Upload alerts to Security tab
