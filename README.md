@@ -48,6 +48,16 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
+## Advanced
+
+To configure pre-job and post-job tasks to run, such as container mapping to send to Microsoft Defender for DevOps, set the command to `all`:
+```yaml
+- uses: microsoft/security-devops-action@v1
+  id: msdo
+  with:
+    command: all
+```
+
 # Tools
 
 | Name | Language | License |
