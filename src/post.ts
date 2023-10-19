@@ -4,7 +4,7 @@ import { SourceType } from './msdo-helpers';
 
 const source = SourceType.Post;
 
-export async function runPost() {
+async function runPost() {
     await run(source);
 }
 

@@ -4,7 +4,7 @@ import { SourceType } from './msdo-helpers';
 
 const source = SourceType.Pre;
 
-export async function runPre() {
+async function runPre() {
     await run(source);
 }
 
