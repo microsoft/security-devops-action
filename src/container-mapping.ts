@@ -149,7 +149,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
             var bearerToken = await core.getIDToken();
-            let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/container-mappings";
+            let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/container-mappings";
+            if (process.env.MSDO_DOGFOOD) {
+                url = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/container-mappings";
+            }
             let options = {
                 method: 'POST',
                 timeout: 2500,
