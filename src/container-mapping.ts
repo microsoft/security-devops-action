@@ -140,14 +140,13 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<void> {
         core.debug('Attempting to send data: ' + data);
         return await this._sendReport(data)
-        .catch((error) => {
+                .catch((error) => {
             if (retryCount == 0) {
                 Promise.reject('Failed to send report: ' + error);
             } else {
                 core.debug(`Retrying API call. Retry count: ${retryCount}`);
                 retryCount--;
-                return this.sendReport(data, bearerToken, retryCount)
-                .catch((error) => { core.debug("Caught inside the nest: " + error); });
+                return this.sendReport(data, bearerToken, retryCount);
             }
         });
     }
@@ -190,7 +189,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                         core.debug('Response: ' + resData);
                     }
                     if (res.statusCode != 200) {
-                        reject(new Error(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`));
+                        reject(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`);
                     }
                     resolve();
                 });
