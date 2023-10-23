@@ -109,7 +109,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         var reportSent: boolean = await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount);
         if (!reportSent) {
-            throw new Error("error sending report");
+            throw new Error("Unable to send report to backend service");
         };
     }
 
@@ -148,7 +148,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 if (retryCount == 0) {
                     return false;
                 } else {
-                    core.debug(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                    core.warning(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
                     retryCount--;
                     return this.sendReport(data, bearerToken, retryCount);
                 }
