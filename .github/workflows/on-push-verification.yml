@@ -29,20 +29,20 @@ jobs:
     #   id: msdo
 
       # Run analyzers
-    - uses: ContosoDfDEnterprise/larohra-security-devops-action@larohra/fix-data-format # davidknise/security-devops-action@dev/daknis/container-mapping
+    - uses: davidknise/security-devops-action@dev/daknis/container-mapping
       id: msdo
       with:
         tools: container-mapping
 
       # Upload alerts to the Security tab
-    # - name: Upload alerts to Security tab
-    #   uses: github/codeql-action/upload-sarif@v2
-    #   with:
-    #     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+    - name: Upload alerts to Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-    #   # Upload alerts file as a workflow artifact
-    # - name: Upload alerts file as a workflow artifact
-    #   uses: actions/upload-artifact@v3
-    #   with:  
-    #     name: alerts
-    #     path: ${{ steps.msdo.outputs.sarifFile }}
+      # Upload alerts file as a workflow artifact
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo.outputs.sarifFile }}

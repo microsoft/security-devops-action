@@ -207,7 +207,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     if (resData.length > 0) {
                         core.debug('Response: ' + resData);
                     }
-                    if (res.statusCode != 200) {
+                    if (res.statusCode < 200 || res.statusCode >= 300) {
                         reject(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`);
                     }
                     resolve();
