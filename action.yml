@@ -31,6 +31,6 @@ runs:
   using: 'node16'
   main: 'lib/main.js'
   pre: 'lib/pre.js'
-  pre-if: ${{ inputs.command == 'all' || inputs.command == 'pre-job' }}
+  pre-if: inputs.command == 'all' || inputs.command == 'pre-job'
   post: 'lib/post.js'
-  post-if: ${{ inputs.command == 'all' || inputs.command == 'post-job' }}
+  post-if: inputs.command == 'all' || inputs.command == 'post-job'
