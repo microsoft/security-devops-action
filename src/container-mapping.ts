@@ -55,28 +55,16 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * Container mapping post-job commands wrapped in exception handling.
      */
     public async runPostJob() {
-        writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
-        await this._runPostJob()
-            .catch((error) => {
-                // Log the error
-                writeToOutStream("Error in Container Mapping post-job: " + error);
-            })
-            .finally(() => {
-                // End the collapsible section
-                writeToOutStream("::endgroup::");
-            });
-
-        // try {
-
-        // }
-        // catch (error) {
-        //     // Log the error
-        //     writeToOutStream("Error in Container Mapping post-job: " + error);
-        // }
-        // finally {
-        //     // End the collapsible section
-        //     writeToOutStream("::endgroup::");
-        // }
+        try {
+            writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            await this._runPostJob();
+        } catch (error) {
+            // Log the error
+            writeToOutStream("Error in Container Mapping post-job: " + error);
+        } finally {
+            // End the collapsible section
+            writeToOutStream("::endgroup::");
+        }
     }
 
     /*
@@ -108,7 +96,20 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         core.debug("Finished data collection, starting API calls.");
 
-        await this.sendReport(reportData, sendReportRetryCount);
+        let bearerToken:string | void = await core.getIDToken()
+        .then((token) => { return token; })
+            .catch((error) => {
+                throw new Error("Unable to get token: " + error);
+            });
+        
+        if(!bearerToken) {
+            throw new Error("Empty OIDC token received");
+        }
+
+        await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount)
+            .catch((error) => {
+                throw new Error(error);
+            });
     }
 
     /**
@@ -135,10 +136,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @param retryCount the number of time to retry
      * @returns a Promise
      */
-    private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
-        core.debug('Attempting to send data: ' + JSON.stringify(data));
+    private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<void> {
+        core.debug('Attempting to send data: ' + data);
         return new Promise(async (resolve, reject) => {
-            await this._sendReport(JSON.stringify(data))
+            await this._sendReport(data)
                 .then(() => {
                     resolve();
                 })
@@ -148,7 +149,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     } else {
                         core.debug(`Retrying API call. Retry count: ${retryCount}`);
                         retryCount--;
-                        return this.sendReport(data, retryCount);
+                        return this.sendReport(data, bearerToken, retryCount);
                     }
                 });
         });
