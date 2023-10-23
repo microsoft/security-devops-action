@@ -88,12 +88,22 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         };
 
         // Initialize the commands 
-        await this.execCommand('docker --version', dockerVersion);
+        await this.execCommand('docker --version', dockerVersion)
+        .catch((error) => {
+            throw new Error("Unable to get docker version: " + error);
+        });
         // The backend expects the docker version to be a string, not an array
         reportData.dockerVersion = dockerVersion.join('');
 
-        await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents);
-        await this.execCommand(`docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}`, reportData.dockerImages);
+        await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents)
+        .catch((error) => {
+            throw new Error("Unable to get docker events: " + error);
+        });
+
+        await this.execCommand(`docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}`, reportData.dockerImages)
+        .catch((error) => {
+            throw new Error("Unable to get docker images: " + error);
+        });
 
         core.debug("Finished data collection, starting API calls.");
 
@@ -119,7 +129,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @param listener Listener to capture the output
      * @returns a Promise
      */
-    private async execCommand(command: string, listener: string[]): Promise<number> {
+    private async execCommand(command: string, listener: string[]): Promise<void> {
         return exec.exec(command, null, {
             listeners: {
                 stdout: (data: Buffer) => {
@@ -130,13 +140,18 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 }
             }
         })
+        .then((exitCode) => {
+            if (exitCode != 0) {
+                Promise.reject(`Command failed with exit code ${exitCode}`);
+            }
+        });
     }
 
     /**
      * Sends a report to Defender for DevOps and retries on the specified count
      * @param data the data to send
      * @param retryCount the number of time to retry
-     * @returns a Promise
+     * @returns a boolean Promise to indicate if the report was sent successfully or not
      */
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<boolean> {
         core.debug(`attempting to send report: ${data}`);
@@ -170,7 +185,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             }
             let options = {
                 method: 'POST',
-                timeout: 5000,
+                timeout: 2500,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + bearerToken,
