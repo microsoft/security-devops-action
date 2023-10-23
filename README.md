@@ -50,12 +50,12 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 
 ## Advanced
 
-To configure pre-job and post-job tasks to run, such as container mapping to send to Microsoft Defender for DevOps, set the command to `all`:
+To configure **Container Mapping** to send to **Microsoft Defender for DevOps**, include `container-mapping` with your `tools` input option:
 ```yaml
 - uses: microsoft/security-devops-action@v1
   id: msdo
   with:
-    command: all
+    tools: container-mapping
 ```
 
 # Tools
