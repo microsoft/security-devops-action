@@ -55,18 +55,28 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * Container mapping post-job commands wrapped in exception handling.
      */
     public async runPostJob() {
-        try {
-            writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
-            await this._runPostJob();
-        }
-        catch (error) {
-            // Log the error
-            writeToOutStream("Error in Container Mapping post-job: " + error);
-        }
-        finally {
-            // End the collapsible section
-            writeToOutStream("::endgroup::");
-        }
+        writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+        await this._runPostJob()
+            .catch((error) => {
+                // Log the error
+                writeToOutStream("Error in Container Mapping post-job: " + error);
+            })
+            .finally(() => {
+                // End the collapsible section
+                writeToOutStream("::endgroup::");
+            });
+
+        // try {
+
+        // }
+        // catch (error) {
+        //     // Log the error
+        //     writeToOutStream("Error in Container Mapping post-job: " + error);
+        // }
+        // finally {
+        //     // End the collapsible section
+        //     writeToOutStream("::endgroup::");
+        // }
     }
 
     /*
@@ -98,10 +108,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         core.debug("Finished data collection, starting API calls.");
 
-        await this.sendReport(reportData, sendReportRetryCount)
-        .catch((error) => {
-            throw new Error(`Error sending report: ${error}`);
-        });
+        await this.sendReport(reportData, sendReportRetryCount);
     }
 
     /**
