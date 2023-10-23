@@ -1,26 +1,30 @@
 import * as core from '@actions/core';
 import { MicrosoftSecurityDevOps } from './msdo';
-import { Inputs, SourceType, CommandType } from './msdo-helpers';
+import { Inputs, RunnerType, CommandType } from './msdo-helpers';
 import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 import { ContainerMapping } from './container-mapping';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
-export async function run(sourceString: string) {
-    var source = sourceString as SourceType;
-    var command = getCommandType();
+/**
+ * Runs the action.
+ * @param runnerString The runner where the task is being run: main, pre, or post. 
+ */
+export async function run(runnerString: string) {
+    let runner = runnerString as RunnerType;
+    let command: CommandType = getCommandType();
 
-    switch (source) {
-        case SourceType.Main:
+    switch (runner) {
+        case RunnerType.Main:
             await _runMain(command);
             break;
-        case SourceType.Pre:
+        case RunnerType.Pre:
             await _runPreJob(command);
             break;
-        case SourceType.Post:
+        case RunnerType.Post:
             await _runPostJob(command);
             break;
         default:
-            throw new Error(`Invalid source type for the task: ${sourceString}`);
+            throw new Error(`Invalid source type for the task: ${runnerString}`);
     }
 }
 

@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import { run } from './index';
-import { SourceType } from './msdo-helpers';
+import { RunnerType } from './msdo-helpers';
 
-const source = SourceType.Pre;
+const runner = RunnerType.Pre;
 
 async function runPre() {
-    await run(source);
+    await run(runner);
 }
 
 runPre().catch((error) => {

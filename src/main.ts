@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import { run } from './index';
-import { SourceType, writeToOutStream } from './msdo-helpers';
+import { RunnerType, writeToOutStream } from './msdo-helpers';
 
-const source = SourceType.Main;
+const runner = RunnerType.Main;
 
 async function runMain() {
-    await run(source);
+    await run(runner);
 }
 
 runMain().catch(error => {

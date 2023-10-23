@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs";
 import os from 'os';
 import { Writable } from "stream";
 
@@ -13,9 +11,9 @@ export enum Inputs {
 }
 
 /**
- * Enum for the source of the action's run.
+ * Enum for the runner of the action.
  */
-export enum SourceType {
+export enum RunnerType {
     Main = 'main',
     Pre = 'pre',
     Post = 'post'
