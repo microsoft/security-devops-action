@@ -108,7 +108,8 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount)
             .catch((error) => {
-                throw new Error(error);
+                core.debug(error);
+                // throw new Error(error);
             });
     }
 
