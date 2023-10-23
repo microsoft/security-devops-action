@@ -34,7 +34,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         }
     }
 
-    
+
     /*
     * Set the start time of the job run.
     */
@@ -81,38 +81,42 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         }
         console.log(`PreJobStartTime: ${startTime}`);
 
+        let dockerVersion = [];
         let reportData = {
-            dockerVer: "",
-            dockerEvents: "",
-            dockerImages: ""
+            dockerVersion: "",
+            dockerEvents: [],
+            dockerImages: []
         };
-        
+
         // Initialize the commands 
-        await exec.exec('docker --version', null, {
-            listeners: {
-                stdout: (data: Buffer) => {
-                    reportData.dockerVer = reportData.dockerVer.concat(data.toString());
-                }
-            }
-        });
-        await exec.exec(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, null, {
-            listeners: {
-                stdout: (data: Buffer) => {
-                    reportData.dockerEvents = reportData.dockerEvents.concat(data.toString());
-                }
-            }
-        });
-        await exec.exec('docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}', null, {
-            listeners: {
-                stdout: (data: Buffer) => {
-                    reportData.dockerImages = reportData.dockerImages.concat(data.toString());
-                }
-            }
-        });
+        await this.execCommand('docker --version', dockerVersion);
+        // The backend expects the docker version to be a string, not an array
+        reportData.dockerVersion = dockerVersion.join('');
+
+        await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents);
+        await this.execCommand(`docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}`, reportData.dockerImages);
 
         core.debug("Finished data collection, starting API calls.");
 
         await this.sendReport(reportData, sendReportRetryCount);
+    }
+
+    /**
+     * Execute command and setup the listener to capture the output
+     * @param command Command to execute
+     * @param listener Listener to capture the output
+     * @returns a Promise
+     */
+    private async execCommand(command: string, listener: string[]): Promise<number> {
+        return exec.exec(command, null, {
+            listeners: {
+                stdout: (data: Buffer) => {
+                    var d = data.toString().trim();
+                    if (d.length > 0)
+                        listener.push(d);
+                }
+            }
+        })
     }
 
     /**
@@ -122,6 +126,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @returns a Promise
      */
     private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
+        
         return new Promise(async (resolve, reject) => {
             do {
                 try {
@@ -139,7 +144,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             } while (retryCount >= 0)
         });
     }
-    
+
     /**
      * Sends a report to Defender for DevOps
      * @param data the data to send
@@ -163,24 +168,28 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 data: data
             };
             core.debug(`${options['method'].toUpperCase()} ${url}`);
-    
+
             const req = https.request(url, options, (res) => {
                 let resData = '';
                 res.on('data', (chunk) => {
                     resData += chunk.toString();
                 });
-    
+
                 res.on('end', () => {
                     core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
-                    core.debug('Response: ' + resData);
+                    core.debug('Status code: ' + res.statusCode);
+                    if(resData.length > 0)
+                    {
+                        core.debug('Response: ' + resData);
+                    }
                     resolve();
                 });
             });
-    
+
             req.on('error', (error) => {
                 reject(new Error(`Error calling url: ${error}`));
             });
-            
+
             req.end();
         });
     }
