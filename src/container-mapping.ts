@@ -96,21 +96,20 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         core.debug("Finished data collection, starting API calls.");
 
-        let bearerToken:string | void = await core.getIDToken()
-        .then((token) => { return token; })
+        let bearerToken: string | void = await core.getIDToken()
+            .then((token) => { return token; })
             .catch((error) => {
                 throw new Error("Unable to get token: " + error);
             });
-        
-        if(!bearerToken) {
+
+        if (!bearerToken) {
             throw new Error("Empty OIDC token received");
         }
 
-        await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount)
-            .catch((error) => {
-                core.debug(error);
-                // throw new Error(error);
-            });
+        var reportSent: boolean = await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount);
+        if (!reportSent) {
+            throw new Error("error sending report");
+        };
     }
 
     /**
@@ -137,18 +136,20 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @param retryCount the number of time to retry
      * @returns a Promise
      */
-    private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<void> {
-        core.debug('Attempting to send data: ' + data);
+    private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<boolean> {
         return await this._sendReport(data)
-                .catch((error) => {
-            if (retryCount == 0) {
-                Promise.reject('Failed to send report: ' + error);
-            } else {
-                core.debug(`Retrying API call. Retry count: ${retryCount}`);
-                retryCount--;
-                return this.sendReport(data, bearerToken, retryCount);
-            }
-        });
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                if (retryCount == 0) {
+                    return false;
+                } else {
+                    core.debug(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                    retryCount--;
+                    return this.sendReport(data, bearerToken, retryCount);
+                }
+            });
     }
 
     /**
