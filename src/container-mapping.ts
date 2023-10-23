@@ -128,20 +128,21 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
         core.debug('Attempting to send data: ' + JSON.stringify(data));
         return new Promise(async (resolve, reject) => {
-            do {
-                try {
-                    await this._sendReport(data);
+            if(retryCount > 0) {
+                await this._sendReport(JSON.stringify(data))
+                .then(() => {
                     resolve();
-                    break;
-                } catch (error) {
+                })
+                .catch((error) => {
+                    retryCount--;
                     if (retryCount == 0) {
                         reject('Failed to send report: ' + error);
                     } else {
-                        retryCount--;
                         core.debug(`Retrying API call. Retry count: ${retryCount}`);
+                        return this.sendReport(data, retryCount);
                     }
-                }
-            } while (retryCount >= 0)
+                });
+            }
         });
     }
 
@@ -150,7 +151,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @param data the data to send
      * @returns a Promise
      */
-    private async _sendReport(data: Object): Promise<void> {
+    private async _sendReport(data: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
             var bearerToken = await core.getIDToken();
@@ -160,12 +161,12 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             }
             let options = {
                 method: 'POST',
-                timeout: 2500,
+                timeout: 120,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + bearerToken
-                },
-                data: data
+                    'Authorization': 'Bearer ' + bearerToken,
+                    'Content-Length': data.length
+                }
             };
             core.debug(`${options['method'].toUpperCase()} ${url}`);
 
@@ -194,6 +195,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 reject(new Error(`Error calling url: ${error}`));
             });
 
+            req.write(data);
             req.end();
         });
     }
