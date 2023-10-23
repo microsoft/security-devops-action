@@ -98,7 +98,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         core.debug("Finished data collection, starting API calls.");
 
-        await this.sendReport(reportData, sendReportRetryCount);
+        await this.sendReport(reportData, sendReportRetryCount)
+        .catch((error) => {
+            throw new Error(`Error sending report: ${error}`);
+        });
     }
 
     /**
@@ -182,7 +185,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                         core.debug('Response: ' + resData);
                     }
                     if (res.statusCode != 200) {
-                        reject(new Error(`Error calling url: ${res.statusCode} ${resData}`));
+                        reject(new Error(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`));
                     }
                     resolve();
                 });
