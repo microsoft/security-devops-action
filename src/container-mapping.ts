@@ -3,6 +3,7 @@ import { IMicrosoftSecurityDevOps } from "./msdo-interface";
 import * as https from "https";
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as os from 'os';
 
 const sendReportRetryCount: number = 1;
 
@@ -122,9 +123,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         return exec.exec(command, null, {
             listeners: {
                 stdout: (data: Buffer) => {
-                    var d = data.toString().trim();
-                    if (d.length > 0)
-                        listener.push(d);
+                    var lines = data.toString().trim().split(os.EOL);
+                    lines.forEach(element => {
+                        listener.push(element);
+                    });
                 }
             }
         })
@@ -137,6 +139,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @returns a Promise
      */
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<boolean> {
+        core.debug(`attempting to send report: ${data}`);
         return await this._sendReport(data)
             .then(() => {
                 return true;
