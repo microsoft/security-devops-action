@@ -126,7 +126,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @returns a Promise
      */
     private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
-        
+        core.debug('Attempting to send data: ' + JSON.stringify(data));
         return new Promise(async (resolve, reject) => {
             do {
                 try {
@@ -181,6 +181,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     if(resData.length > 0)
                     {
                         core.debug('Response: ' + resData);
+                    }
+                    if(res.statusCode != 200)
+                    {
+                        reject(new Error(`Error calling url: ${res.statusCode} ${resData}`));
                     }
                     resolve();
                 });
