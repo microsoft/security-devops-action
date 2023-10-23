@@ -146,7 +146,8 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             } else {
                 core.debug(`Retrying API call. Retry count: ${retryCount}`);
                 retryCount--;
-                return this.sendReport(data, bearerToken, retryCount);
+                return this.sendReport(data, bearerToken, retryCount)
+                .catch((error) => { core.debug("Caught inside the nest: " + error); });
             }
         });
     }
