@@ -3,8 +3,7 @@ import { MicrosoftSecurityDevOps } from './msdo';
 import { Inputs, SourceType, CommandType } from './msdo-helpers';
 import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 import { ContainerMapping } from './container-mapping';
-
-const source = "main";
+import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
 export async function run(sourceString: string) {
     var source = sourceString as SourceType;
@@ -30,7 +29,9 @@ async function _runPreJob(command: CommandType) {
         return;
     }
     // if explicit PreJob, will run in main
-    await _getExecutor(ContainerMapping).runPreJob();
+    if (_toolIsEnabled(Inputs.ContainerMapping)) {
+        await _getExecutor(ContainerMapping).runPreJob();
+    }
 }
 
 async function _runPostJob(command: CommandType) {
@@ -38,7 +39,9 @@ async function _runPostJob(command: CommandType) {
         return;
     }
     // if explicit PostJob, will run in main
-    await _getExecutor(ContainerMapping).runPostJob();
+    if (_toolIsEnabled(Inputs.ContainerMapping)) {
+        await _getExecutor(ContainerMapping).runPostJob();
+    }
 }
 
 async function _runMain(command: CommandType) {
@@ -54,6 +57,22 @@ async function _runMain(command: CommandType) {
     } else {
         throw new Error(`Invalid command type for the main task: ${command}`);
     }
+}
+
+/**
+ * Returns true if the tool is enabled in the inputs.
+ * @param toolName - The name of the tool. 
+ * @returns True if the tool is enabled in the inputs.
+ */
+function _toolIsEnabled(toolName: string) {
+    let enabled: boolean = false;
+    let toolsString: string = core.getInput('tools');
+    if (!common.isNullOrWhiteSpace(toolsString)) {
+        let tools = toolsString.split(',');
+        const toolIndex = tools.indexOf(toolName);
+        enabled = toolIndex > -1;
+    }
+    return enabled;
 }
 
 /**

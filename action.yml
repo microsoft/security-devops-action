@@ -31,6 +31,4 @@ runs:
   using: 'node16'
   main: 'lib/main.js'
   pre: 'lib/pre.js'
-  pre-if: github.events.inputs.command == 'all' || github.events.inputs.command == 'pre-job'
   post: 'lib/post.js'
-  post-if: github.events.inputs.command == 'all' || github.events.inputs.command == 'post-job'

@@ -8,7 +8,8 @@ import { Writable } from "stream";
  * Enum for the possible inputs for the task (specified in task.json)
  */
 export enum Inputs {
-    Command = 'command'
+    Command = 'command',
+    ContainerMapping = 'container-mapping'
 }
 
 /**
