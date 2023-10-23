@@ -128,21 +128,19 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private async sendReport(data: Object, retryCount: number = 0): Promise<void> {
         core.debug('Attempting to send data: ' + JSON.stringify(data));
         return new Promise(async (resolve, reject) => {
-            if(retryCount > 0) {
-                await this._sendReport(JSON.stringify(data))
+            await this._sendReport(JSON.stringify(data))
                 .then(() => {
                     resolve();
                 })
                 .catch((error) => {
-                    retryCount--;
                     if (retryCount == 0) {
                         reject('Failed to send report: ' + error);
                     } else {
                         core.debug(`Retrying API call. Retry count: ${retryCount}`);
+                        retryCount--;
                         return this.sendReport(data, retryCount);
                     }
                 });
-            }
         });
     }
 
@@ -178,13 +176,12 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
                 res.on('end', () => {
                     core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
-                    core.debug('Status code: ' + res.statusCode);
-                    if(resData.length > 0)
-                    {
+                    core.debug(`Status code: ${res.statusCode} ${res.statusMessage}`);
+                    core.debug('Response headers: ' + JSON.stringify(res.headers));
+                    if (resData.length > 0) {
                         core.debug('Response: ' + resData);
                     }
-                    if(res.statusCode != 200)
-                    {
+                    if (res.statusCode != 200) {
                         reject(new Error(`Error calling url: ${res.statusCode} ${resData}`));
                     }
                     resolve();
