@@ -79,6 +79,7 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             const containerMappingIndex = tools.indexOf('container-mapping');
             if (containerMappingIndex > -1) {
                 if (!scanEnabled && tools.length == 1) {
+                    // Only container mapping is enabled
                     console.log("Scanning not enabled. Skipping...");
                     return;
                 } else {
