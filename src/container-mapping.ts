@@ -161,7 +161,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             }
             let options = {
                 method: 'POST',
-                timeout: 120,
+                timeout: 5000,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + bearerToken,
