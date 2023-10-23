@@ -139,20 +139,15 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<void> {
         core.debug('Attempting to send data: ' + data);
-        return new Promise(async (resolve, reject) => {
-            await this._sendReport(data)
-                .then(() => {
-                    resolve();
-                })
-                .catch((error) => {
-                    if (retryCount == 0) {
-                        reject('Failed to send report: ' + error);
-                    } else {
-                        core.debug(`Retrying API call. Retry count: ${retryCount}`);
-                        retryCount--;
-                        return this.sendReport(data, bearerToken, retryCount);
-                    }
-                });
+        return await this._sendReport(data)
+        .catch((error) => {
+            if (retryCount == 0) {
+                Promise.reject('Failed to send report: ' + error);
+            } else {
+                core.debug(`Retrying API call. Retry count: ${retryCount}`);
+                retryCount--;
+                return this.sendReport(data, bearerToken, retryCount);
+            }
         });
     }
 
