@@ -155,17 +155,17 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<boolean> {
         core.debug(`attempting to send report: ${data}`);
-        return await this._sendReport(data)
+        return await this._sendReport(data, bearerToken)
             .then(() => {
                 return true;
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 if (retryCount == 0) {
                     return false;
                 } else {
-                    core.warning(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                    writeToOutStream(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
                     retryCount--;
-                    return this.sendReport(data, bearerToken, retryCount);
+                    return await this.sendReport(data, bearerToken, retryCount);
                 }
             });
     }
@@ -175,10 +175,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @param data the data to send
      * @returns a Promise
      */
-    private async _sendReport(data: string): Promise<void> {
+    private async _sendReport(data: string, bearerToken: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
-            var bearerToken = await core.getIDToken();
             let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/container-mappings";
             if (process.env.MSDO_DOGFOOD) {
                 url = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/container-mappings";
@@ -208,7 +207,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                         core.debug('Response: ' + resData);
                     }
                     if (res.statusCode < 200 || res.statusCode >= 300) {
-                        reject(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`);
+                        return reject(`Received Failed Status code when calling url: ${res.statusCode} ${resData}`);
                     }
                     resolve();
                 });
