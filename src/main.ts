@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { run } from './index';
-import { RunnerType, writeToOutStream } from './msdo-helpers';
+import { RunnerType } from './msdo-helpers';
 
 const runner = RunnerType.Main;
 
