@@ -7,7 +7,8 @@ on:
       - '**'
 
 permissions:
-  security-events: write
+  id-token: write # This is required for federation to Defender for DevOps
+  security-events: write # This is required to upload SARIF files
 
 jobs:
   sample:
@@ -24,9 +25,14 @@ jobs:
     - uses: actions/checkout@v3
 
       # Run analyzers
-    - name: Run Microsoft Security DevOps Analysis
-      uses: ./
+    # - uses: ./
+    #   id: msdo
+
+      # Run analyzers
+    - uses: davidknise/security-devops-action@dev/daknis/container-mapping
       id: msdo
+      with:
+        tools: container-mapping
 
       # Upload alerts to the Security tab
     - name: Upload alerts to Security tab

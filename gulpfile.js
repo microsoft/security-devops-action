@@ -6,6 +6,7 @@ const process = require('process');
 const ts = require('gulp-typescript');
 
 const tsProject = ts.createProject('tsconfig.json');
+const testTsProject = ts.createProject(path.join(__dirname, 'test', 'tsconfig.json'));
 
 function clean(cb) {
     import('del')
@@ -58,6 +59,14 @@ function compile(cb) {
         .on('end', () => cb());
 }
 
+function compileTests(cb) {
+    testTsProject
+        .src()
+        .pipe(testTsProject()).js
+        .pipe(gulp.dest(path.join(__dirname, 'test')))
+        .on('end', () => cb());
+}
+
 function clearDir(dirPath) {
     // Get a list of files and subdirectories in the directory
     const items = fs.readdirSync(dirPath);
@@ -96,5 +105,7 @@ function copyFiles(srcDir, destDir) {
 
 exports.clean = clean;
 exports.compile = compile;
+exports.compileTests = compileTests;
 exports.build = gulp.series(clean, sideload, compile);
+exports.buildTests = gulp.series(exports.build, compileTests);
 exports.default = exports.build;
