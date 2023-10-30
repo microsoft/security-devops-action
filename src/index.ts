@@ -60,7 +60,7 @@ async function _runMain(command: CommandType) {
         if (_featureIsEnabled(Features.Scanning)) {
             await _getExecutor(MicrosoftSecurityDevOps).runMain();
         } else {
-            console.log("Scanning is not enabled. Skipping");
+            console.log("Scanning is not enabled. Skipping...");
         }
     } else {
         throw new Error(`Invalid command type for the main task: ${command}`);
