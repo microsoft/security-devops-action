@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { MicrosoftSecurityDevOps } from './msdo';
-import { Inputs, RunnerType, CommandType } from './msdo-helpers';
+import { CommandType, Features, Inputs, RunnerType } from './msdo-helpers';
 import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 import { ContainerMapping } from './container-mapping';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
@@ -33,7 +33,7 @@ async function _runPreJob(command: CommandType) {
         return;
     }
     // if explicit PreJob, will run in main
-    if (_toolIsEnabled(Inputs.ContainerMapping)) {
+    if (_featureIsEnabled(Features.Mapping)) {
         await _getExecutor(ContainerMapping).runPreJob();
     }
 }
@@ -43,7 +43,7 @@ async function _runPostJob(command: CommandType) {
         return;
     }
     // if explicit PostJob, will run in main
-    if (_toolIsEnabled(Inputs.ContainerMapping)) {
+    if (_featureIsEnabled(Features.Mapping)) {
         await _getExecutor(ContainerMapping).runPostJob();
     }
 }
@@ -57,24 +57,31 @@ async function _runMain(command: CommandType) {
         await _runPostJob(command);
     } else if (command == CommandType.All || command == CommandType.Run) {
         // Run main
-        await _getExecutor(MicrosoftSecurityDevOps).runMain();
+        if (_featureIsEnabled(Features.Scanning)) {
+            await _getExecutor(MicrosoftSecurityDevOps).runMain();
+        } else {
+            console.log("Scanning is not enabled. Skipping...");
+        }
     } else {
         throw new Error(`Invalid command type for the main task: ${command}`);
     }
 }
 
 /**
- * Returns true if the tool is enabled in the inputs.
- * @param toolName - The name of the tool. 
- * @returns True if the tool is enabled in the inputs.
+ * Returns true if the feature is enabled in the inputs.
+ * @param featureName - The name of the feature. 
+ * @returns True if the feature is enabled in the inputs.
  */
-function _toolIsEnabled(toolName: string) {
+function _featureIsEnabled(featureName: string) {
     let enabled: boolean = false;
-    let toolsString: string = core.getInput('tools');
-    if (!common.isNullOrWhiteSpace(toolsString)) {
-        let tools = toolsString.split(',');
-        const toolIndex = tools.indexOf(toolName);
+    let featuresString: string = core.getInput(Inputs.Features);
+    if (!common.isNullOrWhiteSpace(featuresString)) {
+        let features = featuresString.split(',').map(item => item.trim());
+        const toolIndex = features.indexOf(featureName);
         enabled = toolIndex > -1;
+        if (!enabled) {
+            enabled = features.indexOf(Features.All) > -1;
+        }
     }
     return enabled;
 }

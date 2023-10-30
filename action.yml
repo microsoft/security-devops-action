@@ -13,6 +13,9 @@ inputs:
       - run
       - pre-job
       - post-job
+  features:
+    description: A comma separated list of features to enable. Example scanning, mapping, all. Defaults to scanning.
+    default: scanning
   config:
     description: A file path to a .gdnconfig file.
   policy:
@@ -23,7 +26,7 @@ inputs:
   languages:
     description: A comma separated list of languages to analyze. Example javascript, typescript. Defaults to all.
   tools:
-    description: A comma separated list of analyzer tools to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
+    description: A comma separated list of analyzer tools to run. Example bandit, binskim, eslint, templateanalyzer, terrascan, trivy.
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.

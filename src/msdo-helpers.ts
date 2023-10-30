@@ -3,11 +3,11 @@ import { Writable } from "stream";
 
 
 /**
- * Enum for the possible inputs for the task (specified in task.json)
+ * Enum for the possible inputs for the task (specified in action.yml)
  */
 export enum Inputs {
     Command = 'command',
-    ContainerMapping = 'container-mapping'
+    Features = 'features'
 }
 
 /**
@@ -20,13 +20,22 @@ export enum RunnerType {
 }
 
 /*
-* Enum for the possible values for the Inputs.CommandType (specified in task.json)
+* Enum for the possible values for the Inputs.CommandType (specified in action.yml)
 */
 export enum CommandType {
     All = 'all',
     PreJob = 'pre-job',
     PostJob = 'post-job',
     Run = 'run'
+}
+
+/**
+ * Enum for the possible values for the Inputs.Features (specified in action.yml)
+ */
+export enum Features {
+    All = 'all',
+    Scanning = 'scanning',
+    Mapping = 'mapping'
 }
 
 /**
@@ -57,7 +66,7 @@ export const encode = (str: string):string => Buffer.from(str, 'binary').toStrin
  * @param dockerVersion - The version of Docker.
  * @param dockerEvents - The Docker events.
  * @param dockerImages - The Docker images.
- * @param taskVersion - Optional version of the task. Defaults to the version in the task.json file.
+ * @param taskVersion - Optional version of the task. Defaults to the version in the action.yml file.
  * @param sectionDelim - Optional delimiter to separate sections in the encoded content. Defaults to ":::".
  * @returns The encoded content of the Docker version, Docker events, and Docker images.
  */
