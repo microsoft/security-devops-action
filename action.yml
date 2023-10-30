@@ -15,7 +15,7 @@ inputs:
       - post-job
   features:
     description: A comma separated list of features to enable. Example scanning, mapping, all. Defaults to scanning.
-    default: all
+    default: scanning
   config:
     description: A file path to a .gdnconfig file.
   policy:
