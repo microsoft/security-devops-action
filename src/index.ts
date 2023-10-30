@@ -76,7 +76,7 @@ function _featureIsEnabled(featureName: string) {
     let enabled: boolean = false;
     let featuresString: string = core.getInput(Inputs.Features);
     if (!common.isNullOrWhiteSpace(featuresString)) {
-        let features = featuresString.split(',');
+        let features = featuresString.split(',').map(item => item.trim());
         const toolIndex = features.indexOf(featureName);
         enabled = toolIndex > -1;
         if (!enabled) {
