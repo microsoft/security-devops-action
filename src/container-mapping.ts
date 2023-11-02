@@ -57,14 +57,14 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     public async runPostJob() {
         try {
-            writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            core.info("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
             await this._runPostJob();
         } catch (error) {
             // Log the error
-            writeToOutStream("Error in Container Mapping post-job: " + error);
+            core.info("Error in Container Mapping post-job: " + error);
         } finally {
             // End the collapsible section
-            writeToOutStream("::endgroup::");
+            core.info("::endgroup::");
         }
     }
 
@@ -76,11 +76,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         let startTime = core.getState('PreJobStartTime');
         if (startTime.length <= 0) {
             startTime = new Date(new Date().getTime() - 10000).toISOString();
-            console.log(`PreJobStartTime not defined, using now-10secs`);
+            core.debug(`PreJobStartTime not defined, using now-10secs`);
         }
-        console.log(`PreJobStartTime: ${startTime}`);
+        core.info(`PreJobStartTime: ${startTime}`);
 
-        let dockerVersion = [];
         let reportData = {
             dockerVersion: "",
             dockerEvents: [],
@@ -95,21 +94,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             return;
         }
         reportData.dockerVersion = dockerVersionOutput.stdout.trim();
-
-        // await this.execCommand('docker --version', dockerVersion)
-        // .catch((error) => {
-        //     throw new Error("Unable to get docker version: " + error);
-        // });
-        // // The backend expects the docker version to be a string, not an array
-        // reportData.dockerVersion = dockerVersion.join('');
-
-        await exec.getExecOutput('docker events --since ' + startTime + ' --until ' + new Date().toISOString() + ' --filter event=push --filter type=image --format ID={{.ID}}')
-        .then((result) => {
-            
-            result.stdout.trim().split(os.EOL).forEach(element => {
-                reportData.dockerEvents.push(element);
-            });
-        });
 
         await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents)
         .catch((error) => {
@@ -152,7 +136,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 return Promise.reject(`Command execution failed: ${result}`);
             }
             result.stdout.trim().split(os.EOL).forEach(element => {
-                listener.push(element);
+                if(element.length > 0) {
+                    listener.push(element);
+                }
             });
         });
         // return exec.exec(command, null, {
@@ -188,7 +174,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 if (retryCount == 0) {
                     return false;
                 } else {
-                    writeToOutStream(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                    core.info(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
                     retryCount--;
                     return await this.sendReport(data, bearerToken, retryCount);
                 }
