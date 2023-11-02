@@ -88,12 +88,28 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         };
 
         // Initialize the commands 
-        await this.execCommand('docker --version', dockerVersion)
-        .catch((error) => {
-            throw new Error("Unable to get docker version: " + error);
+        let dockerVersionOutput = await exec.getExecOutput('docker --version');
+        if (dockerVersionOutput.exitCode != 0 || dockerVersionOutput.stderr.length > 0) {
+            core.info(`Unable to get docker version: ${dockerVersionOutput}`);
+            core.info(`Skipping container mapping since docker not found/available.`);
+            return;
+        }
+        reportData.dockerVersion = dockerVersionOutput.stdout.trim();
+
+        // await this.execCommand('docker --version', dockerVersion)
+        // .catch((error) => {
+        //     throw new Error("Unable to get docker version: " + error);
+        // });
+        // // The backend expects the docker version to be a string, not an array
+        // reportData.dockerVersion = dockerVersion.join('');
+
+        await exec.getExecOutput('docker events --since ' + startTime + ' --until ' + new Date().toISOString() + ' --filter event=push --filter type=image --format ID={{.ID}}')
+        .then((result) => {
+            
+            result.stdout.trim().split(os.EOL).forEach(element => {
+                reportData.dockerEvents.push(element);
+            });
         });
-        // The backend expects the docker version to be a string, not an array
-        reportData.dockerVersion = dockerVersion.join('');
 
         await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents)
         .catch((error) => {
@@ -130,21 +146,30 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @returns a Promise
      */
     private async execCommand(command: string, listener: string[]): Promise<void> {
-        return exec.exec(command, null, {
-            listeners: {
-                stdout: (data: Buffer) => {
-                    var lines = data.toString().trim().split(os.EOL);
-                    lines.forEach(element => {
-                        listener.push(element);
-                    });
-                }
+        return exec.getExecOutput(command)
+        .then((result) => {
+            if(result.exitCode != 0) {
+                return Promise.reject(`Command execution failed: ${result}`);
             }
-        })
-        .then((exitCode) => {
-            if (exitCode != 0) {
-                Promise.reject(`Command failed with exit code ${exitCode}`);
-            }
+            result.stdout.trim().split(os.EOL).forEach(element => {
+                listener.push(element);
+            });
         });
+        // return exec.exec(command, null, {
+        //     listeners: {
+        //         stdout: (data: Buffer) => {
+        //             var lines = data.toString().trim().split(os.EOL);
+        //             lines.forEach(element => {
+        //                 listener.push(element);
+        //             });
+        //         }
+        //     }
+        // })
+        // .then((exitCode) => {
+        //     if (exitCode != 0) {
+        //         Promise.reject(`Command failed with exit code ${exitCode}`);
+        //     }
+        // });
     }
 
     /**
