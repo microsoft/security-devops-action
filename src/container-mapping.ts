@@ -22,16 +22,16 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     public runPreJob() {
         try {
-            writeToOutStream("::group::Microsoft Defender for DevOps container mapping pre-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            core.info("::group::Microsoft Defender for DevOps container mapping pre-job - https://go.microsoft.com/fwlink/?linkid=2231419");
             this._runPreJob();
         }
         catch (error) {
             // Log the error
-            writeToOutStream("Error in Container Mapping pre-job: " + error);
+            core.info("Error in Container Mapping pre-job: " + error);
         }
         finally {
             // End the collapsible section
-            writeToOutStream("::endgroup::");
+            core.info("::endgroup::");
         }
     }
 
@@ -42,7 +42,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private _runPreJob() {
         const startTime = new Date().toISOString();
         core.saveState('PreJobStartTime', startTime);
-        console.log('PreJobStartTime', startTime);
+        core.info(`PreJobStartTime: ${startTime}`);
     }
 
     /**
@@ -88,7 +88,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
         // Initialize the commands 
         let dockerVersionOutput = await exec.getExecOutput('docker --version');
-        if (dockerVersionOutput.exitCode != 0 || dockerVersionOutput.stderr.length > 0) {
+        if (dockerVersionOutput.exitCode != 0) {
             core.info(`Unable to get docker version: ${dockerVersionOutput}`);
             core.info(`Skipping container mapping since docker not found/available.`);
             return;
@@ -121,6 +121,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         if (!reportSent) {
             throw new Error("Unable to send report to backend service");
         };
+        core.info("Container mapping data sent successfully.");
     }
 
     /**
@@ -141,21 +142,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 }
             });
         });
-        // return exec.exec(command, null, {
-        //     listeners: {
-        //         stdout: (data: Buffer) => {
-        //             var lines = data.toString().trim().split(os.EOL);
-        //             lines.forEach(element => {
-        //                 listener.push(element);
-        //             });
-        //         }
-        //     }
-        // })
-        // .then((exitCode) => {
-        //     if (exitCode != 0) {
-        //         Promise.reject(`Command failed with exit code ${exitCode}`);
-        //     }
-        // });
     }
 
     /**
