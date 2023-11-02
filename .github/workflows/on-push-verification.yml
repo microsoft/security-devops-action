@@ -32,7 +32,7 @@ jobs:
     - uses: microsoft/security-devops-action@containerMappingPreview
       id: msdo
       with:
-        tools: container-mapping
+        features: mapping
 
       # Upload alerts to the Security tab
     - name: Upload alerts to Security tab

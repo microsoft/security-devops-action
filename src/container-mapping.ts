@@ -22,16 +22,16 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     public runPreJob() {
         try {
-            writeToOutStream("::group::Microsoft Defender for DevOps container mapping pre-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            core.info("::group::Microsoft Defender for DevOps container mapping pre-job - https://go.microsoft.com/fwlink/?linkid=2231419");
             this._runPreJob();
         }
         catch (error) {
             // Log the error
-            writeToOutStream("Error in Container Mapping pre-job: " + error);
+            core.info("Error in Container Mapping pre-job: " + error);
         }
         finally {
             // End the collapsible section
-            writeToOutStream("::endgroup::");
+            core.info("::endgroup::");
         }
     }
 
@@ -42,7 +42,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private _runPreJob() {
         const startTime = new Date().toISOString();
         core.saveState('PreJobStartTime', startTime);
-        console.log('PreJobStartTime', startTime);
+        core.info(`PreJobStartTime: ${startTime}`);
     }
 
     /**
@@ -57,14 +57,14 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      */
     public async runPostJob() {
         try {
-            writeToOutStream("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
+            core.info("::group::Microsoft Defender for DevOps container mapping post-job - https://go.microsoft.com/fwlink/?linkid=2231419");
             await this._runPostJob();
         } catch (error) {
             // Log the error
-            writeToOutStream("Error in Container Mapping post-job: " + error);
+            core.info("Error in Container Mapping post-job: " + error);
         } finally {
             // End the collapsible section
-            writeToOutStream("::endgroup::");
+            core.info("::endgroup::");
         }
     }
 
@@ -76,11 +76,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         let startTime = core.getState('PreJobStartTime');
         if (startTime.length <= 0) {
             startTime = new Date(new Date().getTime() - 10000).toISOString();
-            console.log(`PreJobStartTime not defined, using now-10secs`);
+            core.debug(`PreJobStartTime not defined, using now-10secs`);
         }
-        console.log(`PreJobStartTime: ${startTime}`);
+        core.info(`PreJobStartTime: ${startTime}`);
 
-        let dockerVersion = [];
         let reportData = {
             dockerVersion: "",
             dockerEvents: [],
@@ -88,12 +87,13 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         };
 
         // Initialize the commands 
-        await this.execCommand('docker --version', dockerVersion)
-        .catch((error) => {
-            throw new Error("Unable to get docker version: " + error);
-        });
-        // The backend expects the docker version to be a string, not an array
-        reportData.dockerVersion = dockerVersion.join('');
+        let dockerVersionOutput = await exec.getExecOutput('docker --version');
+        if (dockerVersionOutput.exitCode != 0) {
+            core.info(`Unable to get docker version: ${dockerVersionOutput}`);
+            core.info(`Skipping container mapping since docker not found/available.`);
+            return;
+        }
+        reportData.dockerVersion = dockerVersionOutput.stdout.trim();
 
         await this.execCommand(`docker events --since ${startTime} --until ${new Date().toISOString()} --filter event=push --filter type=image --format ID={{.ID}}`, reportData.dockerEvents)
         .catch((error) => {
@@ -121,6 +121,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         if (!reportSent) {
             throw new Error("Unable to send report to backend service");
         };
+        core.info("Container mapping data sent successfully.");
     }
 
     /**
@@ -130,20 +131,16 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * @returns a Promise
      */
     private async execCommand(command: string, listener: string[]): Promise<void> {
-        return exec.exec(command, null, {
-            listeners: {
-                stdout: (data: Buffer) => {
-                    var lines = data.toString().trim().split(os.EOL);
-                    lines.forEach(element => {
-                        listener.push(element);
-                    });
+        return exec.getExecOutput(command)
+        .then((result) => {
+            if(result.exitCode != 0) {
+                return Promise.reject(`Command execution failed: ${result}`);
+            }
+            result.stdout.trim().split(os.EOL).forEach(element => {
+                if(element.length > 0) {
+                    listener.push(element);
                 }
-            }
-        })
-        .then((exitCode) => {
-            if (exitCode != 0) {
-                Promise.reject(`Command failed with exit code ${exitCode}`);
-            }
+            });
         });
     }
 
@@ -163,7 +160,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 if (retryCount == 0) {
                     return false;
                 } else {
-                    writeToOutStream(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                    core.info(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
                     retryCount--;
                     return await this.sendReport(data, bearerToken, retryCount);
                 }
