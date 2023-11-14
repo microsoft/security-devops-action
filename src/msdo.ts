@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { IMicrosoftSecurityDevOps } from './msdo-interface';
+import { Tools } from './msdo-helpers';
 import * as client from '@microsoft/security-devops-actions-toolkit/msdo-client';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
@@ -65,13 +66,38 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
         }
 
         let toolsString: string = core.getInput('tools');
+        let includedTools = [];
         if (!common.isNullOrWhiteSpace(toolsString)) {
             let tools = toolsString.split(',');
-            args.push('--tool');
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
-                if (!common.isNullOrWhiteSpace(tool)) {
-                    args.push(tool.trim());
+                let toolTrimmed = tool.trim();
+                if (!common.isNullOrWhiteSpace(tool)
+                    && tool != Tools.ContainerMapping
+                    && includedTools.indexOf(toolTrimmed) == -1) {
+                    args.push(toolTrimmed);
+                    if (includedTools.length == 0) {
+                        args.push('--tool');
+                    }
+                    includedTools.push(toolTrimmed);
+                }
+            }
+        }
+        
+        let includeToolsString: string = core.getInput('includeTools');
+        if (!common.isNullOrWhiteSpace(includeToolsString)) {
+            let includeTools = includeToolsString.split(',');
+            for (let i = 0; i < includeTools.length; i++) {
+                let includeTool = includeTools[i];
+                let toolTrimmed = includeTool.trim();
+                if (!common.isNullOrWhiteSpace(includeTool)
+                    && includeTool != Tools.ContainerMapping
+                    && includedTools.indexOf(toolTrimmed) == -1) {
+                    args.push(toolTrimmed);
+                    if (includedTools.length == 0) {
+                        args.push('--tool');
+                    }
+                    includedTools.push(toolTrimmed);
                 }
             }
         }
