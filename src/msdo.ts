@@ -75,10 +75,10 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
                 if (!common.isNullOrWhiteSpace(tool)
                     && tool != Tools.ContainerMapping
                     && includedTools.indexOf(toolTrimmed) == -1) {
-                    args.push(toolTrimmed);
                     if (includedTools.length == 0) {
                         args.push('--tool');
                     }
+                    args.push(toolTrimmed);
                     includedTools.push(toolTrimmed);
                 }
             }
@@ -93,10 +93,10 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
                 if (!common.isNullOrWhiteSpace(includeTool)
                     && includeTool != Tools.ContainerMapping
                     && includedTools.indexOf(toolTrimmed) == -1) {
-                    args.push(toolTrimmed);
                     if (includedTools.length == 0) {
                         args.push('--tool');
                     }
+                    args.push(toolTrimmed);
                     includedTools.push(toolTrimmed);
                 }
             }
