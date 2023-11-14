@@ -71,8 +71,10 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             args.push('--tool');
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
-                if (!common.isNullOrWhiteSpace(tool) && tool != "container-mapping") {
-                    let toolTrimmed = tool.trim();
+                let toolTrimmed = tool.trim();
+                if (!common.isNullOrWhiteSpace(tool)
+                    && tool != "container-mapping"
+                    && includedTools.indexOf(toolTrimmed) == -1) {
                     args.push(toolTrimmed);
                     includedTools.push(toolTrimmed);
                 }
@@ -87,8 +89,10 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             }
             for (let i = 0; i < includeTools.length; i++) {
                 let includeTool = includeTools[i];
-                if (!common.isNullOrWhiteSpace(includeTool) && includeTool != "container-mapping") {
-                    let toolTrimmed = includeTool.trim();
+                let toolTrimmed = includeTool.trim();
+                if (!common.isNullOrWhiteSpace(includeTool)
+                    && includeTool != "container-mapping"
+                    && includedTools.indexOf(toolTrimmed) == -1) {
                     args.push(toolTrimmed);
                     includedTools.push(toolTrimmed);
                 }
