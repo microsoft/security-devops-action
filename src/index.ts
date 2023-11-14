@@ -90,15 +90,15 @@ function _toolIsEnabled(toolName: string): boolean {
  * Returns true if the tool is enabled on the specified input.
  * @param inputName The action input name to check for the list of tools. Values tools or includeTools.
  * @param toolName The name of the tool to look for.
- * @param isOnlyTools Return true only if it is the only tool.
+ * @param isOnlyTool Return true only if it is the only tool.
  * @returns True if the tool is enabled on the specified input.
  */
-function _toolIsEnabledOnInput(inputName: string, toolName: string, isOnlyTools: boolean = false) {
+function _toolIsEnabledOnInput(inputName: string, toolName: string, isOnlyTool: boolean = false) {
     let enabled: boolean = false;
     let toolsString: string = core.getInput(inputName);
     if (!common.isNullOrWhiteSpace(toolsString)) {
         let tools = toolsString.split(',');
-        if (isOnlyTools && tools.length > 1) {
+        if (isOnlyTool && tools.length > 1) {
             enabled = false;
         } else {
             const toolIndex = tools.indexOf(toolName);
