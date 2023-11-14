@@ -70,8 +70,19 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             args.push('--tool');
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
-                if (!common.isNullOrWhiteSpace(tool)) {
+                if (!common.isNullOrWhiteSpace(tool) && tool != "container-mapping") {
                     args.push(tool.trim());
+                }
+            }
+        }
+        
+        let includeToolsString: string = core.getInput('includeTools');
+        if (!common.isNullOrWhiteSpace(includeToolsString)) {
+            let includeTools = includeToolsString.split(',');
+            for (let i = 0; i < includeTools.length; i++) {
+                let includeTool = includeTools[i];
+                if (!common.isNullOrWhiteSpace(includeTool) && includeTool != "container-mapping") {
+                    args.push(includeTool.trim());
                 }
             }
         }

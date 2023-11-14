@@ -1,13 +1,17 @@
 import os from 'os';
 import { Writable } from "stream";
 
-
 /**
  * Enum for the possible inputs for the task (specified in action.yml)
  */
 export enum Inputs {
     Command = 'command',
-    Features = 'features'
+    Config = 'config',
+    Policy = 'policy',
+    Categories = 'categories',
+    Languages = 'languages',
+    Tools = 'tools',
+    IncludeTools = 'includeTools'
 }
 
 /**
@@ -29,13 +33,17 @@ export enum CommandType {
     Run = 'run'
 }
 
-/**
- * Enum for the possible values for the Inputs.Features (specified in action.yml)
- */
-export enum Features {
-    All = 'all',
-    Scanning = 'scanning',
-    Mapping = 'mapping'
+/*
+* Enum for the possible values for the Inputs.Tools (specified in action.yml)
+*/
+export enum Tools {
+    Bandit = 'bandit',
+    Binskim = 'binskim',
+    ContainerMapping = 'container-mapping',
+    ESLint = 'eslint',
+    TemplateAnalyzer = 'templateanalyzer',
+    Terrascan = 'terrascan',
+    Trivy = 'trivy'
 }
 
 /**
