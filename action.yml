@@ -5,6 +5,14 @@ branding:
   icon: 'shield'
   color: 'black'
 inputs:
+  command:
+    description: The command to run. Defaults to run.
+    default: all
+    options:
+      - all
+      - run
+      - pre-job
+      - post-job
   config:
     description: A file path to a .gdnconfig file.
   policy:
@@ -15,10 +23,14 @@ inputs:
   languages:
     description: A comma separated list of languages to analyze. Example javascript, typescript. Defaults to all.
   tools:
-    description: A comma separated list of analyzer tools to run. Example bandit, binskim, eslint, templateanalyzer, terrascan, trivy.
+    description: A comma separated list of analyzer to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
+  includeTools:
+    description: A comma separated list of analyzers to run in addition to the default set defined by the policy. Limited to container-mapping
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.
 runs:
   using: 'node16'
-  main: 'lib/action.js'
+  main: 'lib/main.js'
+  pre: 'lib/pre.js'
+  post: 'lib/post.js'
