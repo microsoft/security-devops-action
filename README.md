@@ -48,6 +48,24 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
+## Advanced
+
+To configure **Container Mapping** to send to **Microsoft Defender for DevOps**, include `container-mapping` as a tool:
+```yaml
+- uses: microsoft/security-devops-action@v1
+  id: msdo
+  with:
+    includeTools: container-mapping
+```
+
+This will run all the analyzers defined by the configured or defaulted policy in addition to `container-mapping`. To only run this feature, define `container-mapping` as the only `tool` to run:
+```yaml
+- uses: microsoft/security-devops-action@v1
+  id: msdo
+  with:
+    tools: container-mapping
+```
+
 # Tools
 
 | Name | Language | License |
