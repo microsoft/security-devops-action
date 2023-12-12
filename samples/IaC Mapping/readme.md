@@ -16,7 +16,7 @@ Note that we do not choose a backend location to store the state file in this de
   * Requires GitHub Secrets to be added to repository and the environment.
     * Repository - For guidance, see [here](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-encrypted-secrets-for-a-repository)
       * AZURE_CLIENT_ID : The application (client) ID of the app registration in Azure
-      * AZURE_TENANT_ID : The tenant ID of Azure Active Directory where the app registration is defined.
+      * AZURE_TENANT_ID : The tenant ID of Entra ID where the app registration is defined.
       * AZURE_SUBSCRIPTION_ID : The subscription ID where the app registration is defined.
     * Environment - For guidance, see [here](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-encrypted-secrets-for-an-environment)
       * AZURE_CLIENT_ID : The application (client) ID of the app registration in Azure
