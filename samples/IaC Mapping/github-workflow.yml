@@ -144,3 +144,23 @@ jobs:
     # Terraform Apply
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
+
+    # Run analyzers
+    - name: Run Microsoft Security DevOps Analysis
+      uses: microsoft/security-devops-action@latest
+      id: msdo
+      with:
+        tools: 'iacfilescanner'
+
+    # Upload alerts to the Security tab
+    - name: Upload alerts to Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
+    # Upload alerts file as a workflow artifact
+    - name: Upload alerts file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo.outputs.sarifFile }}
