@@ -9,4 +9,4 @@ Note that we do not choose a backend location to store the state file in this de
 ## Contents
 * [main.tf](main.tf) provisions an Azure Storage account through Terraform with a unique mapping_tag. To use this template, ensure you modify the locations, names, and unique GUID. To generate a GUID, use [this website](https://guidgenerator.com/).
 * [azure-pipelines.yml](azure-pipelines.yml) is a sample Azure DevOps pipeline that can be used to provision the Terraform code in main.tf as a resource within Azure. It is important to include the MSDO task in your ADO pipeline.
-  * Requires [Azure Resource Manager service connection](https://learn.microsoft.com/en-us/troubleshoot/azure/devops/overview-of-azure-resource-manager-service-connections#create-an-azure-rm-service-connection) with permissions to an Azure subscription.
+  * Requires [Azure Resource Manager service connection](https://learn.microsoft.com/troubleshoot/azure/devops/overview-of-azure-resource-manager-service-connections#create-an-azure-rm-service-connection) with permissions to an Azure subscription.
