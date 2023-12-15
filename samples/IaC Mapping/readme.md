@@ -9,7 +9,7 @@ Note that we do not choose a backend location to store the state file in this de
 ## Contents
 * [main.tf](main.tf) provisions an Azure Storage account through Terraform with a unique mapping_tag. To use this template, ensure you modify the locations, names, and unique GUID. To generate a GUID, use [this website](https://guidgenerator.com/).
 * [azure-pipeline.yml](azure-pipeline.yml) is a sample Azure DevOps pipeline that can be used to provision the Terraform code in main.tf as a resource within Azure.
-  * Requires [Azure Resource Manager service connection](https://learn.microsoft.com/en-us/troubleshoot/azure/devops/overview-of-azure-resource-manager-service-connections#create-an-azure-rm-service-connection) with permissions to an Azure subscription.
+  * Requires [Azure Resource Manager service connection](https://learn.microsoft.com/troubleshoot/azure/devops/overview-of-azure-resource-manager-service-connections#create-an-azure-rm-service-connection) with permissions to an Azure subscription.
   * Requires [Microsoft Entra application for authentication](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect). 
   * Requires GitHub Secrets to be added to repository and the environment.
     * Repository - For guidance, see [here](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-encrypted-secrets-for-a-repository)
