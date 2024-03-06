@@ -10,6 +10,9 @@ permissions:
   id-token: write # This is required for federation to Defender for DevOps
   security-events: write # This is required to upload SARIF files
 
+env:
+  GDN_DEBUG_DROP: 'true'
+
 jobs:
   sample:
     name: MSDO on ${{ matrix.os }}
