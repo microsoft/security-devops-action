@@ -43,3 +43,9 @@ jobs:
       with:  
         name: alerts
         path: ${{ steps.msdo.outputs.sarifFile }}
+
+    - name: Upload debugDrop file as a workflow artifact
+      uses: actions/upload-artifact@v3
+      with:  
+        name: debugDrop
+        path: ${{ steps.msdo.outputs.debugDrop }} # Note the 'msdo' here must match the id of the security-devops-action above
