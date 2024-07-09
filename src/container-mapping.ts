@@ -86,6 +86,24 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             dockerImages: []
         };
 
+        
+        let bearerToken: string | void = await core.getIDToken()
+            .then((token) => { return token; })
+            .catch((error) => {
+                throw new Error("Unable to get token: " + error);
+            });
+
+        if (!bearerToken) {
+            throw new Error("Empty OIDC token received");
+        }
+
+        // Don't run the container mapping workload if this caller isn't an active customer.
+        var callerIsOnboarded: boolean = await this.checkCallerIsCustomer(bearerToken, sendReportRetryCount);
+        if (!callerIsOnboarded) {
+            core.info("Client is not onboarded to Defender for DevOps. Skipping container mapping workload.")
+            return;
+        }
+
         // Initialize the commands 
         let dockerVersionOutput = await exec.getExecOutput('docker --version');
         if (dockerVersionOutput.exitCode != 0) {
@@ -106,16 +124,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         });
 
         core.debug("Finished data collection, starting API calls.");
-
-        let bearerToken: string | void = await core.getIDToken()
-            .then((token) => { return token; })
-            .catch((error) => {
-                throw new Error("Unable to get token: " + error);
-            });
-
-        if (!bearerToken) {
-            throw new Error("Empty OIDC token received");
-        }
 
         var reportSent: boolean = await this.sendReport(JSON.stringify(reportData), bearerToken, sendReportRetryCount);
         if (!reportSent) {
@@ -215,4 +223,71 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             req.end();
         });
     }
+
+    private async checkCallerIsCustomer(bearerToken: string, retryCount: number = 0): Promise<boolean> {
+        core.debug(`Checking if client is onboarded`);
+        return await this._checkCallerIsCustomer(bearerToken)
+        .then(async (statusCode) => {
+            if (statusCode == 200) { // Status 'OK' means the caller is an onboarded customer.
+                return true;
+            } else if (statusCode == 403) {// Status 'Forbidden' means caller is not a customer.
+                return false;
+            } else {
+                core.debug(`Unexpected status code: ${statusCode}`);
+                if (retryCount == 0) {
+                    return false;
+                } else {
+                    core.info(`Retrying API call.\nRetry count: ${retryCount}`);
+                    retryCount--;
+                    return await this.checkCallerIsCustomer(bearerToken, retryCount);
+                }
+            }
+        })
+        .catch(async (error) => {
+            if (retryCount == 0) {
+                return false;
+            } else {
+                core.info(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                retryCount--;
+                return await this.checkCallerIsCustomer(bearerToken, retryCount);
+            }
+        });
+    }
+
+    private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
+        return new Promise(async (resolve, reject) => {
+            let apiTime = new Date().getMilliseconds();
+            let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
+            let options = {
+                method: 'POST',
+                timeout: 2500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + bearerToken,
+                }
+            };
+            core.debug(`${options['method'].toUpperCase()} ${url}`);
+
+            const req = https.request(url, options, (res) => {
+                let resData = '';
+                res.on('data', (chunk) => {
+                    resData += chunk.toString();
+                });
+
+                res.on('end', () => {
+                    core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
+                    core.debug(`Status code: ${res.statusCode} ${res.statusMessage}`);
+                    core.debug('Response headers: ' + JSON.stringify(res.headers));
+                    resolve(res.statusCode);
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(new Error(`Error calling url: ${error}`));
+            });
+
+            req.end();
+        });
+    }
+
 }
