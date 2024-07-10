@@ -98,11 +98,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         }
 
         // Don't run the container mapping workload if this caller isn't an active customer.
-        var callerIsOnboarded: boolean | void = await this.checkCallerIsCustomer(bearerToken, sendReportRetryCount)
-            .catch((error) => {
-                core.info(`CAUGHT: ${error}`);
-                return;
-            });
+        var callerIsOnboarded: boolean = await this.checkCallerIsCustomer(bearerToken, sendReportRetryCount);
         if (!callerIsOnboarded) {
             core.info("Client is not onboarded to Defender for DevOps. Skipping container mapping workload.")
             return;
@@ -238,7 +234,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             } else if (statusCode == 403) {// Status 'Forbidden' means caller is not a customer.
                 return false;
             } else {
-                core.info(`Unexpected status code: ${statusCode}`); // TODO: core.debug
+                core.debug(`Unexpected status code: ${statusCode}`);
                 if (retryCount == 0) {
                     return false;
                 } else {
@@ -277,16 +273,14 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
                 res.on('end', () => {
                     core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
-                    core.info(`Status code: ${res.statusCode} ${res.statusMessage}`); // TODO
+                    core.info(`Status code: ${res.statusCode} ${res.statusMessage}`);
                     resolve(res.statusCode);
                 });
-                // res.on('data', function(d) {
-                //     core.info(`data: ${d}`);
-                // });
+                res.on('data', function(d) {
+                });
             });
 
             req.on('error', (error) => {
-                core.info(`Error in _checkCallerIsCustomer: ${error.name}, ${error.message}`); // TODO
                 reject(new Error(`Error calling url: ${error}`));
             });
 
