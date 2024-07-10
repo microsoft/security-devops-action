@@ -264,7 +264,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
-            let url: string = "dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
+            let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
             let options = {
                 method: 'POST',
                 timeout: 2500,
