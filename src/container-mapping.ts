@@ -233,7 +233,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         core.info(`Checking if client is onboarded`);
         return await this._checkCallerIsCustomer(bearerToken)
         .then(async (statusCode) => {
-            core.info(`Status Code is ${statusCode}`);
             if (statusCode == 200) { // Status 'OK' means the caller is an onboarded customer.
                 return true;
             } else if (statusCode == 403) {// Status 'Forbidden' means caller is not a customer.
@@ -250,11 +249,10 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             }
         })
         .catch(async (error) => {
-            core.info(`catch on 253: ${error}`);
             if (retryCount == 0) {
                 return false;
             } else {
-                core.info(`Retrying checkCallerIsCustomer call due to error!: ${error}.\nRetry count: ${retryCount}`);
+                core.info(`Retrying checkCallerIsCustomer call due to error: ${error}.\nRetry count: ${retryCount}`);
                 retryCount--;
                 return await this.checkCallerIsCustomer(bearerToken, retryCount);
             }
@@ -280,12 +278,11 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                 res.on('end', () => {
                     core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
                     core.info(`Status code: ${res.statusCode} ${res.statusMessage}`); // TODO
-                    core.debug('Response headers: ' + JSON.stringify(res.headers));
                     resolve(res.statusCode);
                 });
-                res.on('data', function(d) {
-                    core.info(`data: ${d}`);
-                });
+                // res.on('data', function(d) {
+                //     core.info(`data: ${d}`);
+                // });
             });
 
             req.on('error', (error) => {
