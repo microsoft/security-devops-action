@@ -79,7 +79,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             core.debug(`PreJobStartTime not defined, using now-10secs`);
         }
         core.info(`PreJobStartTime: ${startTime}`);
-        core.info(`TEST MESSAGE`);
 
         let reportData = {
             dockerVersion: "",
@@ -99,7 +98,11 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         }
 
         // Don't run the container mapping workload if this caller isn't an active customer.
-        var callerIsOnboarded: boolean = await this.checkCallerIsCustomer(bearerToken, sendReportRetryCount);
+        var callerIsOnboarded: boolean | void = await this.checkCallerIsCustomer(bearerToken, sendReportRetryCount)
+            .catch((error) => {
+                core.info(`CAUGHT: ${error}`);
+                return;
+            });
         if (!callerIsOnboarded) {
             core.info("Client is not onboarded to Defender for DevOps. Skipping container mapping workload.")
             return;
