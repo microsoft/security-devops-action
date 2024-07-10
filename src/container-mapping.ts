@@ -225,7 +225,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     }
 
     private async checkCallerIsCustomer(bearerToken: string, retryCount: number = 0): Promise<boolean> {
-        core.debug(`Checking if client is onboarded`);
+        core.info(`Checking if client is onboarded`);
         return await this._checkCallerIsCustomer(bearerToken)
         .then(async (statusCode) => {
             if (statusCode == 200) { // Status 'OK' means the caller is an onboarded customer.
@@ -233,7 +233,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             } else if (statusCode == 403) {// Status 'Forbidden' means caller is not a customer.
                 return false;
             } else {
-                core.debug(`Unexpected status code: ${statusCode}`);
+                core.info(`Unexpected status code: ${statusCode}`); // TODO: core.debug
                 if (retryCount == 0) {
                     return false;
                 } else {
@@ -269,20 +269,17 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             core.debug(`${options['method'].toUpperCase()} ${url}`);
 
             const req = https.request(url, options, (res) => {
-                let resData = '';
-                res.on('data', (chunk) => {
-                    resData += chunk.toString();
-                });
 
                 res.on('end', () => {
                     core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
-                    core.debug(`Status code: ${res.statusCode} ${res.statusMessage}`);
+                    core.info(`Status code: ${res.statusCode} ${res.statusMessage}`); // TODO
                     core.debug('Response headers: ' + JSON.stringify(res.headers));
                     resolve(res.statusCode);
                 });
             });
 
             req.on('error', (error) => {
+                core.info(`Error in _checkCallerIsCustomer: ${error.name}, ${error.message}`); // TODO
                 reject(new Error(`Error calling url: ${error}`));
             });
 
