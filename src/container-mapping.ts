@@ -266,7 +266,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             let apiTime = new Date().getMilliseconds();
             let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
             let options = {
-                method: 'POST',
+                method: 'GET',
                 timeout: 2500,
                 headers: {
                     'Content-Type': 'application/json',
