@@ -103,6 +103,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             core.info("Client is not onboarded to Defender for DevOps. Skipping container mapping workload.")
             return;
         }
+        core.info("Client is onboarded for container mapping");
 
         // Initialize the commands 
         let dockerVersionOutput = await exec.getExecOutput('docker --version');
