@@ -103,7 +103,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             core.info("Client is not onboarded to Defender for DevOps. Skipping container mapping workload.")
             return;
         }
-        core.info("Client is onboarded for container mapping");
+        core.info("Client is onboarded for container mapping.");
 
         // Initialize the commands 
         let dockerVersionOutput = await exec.getExecOutput('docker --version');
@@ -226,7 +226,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     }
 
     private async checkCallerIsCustomer(bearerToken: string, retryCount: number = 0): Promise<boolean> {
-        core.info(`Checking if client is onboarded`);
         return await this._checkCallerIsCustomer(bearerToken)
         .then(async (statusCode) => {
             if (statusCode == 200) { // Status 'OK' means the caller is an onboarded customer.
@@ -257,7 +256,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
     private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
-            let apiTime = new Date().getMilliseconds();
             let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
             let options = {
                 method: 'GET',
@@ -272,8 +270,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             const req = https.request(url, options, (res) => {
 
                 res.on('end', () => {
-                    core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
-                    core.info(`Status code: ${res.statusCode} ${res.statusMessage}`);
                     resolve(res.statusCode);
                 });
                 res.on('data', function(d) {
