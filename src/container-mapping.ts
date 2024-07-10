@@ -85,8 +85,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             dockerEvents: [],
             dockerImages: []
         };
-
-        
+       
         let bearerToken: string | void = await core.getIDToken()
             .then((token) => { return token; })
             .catch((error) => {
@@ -157,6 +156,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
      * Sends a report to Defender for DevOps and retries on the specified count
      * @param data the data to send
      * @param retryCount the number of time to retry
+     * @param bearerToken the GitHub-generated OIDC token
      * @returns a boolean Promise to indicate if the report was sent successfully or not
      */
     private async sendReport(data: string, bearerToken: string, retryCount: number = 0): Promise<boolean> {
@@ -225,6 +225,12 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         });
     }
 
+    /**
+     * Queries Defender for DevOps to determine if the caller is onboarded for container mapping.
+     * @param retryCount the number of time to retry
+     * @param bearerToken the GitHub-generated OIDC token
+     * @returns a boolean Promise to indicate if the report was sent successfully or not
+     */
     private async checkCallerIsCustomer(bearerToken: string, retryCount: number = 0): Promise<boolean> {
         return await this._checkCallerIsCustomer(bearerToken)
         .then(async (statusCode) => {
@@ -256,7 +262,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
     private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
-            let url: string = "https://dfdinfra-afdendpoint-dogfood-dqgpa4gjagh0arcw.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
+            let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
             let options = {
                 method: 'GET',
                 timeout: 2500,
