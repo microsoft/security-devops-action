@@ -247,7 +247,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             if (retryCount == 0) {
                 return false;
             } else {
-                core.info(`Retrying API call due to error: ${error}.\nRetry count: ${retryCount}`);
+                core.info(`Retrying API call due to error!: ${error}.\nRetry count: ${retryCount}`);
                 retryCount--;
                 return await this.checkCallerIsCustomer(bearerToken, retryCount);
             }
