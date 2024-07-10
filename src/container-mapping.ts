@@ -79,6 +79,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             core.debug(`PreJobStartTime not defined, using now-10secs`);
         }
         core.info(`PreJobStartTime: ${startTime}`);
+        core.info(`TEST MESSAGE`);
 
         let reportData = {
             dockerVersion: "",
@@ -248,7 +249,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
             if (retryCount == 0) {
                 return false;
             } else {
-                core.info(`Retrying API call due to error!: ${error}.\nRetry count: ${retryCount}`);
+                core.info(`Retrying checkCallerIsCustomer call due to error!: ${error}.\nRetry count: ${retryCount}`);
                 retryCount--;
                 return await this.checkCallerIsCustomer(bearerToken, retryCount);
             }
