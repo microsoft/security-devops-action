@@ -6,6 +6,8 @@ import * as exec from '@actions/exec';
 import * as os from 'os';
 
 const sendReportRetryCount: number = 1;
+const GetScanContextURL: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
+const ContainerMappingURL: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/container-mappings";
 
 /**
  * Represents the tasks for container mapping that are used to fetch Docker images pushed in a job run.
@@ -184,7 +186,6 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
     private async _sendReport(data: string, bearerToken: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
-            let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/container-mappings";
             let options = {
                 method: 'POST',
                 timeout: 2500,
@@ -194,9 +195,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     'Content-Length': data.length
                 }
             };
-            core.debug(`${options['method'].toUpperCase()} ${url}`);
+            core.debug(`${options['method'].toUpperCase()} ${ContainerMappingURL}`);
 
-            const req = https.request(url, options, (res) => {
+            const req = https.request(ContainerMappingURL, options, (res) => {
                 let resData = '';
                 res.on('data', (chunk) => {
                     resData += chunk.toString();
@@ -236,33 +237,31 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
         .then(async (statusCode) => {
             if (statusCode == 200) { // Status 'OK' means the caller is an onboarded customer.
                 return true;
-            } else if (statusCode == 403) {// Status 'Forbidden' means caller is not a customer.
+            } else if (statusCode == 403) { // Status 'Forbidden' means caller is not a customer.
                 return false;
             } else {
                 core.debug(`Unexpected status code: ${statusCode}`);
-                if (retryCount == 0) {
-                    return false;
-                } else {
-                    core.info(`Retrying API call.\nRetry count: ${retryCount}`);
-                    retryCount--;
-                    return await this.checkCallerIsCustomer(bearerToken, retryCount);
-                }
+                return await this.retryCall(bearerToken, retryCount);
             }
         })
         .catch(async (error) => {
-            if (retryCount == 0) {
-                return false;
-            } else {
-                core.info(`Retrying checkCallerIsCustomer call due to error: ${error}.\nRetry count: ${retryCount}`);
-                retryCount--;
-                return await this.checkCallerIsCustomer(bearerToken, retryCount);
-            }
+            core.info(`Unexpected error: ${error}.`);
+            return await this.retryCall(bearerToken, retryCount);
         });
+    }
+
+    private async retryCall(bearerToken: string, retryCount: number): Promise<boolean> {
+        if (retryCount == 0) {
+            return false;
+        } else {
+            core.info(`Retrying checkCallerIsCustomer.\nRetry count: ${retryCount}`);
+            retryCount--;
+            return await this.checkCallerIsCustomer(bearerToken, retryCount);
+        }
     }
 
     private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
         return new Promise(async (resolve, reject) => {
-            let url: string = "https://dfdinfra-afdendpoint-prod-d5fqbucbg7fue0cf.z01.azurefd.net/github/v1/auth-push/GetScanContext?context=authOnly";
             let options = {
                 method: 'GET',
                 timeout: 2500,
@@ -271,9 +270,9 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
                     'Authorization': 'Bearer ' + bearerToken,
                 }
             };
-            core.debug(`${options['method'].toUpperCase()} ${url}`);
+            core.debug(`${options['method'].toUpperCase()} ${GetScanContextURL}`);
 
-            const req = https.request(url, options, (res) => {
+            const req = https.request(GetScanContextURL, options, (res) => {
 
                 res.on('end', () => {
                     resolve(res.statusCode);
