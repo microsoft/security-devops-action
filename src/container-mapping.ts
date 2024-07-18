@@ -252,6 +252,7 @@ export class ContainerMapping implements IMicrosoftSecurityDevOps {
 
     private async retryCall(bearerToken: string, retryCount: number): Promise<boolean> {
         if (retryCount == 0) {
+            core.info(`All retries failed.`);
             return false;
         } else {
             core.info(`Retrying checkCallerIsCustomer.\nRetry count: ${retryCount}`);
