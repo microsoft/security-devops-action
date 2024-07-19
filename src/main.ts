@@ -1,11 +1,8 @@
 import * as core from '@actions/core';
-import { run } from './index';
-import { RunnerType } from './msdo-helpers';
-
-const runner = RunnerType.Main;
+import { runMainJob } from './index';
 
 async function runMain() {
-    await run(runner);
+    await runMainJob();
 }
 
 runMain().catch(error => {

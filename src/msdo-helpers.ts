@@ -28,8 +28,6 @@ export enum RunnerType {
 */
 export enum CommandType {
     All = 'all',
-    PreJob = 'pre-job',
-    PostJob = 'post-job',
     Run = 'run'
 }
 

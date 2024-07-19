@@ -1,70 +1,28 @@
 import * as core from '@actions/core';
 import { MicrosoftSecurityDevOps } from './msdo';
-import { CommandType, Inputs, RunnerType, Tools } from './msdo-helpers';
+import { Inputs, Tools } from './msdo-helpers';
 import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 import { ContainerMapping } from './container-mapping';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
-/**
- * Runs the action.
- * @param runnerString The runner where the task is being run: main, pre, or post. 
- */
-export async function run(runnerString: string) {
-    let runner = runnerString as RunnerType;
-    let command: CommandType = getCommandType();
-
-    switch (runner) {
-        case RunnerType.Main:
-            await _runMain(command);
-            break;
-        case RunnerType.Pre:
-            await _runPreJob(command);
-            break;
-        case RunnerType.Post:
-            await _runPostJob(command);
-            break;
-        default:
-            throw new Error(`Invalid source type for the task: ${runnerString}`);
-    }
-}
-
-async function _runPreJob(command: CommandType) {
-    if (command != CommandType.All) {
-        return;
-    }
-    // if explicit PreJob, will run in main
+export async function runPreJob() {
     if (_toolIsEnabled(Tools.ContainerMapping)) {
         await _getExecutor(ContainerMapping).runPreJob();
     }
 }
 
-async function _runPostJob(command: CommandType) {
-    if (command != CommandType.All) {
-        return;
-    }
-    // if explicit PostJob, will run in main
+export async function runPostJob() {
     if (_toolIsEnabled(Tools.ContainerMapping)) {
         await _getExecutor(ContainerMapping).runPostJob();
     }
 }
 
-async function _runMain(command: CommandType) {
-    if (command == CommandType.PreJob) {
-        // Explicit pre-job
-        await _runPreJob(command);
-    } else if (command == CommandType.PostJob) {
-        // Explicit post-job
-        await _runPostJob(command);
-    } else if (command == CommandType.All || command == CommandType.Run) {
-        // Run main
-        // If container-mapping is the only enabled tool, then skip scanning
-        if (_toolIsEnabledOnInput(Inputs.Tools, Tools.ContainerMapping, true)) {
-            console.log("Scanning is not enabled. Skipping...");
-        } else {
-            await _getExecutor(MicrosoftSecurityDevOps).runMain();
-        }
+export async function runMainJob() {
+    // If container-mapping is the only enabled tool, then skip scanning
+    if (_toolIsEnabledOnInput(Inputs.Tools, Tools.ContainerMapping, true)) {
+        console.log("Scanning is not enabled. Skipping...");
     } else {
-        throw new Error(`Invalid command type for the main task: ${command}`);
+        await _getExecutor(MicrosoftSecurityDevOps).runMain();
     }
 }
 
@@ -117,9 +75,4 @@ function _toolIsEnabledOnInput(inputName: string, toolName: string, isOnlyTool: 
  */
 function _getExecutor(runner: IMicrosoftSecurityDevOpsFactory): IMicrosoftSecurityDevOps {
     return new runner();
-}
-
-function getCommandType(): CommandType {
-    const commandTypeString: string = core.getInput(Inputs.Command) || CommandType.Run;
-    return commandTypeString as CommandType;
 }

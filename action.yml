@@ -6,13 +6,11 @@ branding:
   color: 'black'
 inputs:
   command:
-    description: The command to run. Defaults to run.
+    description: The command to run. Defaults to all.
     default: all
     options:
       - all
       - run
-      - pre-job
-      - post-job
   config:
     description: A file path to a .gdnconfig file.
   policy:
