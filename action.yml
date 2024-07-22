@@ -19,7 +19,7 @@ inputs:
   tools:
     description: A comma separated list of analyzer to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
   includeTools:
-    description: A comma separated list of analyzers to run in addition to the default set defined by the policy. Limited to container-mapping
+    description: Deprecated
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.

@@ -1,8 +1,9 @@
 import * as core from '@actions/core';
-import { runMainJob } from './index';
+import { MicrosoftSecurityDevOps } from './msdo';
+import { getExecutor } from './msdo-interface';
 
 async function runMain() {
-    await runMainJob();
+    await getExecutor(MicrosoftSecurityDevOps).runMain();
 }
 
 runMain().catch(error => {

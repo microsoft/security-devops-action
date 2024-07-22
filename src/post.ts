@@ -1,8 +1,9 @@
 import * as core from '@actions/core';
-import { runPostJob } from './index';
+import { ContainerMapping } from './container-mapping';
+import { getExecutor } from './msdo-interface';
 
 async function runPost() {
-    await runPostJob();
+    await getExecutor(ContainerMapping).runPostJob();
 }
 
 runPost().catch((error) => {

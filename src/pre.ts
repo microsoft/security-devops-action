@@ -1,8 +1,9 @@
 import * as core from '@actions/core';
-import { runPreJob } from './index';
+import { ContainerMapping } from './container-mapping';
+import { getExecutor } from './msdo-interface';
 
 async function runPre() {
-    await runPreJob();
+    await getExecutor(ContainerMapping).runPreJob();
 }
 
 runPre().catch((error) => {

@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { IMicrosoftSecurityDevOps } from './msdo-interface';
-import { Tools } from './msdo-helpers';
 import * as client from '@microsoft/security-devops-actions-toolkit/msdo-client';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
 
@@ -73,25 +72,6 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
                 let tool = tools[i];
                 let toolTrimmed = tool.trim();
                 if (!common.isNullOrWhiteSpace(tool)
-                    && tool != Tools.ContainerMapping
-                    && includedTools.indexOf(toolTrimmed) == -1) {
-                    if (includedTools.length == 0) {
-                        args.push('--tool');
-                    }
-                    args.push(toolTrimmed);
-                    includedTools.push(toolTrimmed);
-                }
-            }
-        }
-        
-        let includeToolsString: string = core.getInput('includeTools');
-        if (!common.isNullOrWhiteSpace(includeToolsString)) {
-            let includeTools = includeToolsString.split(',');
-            for (let i = 0; i < includeTools.length; i++) {
-                let includeTool = includeTools[i];
-                let toolTrimmed = includeTool.trim();
-                if (!common.isNullOrWhiteSpace(includeTool)
-                    && includeTool != Tools.ContainerMapping
                     && includedTools.indexOf(toolTrimmed) == -1) {
                     if (includedTools.length == 0) {
                         args.push('--tool');
