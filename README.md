@@ -50,15 +50,8 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 
 ## Advanced
 
-To configure **Container Mapping** to send to **Microsoft Defender for DevOps**, include `container-mapping` as a tool:
-```yaml
-- uses: microsoft/security-devops-action@v1
-  id: msdo
-  with:
-    includeTools: container-mapping
-```
+To only run specific analyzers, use the `tools` command. This command is a comma-seperated list of tools to run. For example, to run only the `container-mapping` tool, configure this action as follows:
 
-This will run all the analyzers defined by the configured or defaulted policy in addition to `container-mapping`. To only run this feature, define `container-mapping` as the only `tool` to run:
 ```yaml
 - uses: microsoft/security-devops-action@v1
   id: msdo
@@ -77,6 +70,7 @@ This will run all the analyzers defined by the configured or defaulted policy in
 | [Template Analyzer](https://github.com/Azure/template-analyzer) | Infrastructure-as-code (IaC), ARM templates, Bicep files | [MIT License](https://github.com/Azure/template-analyzer/blob/main/LICENSE.txt) |
 | [Terrascan](https://github.com/accurics/terrascan) | Infrastructure-as-code (IaC), Terraform (HCL2), Kubernetes (JSON/YAML), Helm v3, Kustomize, Dockerfiles, Cloudformation | [Apache License 2.0](https://github.com/accurics/terrascan/blob/master/LICENSE) |
 | [Trivy](https://github.com/aquasecurity/trivy) | container images, file systems, and git repositories | [Apache License 2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) |
+| [container-mapping](https://learn.microsoft.com/en-us/azure/defender-for-cloud/container-image-mapping) | container images and registries (only available for DevOps security enabled CSPM plans) | [MIT License](https://github.com/microsoft/security-devops-action/blob/main/LICENSE) |
 
 # More Information
 
