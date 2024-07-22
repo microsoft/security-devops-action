@@ -29,6 +29,6 @@ function shouldRunMain() {
         if (tools.length == 1 && tools[0].trim() == Tools.ContainerMapping) {
             return false;
         }
-        return true;
    }
+   return true;
 }
