@@ -73,7 +73,7 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
                 let tool = tools[i];
                 let toolTrimmed = tool.trim();
                 if (!common.isNullOrWhiteSpace(tool)
-                    && tool != Tools.ContainerMapping
+                    && tool != Tools.ContainerMapping // This tool is not handled by this executor
                     && includedTools.indexOf(toolTrimmed) == -1) {
                     if (includedTools.length == 0) {
                         args.push('--tool');

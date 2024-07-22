@@ -1,6 +1,5 @@
 import os from 'os';
 import { Writable } from "stream";
-import { IMicrosoftSecurityDevOps, IMicrosoftSecurityDevOpsFactory } from './msdo-interface';
 
 /**
  * Enum for the possible inputs for the task (specified in action.yml)
