@@ -1,4 +1,3 @@
-import { CommandType, Constants, getEncodedContent, writeToOutStream } from "./msdo-helpers";
 import { IMicrosoftSecurityDevOps } from "./msdo-interface";
 import * as https from "https";
 import * as core from '@actions/core';

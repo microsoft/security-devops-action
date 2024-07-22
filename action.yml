@@ -6,11 +6,7 @@ branding:
   color: 'black'
 inputs:
   command:
-    description: The command to run. Defaults to all.
-    default: all
-    options:
-      - all
-      - run
+    description: Deprecated, do not use.
   config:
     description: A file path to a .gdnconfig file.
   policy:

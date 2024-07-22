@@ -1,5 +1,3 @@
-import { CommandType } from "./msdo-helpers";
-
 /*
 * Interface for the MicrosoftSecurityDevOps task
 */
