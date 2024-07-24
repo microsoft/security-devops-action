@@ -24,16 +24,6 @@ export enum RunnerType {
 }
 
 /*
-* Enum for the possible values for the Inputs.CommandType (specified in action.yml)
-*/
-export enum CommandType {
-    All = 'all',
-    PreJob = 'pre-job',
-    PostJob = 'post-job',
-    Run = 'run'
-}
-
-/*
 * Enum for the possible values for the Inputs.Tools (specified in action.yml)
 */
 export enum Tools {

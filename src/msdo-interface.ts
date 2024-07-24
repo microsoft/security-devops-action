@@ -1,5 +1,3 @@
-import { CommandType } from "./msdo-helpers";
-
 /*
 * Interface for the MicrosoftSecurityDevOps task
 */
@@ -17,4 +15,15 @@ export interface IMicrosoftSecurityDevOps {
  */
 export interface IMicrosoftSecurityDevOpsFactory {
     new (): IMicrosoftSecurityDevOps;
+}
+
+/**
+ * Returns an instance of IMicrosoftSecurityDevOps based on the input runner and command type.
+ * (This is used to enforce strong typing for the inputs for the runner).
+ * @param runner - The runner to use to create the instance of IMicrosoftSecurityDevOps.
+ * @param commandType - The input command type.
+ * @returns An instance of IMicrosoftSecurityDevOps.
+ */
+export function getExecutor(runner: IMicrosoftSecurityDevOpsFactory): IMicrosoftSecurityDevOps {
+    return new runner();
 }

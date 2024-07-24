@@ -1,11 +1,9 @@
 import * as core from '@actions/core';
-import { run } from './index';
-import { RunnerType } from './msdo-helpers';
-
-const runner = RunnerType.Pre;
+import { ContainerMapping } from './container-mapping';
+import { getExecutor } from './msdo-interface';
 
 async function runPre() {
-    await run(runner);
+    await getExecutor(ContainerMapping).runPreJob();
 }
 
 runPre().catch((error) => {
