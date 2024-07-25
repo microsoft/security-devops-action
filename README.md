@@ -33,7 +33,7 @@ steps:
 - uses: actions/checkout@v3
 
 - name: Run Microsoft Security DevOps
-  uses: microsoft/security-devops-action@v1
+  uses: microsoft/security-devops-action@latest
   id: msdo
 ```
 
@@ -53,7 +53,7 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 To only run specific analyzers, use the `tools` command. This command is a comma-seperated list of tools to run. For example, to run only the `container-mapping` tool, configure this action as follows:
 
 ```yaml
-- uses: microsoft/security-devops-action@v1
+- uses: microsoft/security-devops-action@latest
   id: msdo
   with:
     tools: container-mapping
