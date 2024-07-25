@@ -1,0 +1,30 @@
+trigger: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: TerraformInstaller@0
+  inputs:
+    terraformVersion: '1.0.0'
+- checkout: self
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: '<EnterServiceConnection>'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az account show
+      cd ./Modules-Prod
+      terraform init
+      terraform plan 
+      terraform apply -auto-approve
+
+- task: MicrosoftSecurityDevOps@1
+  displayName: 'Microsoft Security DevOps'
+  task: MicrosoftSecurityDevOps@1
+  displayName: 'Microsoft Security DevOps'
+  # If you want to only run iacfilescanner, uncomment the below lines
+  # inputs:
+      # tools: 'iacfilescanner'

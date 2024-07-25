@@ -1,11 +1,9 @@
 import * as core from '@actions/core';
-import { run } from './index';
-import { RunnerType } from './msdo-helpers';
-
-const runner = RunnerType.Post;
+import { ContainerMapping } from './container-mapping';
+import { getExecutor } from './msdo-interface';
 
 async function runPost() {
-    await run(runner);
+    await getExecutor(ContainerMapping).runPostJob();
 }
 
 runPost().catch((error) => {
