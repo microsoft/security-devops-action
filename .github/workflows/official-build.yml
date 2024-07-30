@@ -44,9 +44,8 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git pull origin ${{ steps.extract_branch.outputs.branch }}
-        git add .
+        git add lib/.
         git commit -m 'Official Build: Compile TypeScript to JavaScript'
-        git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
+        git push --force origin HEAD:${{ steps.extract_branch.outputs.branch }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
