@@ -6,7 +6,7 @@ on:
       - main
 
     paths:
-      - 'release/vNext/**'
+      - 'release/vNext'
 
 permissions:
   contents: read
