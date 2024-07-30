@@ -19,6 +19,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      id: extract_branch
+
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
@@ -38,8 +43,9 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git pull origin ${{ steps.extract_branch.outputs.branch }}
         git add .
         git commit -m 'Compile TypeScript to JavaScript'
-        git push origin HEAD:release/vNext
+        git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
