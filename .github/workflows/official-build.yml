@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+    paths:
+      - 'release/vNext/**'
+
 permissions:
   contents: read
 
