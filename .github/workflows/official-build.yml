@@ -5,14 +5,12 @@ on:
     branches:
       - main
 
-    paths:
-      - 'release/vNext'
-
 permissions:
   contents: read
 
 jobs:
   build:
+    if: github.base_ref == 'main' && github.head_ref == 'release/vNext'
     runs-on: ubuntu-latest
 
     permissions:
@@ -48,7 +46,7 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git pull origin ${{ steps.extract_branch.outputs.branch }}
         git add .
-        git commit -m 'Compile TypeScript to JavaScript'
+        git commit -m 'Official Build: Compile TypeScript to JavaScript'
         git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
