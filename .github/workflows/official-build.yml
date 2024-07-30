@@ -1,9 +1,6 @@
 name: security-devops-action Official Build
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -43,6 +40,6 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add .
         git commit -m 'Compile TypeScript to JavaScript'
-        git push
+        git push origin HEAD:release/vNext
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
