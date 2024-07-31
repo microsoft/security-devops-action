@@ -3,14 +3,13 @@ name: security-devops-action Official Build
 on:
   pull_request:
     branches:
-      - main
+      - release/vNext
 
 permissions:
   contents: read
 
 jobs:
   build:
-    if: github.base_ref == 'main' && github.head_ref == 'release/vNext'
     runs-on: ubuntu-latest
 
     permissions:
@@ -40,7 +39,6 @@ jobs:
       run: npm run build
 
     - name: Commit compiled JavaScript
-      if: github.actor != 'github-actions[bot]'
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
