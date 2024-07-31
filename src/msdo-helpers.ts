@@ -29,6 +29,7 @@ export enum RunnerType {
 export enum Tools {
     Bandit = 'bandit',
     Binskim = 'binskim',
+    Checkov = 'checkov',
     ContainerMapping = 'container-mapping',
     ESLint = 'eslint',
     TemplateAnalyzer = 'templateanalyzer',
