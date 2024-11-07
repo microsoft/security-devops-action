@@ -11,7 +11,8 @@ export enum Inputs {
     Categories = 'categories',
     Languages = 'languages',
     Tools = 'tools',
-    IncludeTools = 'includeTools'
+    IncludeTools = 'includeTools',
+    ExistingFilename = 'existingFilename'
 }
 
 /**
