@@ -25,66 +25,77 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
     public async runMain() {
         core.debug('MicrosoftSecurityDevOps.runMain - Running MSDO...');
 
-        let args: string[] = ['run'];
+        let args: string[] = undefined;
 
-        let config: string = core.getInput('config');
-        if (!common.isNullOrWhiteSpace(config)) {
-            args.push('-c');
-            args.push(config);
+        // Check job type - might be existing file
+        let existingFilename = core.getInput('existingFilename');
+        if (!common.isNullOrWhiteSpace(existingFilename)) {
+            args = ['upload', '--file', existingFilename];
         }
 
-        let policy: string = core.getInput('policy');
-        if (common.isNullOrWhiteSpace(policy)) {
-            policy = "GitHub";
-        }
+        // Nope, run the tool as intended
+        else {
+            args = ['run'];
 
-        args.push('-p');
-        args.push(policy);
-
-        let categoriesString: string = core.getInput('categories');
-        if (!common.isNullOrWhiteSpace(categoriesString)) {
-            args.push('--categories');
-            let categories = categoriesString.split(',');
-            for (let i = 0; i < categories.length; i++) {
-                let category = categories[i];
-                if (!common.isNullOrWhiteSpace(category)) {
-                    args.push(category.trim());
-                }
+            let config: string = core.getInput('config');
+            if (!common.isNullOrWhiteSpace(config)) {
+                args.push('-c');
+                args.push(config);
             }
-        }
 
-        let languagesString: string = core.getInput('languages');
-        if (!common.isNullOrWhiteSpace(languagesString)) {
-            args.push('--languages');
-            let languages = languagesString.split(',');
-            for (let i = 0; i < languages.length; i++) {
-                let language = languages[i];
-                if (!common.isNullOrWhiteSpace(language)) {
-                    args.push(language.trim());
-                }
+            let policy: string = core.getInput('policy');
+            if (common.isNullOrWhiteSpace(policy)) {
+                policy = "GitHub";
             }
-        }
 
-        let toolsString: string = core.getInput('tools');
-        let includedTools = [];
-        if (!common.isNullOrWhiteSpace(toolsString)) {
-            let tools = toolsString.split(',');
-            for (let i = 0; i < tools.length; i++) {
-                let tool = tools[i];
-                let toolTrimmed = tool.trim();
-                if (!common.isNullOrWhiteSpace(tool)
-                    && tool != Tools.ContainerMapping // This tool is not handled by this executor
-                    && includedTools.indexOf(toolTrimmed) == -1) {
-                    if (includedTools.length == 0) {
-                        args.push('--tool');
+            args.push('-p');
+            args.push(policy);
+
+            let categoriesString: string = core.getInput('categories');
+            if (!common.isNullOrWhiteSpace(categoriesString)) {
+                args.push('--categories');
+                let categories = categoriesString.split(',');
+                for (let i = 0; i < categories.length; i++) {
+                    let category = categories[i];
+                    if (!common.isNullOrWhiteSpace(category)) {
+                        args.push(category.trim());
                     }
-                    args.push(toolTrimmed);
-                    includedTools.push(toolTrimmed);
                 }
             }
-        }
 
-        args.push('--github');
+            let languagesString: string = core.getInput('languages');
+            if (!common.isNullOrWhiteSpace(languagesString)) {
+                args.push('--languages');
+                let languages = languagesString.split(',');
+                for (let i = 0; i < languages.length; i++) {
+                    let language = languages[i];
+                    if (!common.isNullOrWhiteSpace(language)) {
+                        args.push(language.trim());
+                    }
+                }
+            }
+
+            let toolsString: string = core.getInput('tools');
+            let includedTools = [];
+            if (!common.isNullOrWhiteSpace(toolsString)) {
+                let tools = toolsString.split(',');
+                for (let i = 0; i < tools.length; i++) {
+                    let tool = tools[i];
+                    let toolTrimmed = tool.trim();
+                    if (!common.isNullOrWhiteSpace(tool)
+                        && tool != Tools.ContainerMapping // This tool is not handled by this executor
+                        && includedTools.indexOf(toolTrimmed) == -1) {
+                        if (includedTools.length == 0) {
+                            args.push('--tool');
+                        }
+                        args.push(toolTrimmed);
+                        includedTools.push(toolTrimmed);
+                    }
+                }
+            }
+
+            args.push('--github');
+        }
 
         await client.run(args, 'microsoft/security-devops-action');
     }

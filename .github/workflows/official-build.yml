@@ -1,0 +1,49 @@
+name: security-devops-action Official Build
+
+on:
+  pull_request:
+    branches:
+      - release/vNext
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      id: extract_branch
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Configure npm to use GitHub Packages
+      run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Compile TypeScript
+      run: npm run build
+
+    - name: Commit compiled JavaScript
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add lib/.
+        git commit -m 'Official Build: Compile TypeScript to JavaScript'
+        git push --force origin HEAD:${{ steps.extract_branch.outputs.branch }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
