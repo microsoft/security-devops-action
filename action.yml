@@ -20,11 +20,13 @@ inputs:
     description: A comma separated list of analyzer to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
   includeTools:
     description: Deprecated
+  existingFilename:
+    description: A SARIF filename that already exists. If it does, then the normal run will not take place and the file will instead be uploaded to MSDO backend.
 outputs:
   sarifFile:
     description: A file path to a SARIF results file.
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'lib/main.js'
   pre: 'lib/pre.js'
   post: 'lib/post.js'
