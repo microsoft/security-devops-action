@@ -43,7 +43,7 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
 
 ```yaml
 - name: Upload results to Security tab
-  uses: github/codeql-action/upload-sarif@v2
+  uses: github/codeql-action/upload-sarif@v3
   with:
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
