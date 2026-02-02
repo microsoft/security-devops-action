@@ -248,15 +248,15 @@ jobs:
             }
 
             const actualSecretPatterns = [
-              /['"][a-zA-Z0-9]{32,}['"]/,
-              /ghp_[a-zA-Z0-9]{36}/,
-              /github_pat_[a-zA-Z0-9_]{82}/,
-              /gho_[a-zA-Z0-9]{36}/,
-              /sk-[a-zA-Z0-9]{48}/,
-              /sk-ant-[a-zA-Z0-9-]{90,}/,
-              /AKIA[0-9A-Z]{16}/,
-              /-----BEGIN (RSA |EC )?PRIVATE KEY/,
-              /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/,
+              /['"][a-zA-Z0-9]{32,}['"]/,                  // Long alphanumeric strings in quotes
+              /ghp_[a-zA-Z0-9]{36}/,                       // GitHub PAT
+              /github_pat_[a-zA-Z0-9_]{82}/,               // GitHub fine-grained PAT
+              /gho_[a-zA-Z0-9]{36}/,                       // GitHub OAuth token
+              /sk-[a-zA-Z0-9]{48}/,                        // OpenAI key format
+              /sk-ant-[a-zA-Z0-9-]{90,}/,                  // Anthropic key format
+              /AKIA[0-9A-Z]{16}/,                          // AWS access key
+              /-----BEGIN (RSA |EC )?PRIVATE KEY/,         // Private keys
+              /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/, // JWT tokens
             ];
 
             for (const pattern of actualSecretPatterns) {
