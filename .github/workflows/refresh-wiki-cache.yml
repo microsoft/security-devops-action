@@ -1,0 +1,88 @@
+name: Refresh Wiki Cache
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  gollum:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clone wiki repository
+        id: clone
+        run: |
+          WIKI_URL="https://github.com/${{ github.repository }}.wiki.git"
+          if git clone --depth 1 "$WIKI_URL" wiki 2>/dev/null; then
+            echo "success=true" >> $GITHUB_OUTPUT
+            echo "Wiki cloned successfully"
+            echo "Pages found:"
+            ls wiki/*.md 2>/dev/null || echo "No markdown files"
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            echo "::warning::Wiki not available or empty"
+          fi
+
+      - name: Build wiki context file
+        if: steps.clone.outputs.success == 'true'
+        run: |
+          mkdir -p .github
+
+          printf '# Wiki Context for Issue Triage Assistant\n' > .github/wiki-context.md
+
+          if [ -f wiki/Home.md ]; then
+            echo -e "\n## Home\n" >> .github/wiki-context.md
+            head -c 3000 wiki/Home.md >> .github/wiki-context.md
+          fi
+
+          if [ -f wiki/FAQ.md ]; then
+            echo -e "\n## FAQ\n" >> .github/wiki-context.md
+            head -c 5000 wiki/FAQ.md >> .github/wiki-context.md
+          fi
+
+          if [ -f wiki/Troubleshooting.md ]; then
+            echo -e "\n## Troubleshooting\n" >> .github/wiki-context.md
+            head -c 4000 wiki/Troubleshooting.md >> .github/wiki-context.md
+          fi
+
+          if [ -f wiki/Tools.md ]; then
+            echo -e "\n## Tools\n" >> .github/wiki-context.md
+            head -c 3000 wiki/Tools.md >> .github/wiki-context.md
+          fi
+
+          if [ -f wiki/Configuration.md ]; then
+            echo -e "\n## Configuration\n" >> .github/wiki-context.md
+            head -c 3000 wiki/Configuration.md >> .github/wiki-context.md
+          fi
+
+          if [ $(wc -c < .github/wiki-context.md) -gt 20000 ]; then
+            head -c 20000 .github/wiki-context.md > .github/wiki-context.tmp
+            mv .github/wiki-context.tmp .github/wiki-context.md
+            echo -e "\n\n[Content truncated due to size limits]" >> .github/wiki-context.md
+          fi
+
+          echo "Wiki context file created:"
+          wc -c .github/wiki-context.md
+
+      - name: Commit and push if changed
+        if: steps.clone.outputs.success == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .github/wiki-context.md
+
+          if git diff --staged --quiet; then
+            echo "No changes to wiki context"
+          else
+            git commit -m "chore: refresh wiki context ($(date -u +'%Y-%m-%d')) [skip ci]"
+            git push
+            echo "Wiki context updated successfully"
+          fi
