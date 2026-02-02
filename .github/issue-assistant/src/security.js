@@ -1,3 +1,18 @@
+/**
+ * Security Validation Module for MSDO Issue Assistant
+ * 
+ * SECURITY DESIGN:
+ * - Core detection logic is in code (open source)
+ * - Specific patterns can be overridden via GitHub Secrets (hidden)
+ * - This prevents attackers from seeing exact patterns to bypass
+ * 
+ * Pattern sources (in priority order):
+ * 1. GitHub Secrets (if provided) - hidden from attackers
+ * 2. Built-in patterns (visible in code) - baseline protection
+ */
+
+// Built-in patterns - provides baseline protection
+// Additional/custom patterns can be stored in GitHub Secrets
 const DEFAULT_INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior)/i,
   /disregard\s+(your\s+)?instructions/i,
