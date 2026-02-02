@@ -3,7 +3,7 @@ name: Refresh Wiki Cache
 on:
   schedule:
     - cron: '0 0 * * *'
-  wiki:
+  gollum:
   workflow_dispatch:
 
 permissions:
@@ -35,44 +35,33 @@ jobs:
         run: |
           mkdir -p .github
 
-          # FIX: No quotes around HEADER so $(date) expands
-          cat > .github/wiki-context.md << HEADER
-          # Wiki Context for Issue Triage Assistant
-          # Auto-generated - do not edit manually
-          # Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          HEADER
+          printf '# Wiki Context for Issue Triage Assistant\n' > .github/wiki-context.md
 
-          # Add Home page
           if [ -f wiki/Home.md ]; then
             echo -e "\n## Home\n" >> .github/wiki-context.md
             head -c 3000 wiki/Home.md >> .github/wiki-context.md
           fi
 
-          # Add FAQ
           if [ -f wiki/FAQ.md ]; then
             echo -e "\n## FAQ\n" >> .github/wiki-context.md
             head -c 5000 wiki/FAQ.md >> .github/wiki-context.md
           fi
 
-          # Add Troubleshooting
           if [ -f wiki/Troubleshooting.md ]; then
             echo -e "\n## Troubleshooting\n" >> .github/wiki-context.md
             head -c 4000 wiki/Troubleshooting.md >> .github/wiki-context.md
           fi
 
-          # Add Tools documentation
           if [ -f wiki/Tools.md ]; then
             echo -e "\n## Tools\n" >> .github/wiki-context.md
             head -c 3000 wiki/Tools.md >> .github/wiki-context.md
           fi
 
-          # Add Configuration
           if [ -f wiki/Configuration.md ]; then
             echo -e "\n## Configuration\n" >> .github/wiki-context.md
             head -c 3000 wiki/Configuration.md >> .github/wiki-context.md
           fi
 
-          # Truncate if too large (keep under 20KB for token limits)
           if [ $(wc -c < .github/wiki-context.md) -gt 20000 ]; then
             head -c 20000 .github/wiki-context.md > .github/wiki-context.tmp
             mv .github/wiki-context.tmp .github/wiki-context.md
@@ -93,7 +82,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to wiki context"
           else
-            git commit -m "chore: refresh wiki context [skip ci]"
+            git commit -m "chore: refresh wiki context ($(date -u +'%Y-%m-%d')) [skip ci]"
             git push
             echo "Wiki context updated successfully"
           fi
