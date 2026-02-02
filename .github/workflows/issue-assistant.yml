@@ -22,7 +22,6 @@ env:
 jobs:
   validate-and-triage:
     runs-on: ubuntu-latest
-    # FIX #3: Bot-loop protection - skip bot comments and PRs
     if: >-
       ${{
         !github.event.issue.pull_request &&
@@ -150,7 +149,6 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Read wiki context
             let wikiContext = '';
             if (process.env.HAS_WIKI === 'true') {
               try {
@@ -161,7 +159,6 @@ jobs:
               }
             }
 
-            // FIX #2: Warn if system prompt secret not set
             let systemPrompt = process.env.SYSTEM_PROMPT;
             if (!systemPrompt) {
               console.log('::warning::ISSUE_ASSISTANT_SYSTEM_PROMPT secret not set, using default');
@@ -192,7 +189,6 @@ jobs:
             userPrompt += '4. Write a helpful response asking for missing details\n';
             userPrompt += 'Keep response under 400 words. Be welcoming.\n';
 
-            // FIX #7: Wrap API call in try/catch for graceful fallback
             let aiResponse = '';
             try {
               console.log('Calling GitHub Models API...');
@@ -227,7 +223,6 @@ jobs:
               console.log('AI response received: ' + aiResponse.length + ' chars');
 
             } catch (error) {
-              // FIX #7: Graceful fallback on API failure
               console.log('::warning::AI API failed: ' + error.message);
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
@@ -235,7 +230,6 @@ jobs:
               return;
             }
 
-            // FIX #8: Check for empty or too-short response
             if (!aiResponse || aiResponse.trim().length < 20) {
               console.log('::warning::AI response empty or too short');
               core.setOutput('response', '');
@@ -244,30 +238,25 @@ jobs:
               return;
             }
 
-            // === RESPONSE VALIDATION ===
             let isValid = true;
             const issues = [];
 
-            // Check 1: Canary token leak
             const canaryToken = process.env.CANARY_TOKEN || '';
             if (canaryToken && aiResponse.includes(canaryToken)) {
               issues.push('Canary token leaked');
               isValid = false;
             }
 
-            // FIX #5: Detect actual secret-like strings, not just keywords
-            // Old approach flagged legitimate text like "check your API key config"
-            // New approach detects actual secret values
             const actualSecretPatterns = [
-              /['"][a-zA-Z0-9]{32,}['"]/,         // Long alphanumeric strings in quotes
-              /ghp_[a-zA-Z0-9]{36}/,               // GitHub PAT
-              /github_pat_[a-zA-Z0-9_]{82}/,       // GitHub fine-grained PAT
-              /gho_[a-zA-Z0-9]{36}/,               // GitHub OAuth token
-              /sk-[a-zA-Z0-9]{48}/,                // OpenAI key format
-              /sk-ant-[a-zA-Z0-9-]{90,}/,          // Anthropic key format
-              /AKIA[0-9A-Z]{16}/,                  // AWS access key
-              /-----BEGIN (RSA |EC )?PRIVATE KEY/,  // Private keys
-              /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/, // JWT tokens
+              /['"][a-zA-Z0-9]{32,}['"]/,
+              /ghp_[a-zA-Z0-9]{36}/,
+              /github_pat_[a-zA-Z0-9_]{82}/,
+              /gho_[a-zA-Z0-9]{36}/,
+              /sk-[a-zA-Z0-9]{48}/,
+              /sk-ant-[a-zA-Z0-9-]{90,}/,
+              /AKIA[0-9A-Z]{16}/,
+              /-----BEGIN (RSA |EC )?PRIVATE KEY/,
+              /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/,
             ];
 
             for (const pattern of actualSecretPatterns) {
@@ -278,8 +267,7 @@ jobs:
               }
             }
 
-            // Check 3: URL allowlist
-            let allowedUrls = [
+            let allowedDomains = [
               'github.com/microsoft/security-devops-action',
               'learn.microsoft.com',
               'docs.microsoft.com',
@@ -288,20 +276,35 @@ jobs:
 
             if (process.env.ALLOWED_URLS) {
               try {
-                allowedUrls = JSON.parse(process.env.ALLOWED_URLS);
+                allowedDomains = JSON.parse(process.env.ALLOWED_URLS);
               } catch (e) {
                 console.log('::warning::Could not parse ALLOWED_URLS secret');
               }
             }
 
-            allowedUrls.push('github.com/' + repoOwner + '/' + repoName);
+            allowedDomains.push('github.com/' + repoOwner + '/' + repoName);
 
             const urlRegex = /https?:\/\/[^\s)>\]]+/gi;
             const foundUrls = aiResponse.match(urlRegex) || [];
-            for (const url of foundUrls) {
-              const isAllowed = allowedUrls.some(domain => url.includes(domain));
-              if (!isAllowed) {
-                issues.push('Unapproved URL: ' + url);
+            for (const urlStr of foundUrls) {
+              try {
+                const parsedUrl = new URL(urlStr);
+                const hostname = parsedUrl.hostname;
+                const fullPath = hostname + parsedUrl.pathname;
+                
+                const isAllowed = allowedDomains.some(domain => {
+                  if (domain.includes('/')) {
+                    return fullPath.startsWith(domain) || fullPath.startsWith(domain.replace(/\/$/, ''));
+                  }
+                  return hostname === domain || hostname.endsWith('.' + domain);
+                });
+                
+                if (!isAllowed) {
+                  issues.push('Unapproved URL: ' + urlStr);
+                  isValid = false;
+                }
+              } catch (e) {
+                issues.push('Invalid URL: ' + urlStr);
                 isValid = false;
               }
             }
