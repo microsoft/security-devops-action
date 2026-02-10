@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       ${{
+        github.event.issue.state == 'open' &&
         !github.event.issue.pull_request &&
         (github.event_name == 'issues' ||
         (github.event_name == 'issue_comment' &&
