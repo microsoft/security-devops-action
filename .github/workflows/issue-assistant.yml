@@ -330,6 +330,10 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            
+            // Response validation constants
+            const MIN_AI_RESPONSE_LENGTH = 20;
+            const MAX_AI_RESPONSE_LENGTH = 1000; // ~150 words with formatting
 
             let wikiContext = '';
             if (process.env.HAS_WIKI === 'true') {
@@ -449,7 +453,7 @@ Keep responses concise (50-150 words). No signatures.`;
               return;
             }
 
-            if (!aiResponse || aiResponse.trim().length < 20) {
+            if (!aiResponse || aiResponse.trim().length < MIN_AI_RESPONSE_LENGTH) {
               console.log('::warning::AI response too short');
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
@@ -458,8 +462,8 @@ Keep responses concise (50-150 words). No signatures.`;
             }
 
             // Check maximum length (50-150 words guidance ≈ 1000 chars with formatting)
-            if (aiResponse.trim().length > 1000) {
-              console.log(`::warning::AI response too long (${aiResponse.trim().length} chars, max 1000)`);
+            if (aiResponse.trim().length > MAX_AI_RESPONSE_LENGTH) {
+              console.log(`::warning::AI response too long (${aiResponse.trim().length} chars, max ${MAX_AI_RESPONSE_LENGTH})`);
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
               core.setOutput('outcome', 'error');
