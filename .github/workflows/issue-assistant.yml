@@ -199,13 +199,15 @@ jobs:
             }
 
             // Determine next state based on conversation flow
+            // Note: We can only reach this point if currentState is NOT a terminal state,
+            // as terminal states are checked earlier (lines 98-103) and cause an early return.
             // Preserve existing terminal states; only set initial state for new conversations
             let nextState = currentState;
             
             if (botComments.length === 0) {
               nextState = 'initial';
             } else if (!['resolved', 'escalated'].includes(currentState)) {
-              // Only update state if not already in a terminal state
+              // Only update state if not already in a terminal state (defensive check)
               if (botComments.length >= maxResponses - 1) {
                 nextState = 'final_attempt';
               } else {
