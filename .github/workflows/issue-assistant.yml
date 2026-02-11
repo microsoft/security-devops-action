@@ -192,7 +192,6 @@ jobs:
               // Strip bot metadata from display
               let content = comment.body;
               if (isBot) {
-                // FIX: Changed [^-]* to [^>]* for safer regex matching
                 content = content
                   .replace(/<!-- msdo-issue-assistant[^>]*-->/g, '')
                   .replace(/<details>[\s\S]*?<\/details>/g, '')
@@ -224,7 +223,6 @@ jobs:
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
 
-            // FIX: Limit history to prevent output size issues (GitHub has 1MB limit)
             const MAX_HISTORY_TURNS = 10;
             const trimmedHistory = history.slice(-MAX_HISTORY_TURNS);
             
@@ -389,7 +387,6 @@ jobs:
             
             // Response validation constants
             const MIN_AI_RESPONSE_LENGTH = 20;
-            // FIX: Increased from 1000 to 1500 to accommodate responses with wiki URLs
             const MAX_AI_RESPONSE_LENGTH = 1500;
 
             let wikiContext = '';
