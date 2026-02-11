@@ -34,6 +34,7 @@ jobs:
       }}
 
     outputs:
+      # FIX: Wrapped in quotes to prevent YAML parsing issues with && and ||
       should_respond: "${{ steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true' }}"
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
@@ -141,6 +142,7 @@ jobs:
             }
 
             // === BUILD CONVERSATION HISTORY ===
+
             /**
              * Sanitizes user input to prevent injection attacks and normalize formatting.
              * @param {string} content - The raw user input to sanitize
@@ -148,19 +150,18 @@ jobs:
              * @returns {string} Sanitized content, truncated if exceeds maxLength
              */
             const sanitizeContent = (content, maxLength = 10000) => {
-              // Handle null, undefined, or empty string
               if (content == null || content === '') return '';
               
-              // Coerce to string if needed (though content should always be a string)
               const str = String(content);
               
               let sanitized = str
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars (preserves \t=tab, \n=newline, \r=CR)
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars
                 .replace(/\r\n/g, '\n')                           // Normalize Windows line endings
                 .replace(/\r/g, '\n')                             // Normalize old Mac line endings
-                .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace (except newlines)
+                .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace
                 .replace(/\n{3,}/g, '\n\n')                       // Collapse excessive newlines
                 .trim();
+
               if (sanitized.length > maxLength) {
                 sanitized = sanitized.substring(0, maxLength) + '... [truncated]';
               }
@@ -191,8 +192,9 @@ jobs:
               // Strip bot metadata from display
               let content = comment.body;
               if (isBot) {
+                // FIX: Changed [^-]* to [^>]* for safer regex matching
                 content = content
-                  .replace(/<!-- msdo-issue-assistant[^-]*-->/g, '')
+                  .replace(/<!-- msdo-issue-assistant[^>]*-->/g, '')
                   .replace(/<details>[\s\S]*?<\/details>/g, '')
                   .trim();
               }
@@ -211,26 +213,28 @@ jobs:
             }
 
             // Determine next state based on conversation flow
-            // Note: We can only reach this point if currentState is NOT a terminal state,
-            // as terminal states are checked earlier (lines 98-103) and cause an early return.
-            // Note: Issues that are closed don't trigger this workflow (see line 29 condition).
-            let nextState = 'gathering'; // Default to gathering for defensive programming
+            let nextState = 'gathering';
             
             if (botComments.length === 0) {
-              // First bot response - always start in 'initial' state
               nextState = 'initial';
             } else if (botComments.length >= maxResponses - 1) {
-              // At the limit - this is the final attempt
               nextState = 'final_attempt';
             }
-            // else: keep the default 'gathering' state for normal conversation flow
 
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
 
+            // FIX: Limit history to prevent output size issues (GitHub has 1MB limit)
+            const MAX_HISTORY_TURNS = 10;
+            const trimmedHistory = history.slice(-MAX_HISTORY_TURNS);
+            
+            if (history.length > MAX_HISTORY_TURNS) {
+              console.log(`History trimmed from ${history.length} to ${MAX_HISTORY_TURNS} turns`);
+            }
+
             core.setOutput('should_respond', 'true');
             core.setOutput('state', nextState);
-            core.setOutput('history', JSON.stringify(history));
+            core.setOutput('history', JSON.stringify(trimmedHistory));
 
       - name: Checkout repository
         if: steps.conversation-state.outputs.should_respond == 'true'
@@ -295,11 +299,8 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // IMPORTANT: For issue_comment events, we validate ONLY the new comment content.
-            // For issues events (new issue), we validate the issue body.
-            // This ensures we don't re-validate the original issue body on subsequent comments.
-            // If the original issue had validation issues but a new comment is clean, we allow it.
-            // If a new comment has validation issues, we block it even if the issue body was clean.
+            // For issue_comment events, validate ONLY the new comment content.
+            // For issues events (new issue), validate the issue body.
             const isComment = context.eventName === 'issue_comment';
             const rawContent = isComment 
               ? context.payload.comment.body 
@@ -388,7 +389,8 @@ jobs:
             
             // Response validation constants
             const MIN_AI_RESPONSE_LENGTH = 20;
-            const MAX_AI_RESPONSE_LENGTH = 1000; // ~150 words (~750 chars) + 250 char buffer for markdown
+            // FIX: Increased from 1000 to 1500 to accommodate responses with wiki URLs
+            const MAX_AI_RESPONSE_LENGTH = 1500;
 
             let wikiContext = '';
             if (process.env.HAS_WIKI === 'true') {
@@ -427,9 +429,6 @@ jobs:
 3. Do NOT ask more questions - either answer or escalate`
             };
 
-            // Build system prompt with state instructions
-            // If SYSTEM_PROMPT exists, append state marker with spacing
-            // If not, start directly with state marker (no leading whitespace)
             if (systemPrompt) {
               systemPrompt += `\n\n--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
             } else {
@@ -506,15 +505,15 @@ Keep responses concise (50-150 words). No signatures.`;
 
               if (outcomeMatch) {
                 if (allOutcomeTags.length > 1) {
-                  console.log(`::warning::Multiple outcome tags found in AI response; using first valid tag. Tags: ${allOutcomeTags.join(', ')}`);
+                  console.log(`::warning::Multiple outcome tags found; using first. Tags: ${allOutcomeTags.join(', ')}`);
                 }
                 outcome = outcomeMatch[1];
                 aiResponse = aiResponse.replace(/\s*\[OUTCOME:\w+\]\s*$/, '').trim();
               } else {
                 if (allOutcomeTags.length > 0) {
-                  console.log(`::warning::Outcome-like tags present but none matched expected format "[OUTCOME:state]"; defaulting outcome to "gathering". Tags: ${allOutcomeTags.join(', ')}`);
+                  console.log(`::warning::Outcome tags present but none matched expected format. Tags: ${allOutcomeTags.join(', ')}`);
                 } else {
-                  console.log('::warning::No [OUTCOME:...] tag found in AI response; defaulting outcome to "gathering".');
+                  console.log('::warning::No [OUTCOME:...] tag found; defaulting to "gathering".');
                 }
               }
 
@@ -528,7 +527,7 @@ Keep responses concise (50-150 words). No signatures.`;
               return;
             }
 
-            // Trim response once for validation
+            // Validate response length
             const trimmedResponse = aiResponse ? aiResponse.trim() : '';
 
             if (!trimmedResponse || trimmedResponse.length < MIN_AI_RESPONSE_LENGTH) {
@@ -539,7 +538,6 @@ Keep responses concise (50-150 words). No signatures.`;
               return;
             }
 
-            // Check maximum length (50-150 words guidance ≈ 1000 chars with formatting)
             if (trimmedResponse.length > MAX_AI_RESPONSE_LENGTH) {
               console.log(`::warning::AI response too long (${trimmedResponse.length} chars, max ${MAX_AI_RESPONSE_LENGTH})`);
               core.setOutput('response', '');
@@ -655,6 +653,7 @@ Keep responses concise (50-150 words). No signatures.`;
             if (outcome === 'escalated') {
               labelsToAdd.push('needs-maintainer');
             }
+
             if (labelsToAdd.length > 0) {
               try {
                 await github.rest.issues.addLabels({
@@ -685,7 +684,7 @@ Keep responses concise (50-150 words). No signatures.`;
               comment += `A maintainer will review this issue. `;
               comment += `No further bot responses will be sent.\n`;
               if (labelAdditionFailed) {
-                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. A maintainer will need to add this label manually to ensure proper triage.\n`;
+                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. A maintainer will need to add this label manually.\n`;
               }
             } else {
               comment += `<details><summary>💬 Gathering info</summary>\n\n`;
