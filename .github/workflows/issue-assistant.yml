@@ -19,7 +19,7 @@ env:
   MAX_INPUT_LENGTH: 10000
   MAX_BOT_RESPONSES: 4
   MIN_RESPONSE_INTERVAL_SECONDS: 120
-  RATE_LIMIT_PER_USER_PER_HOUR: 10
+  RATE_LIMIT_PER_USER_PER_HOUR: 12
 
 jobs:
   validate-and-triage:
@@ -34,7 +34,7 @@ jobs:
       }}
 
     outputs:
-      should_respond: ${{ steps.conversation-state.outputs.should_respond }}
+      should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') ? 'true' : 'false' }}
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
       sanitized_content: ${{ steps.validation.outputs.sanitized_content }}
@@ -246,7 +246,11 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Get the latest user content to validate
+            // IMPORTANT: For issue_comment events, we validate ONLY the new comment content.
+            // For issues events (new issue), we validate the issue body.
+            // This ensures we don't re-validate the original issue body on subsequent comments.
+            // If the original issue had validation issues but a new comment is clean, we allow it.
+            // If a new comment has validation issues, we block it even if the issue body was clean.
             const isComment = context.eventName === 'issue_comment';
             const rawContent = isComment 
               ? context.payload.comment.body 
@@ -256,7 +260,7 @@ jobs:
 
             if (!fs.existsSync(securityPath)) {
               console.log('::warning::security.js not found');
-              core.setOutput('should_respond', 'true');
+              core.setOutput('validation_passed', 'true');
               core.setOutput('sanitized_content', rawContent.slice(0, parseInt(process.env.MAX_INPUT_LENGTH)));
               core.setOutput('issue_type', 'unknown');
               return;
@@ -283,15 +287,17 @@ jobs:
               context,
               maxInputLength: parseInt(process.env.MAX_INPUT_LENGTH),
               rateLimitPerHour: parseInt(process.env.RATE_LIMIT_PER_USER_PER_HOUR),
+              maxBotResponses: parseInt(process.env.MAX_BOT_RESPONSES),
               customInjectionPatterns: injectionPatterns
             });
 
-            core.setOutput('should_respond', result.shouldRespond);
+            core.setOutput('validation_passed', result.shouldRespond ? 'true' : 'false');
             core.setOutput('sanitized_content', result.sanitizedContent || '');
             core.setOutput('issue_type', result.issueType || 'unknown');
 
             if (!result.shouldRespond) {
-              console.log('Validation failed:', result.errors);
+              const contentType = isComment ? 'comment' : 'issue body';
+              console.log(`Validation failed for ${contentType}:`, result.errors);
             }
 
   respond-with-ai:
@@ -330,6 +336,10 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            
+            // Response validation constants
+            const MIN_AI_RESPONSE_LENGTH = 20;
+            const MAX_AI_RESPONSE_LENGTH = 1000; // ~150 words (~750 chars) + 250 char buffer for markdown
 
             let wikiContext = '';
             if (process.env.HAS_WIKI === 'true') {
@@ -436,9 +446,20 @@ Keep responses concise (50-150 words). No signatures.`;
 
               // Extract outcome tag
               const outcomeMatch = aiResponse.match(/\[OUTCOME:(\w+)\]/);
+              const allOutcomeTags = aiResponse.match(/\[OUTCOME:[^\]]+\]/g) || [];
+
               if (outcomeMatch) {
+                if (allOutcomeTags.length > 1) {
+                  console.log(`::warning::Multiple outcome tags found in AI response; using first valid tag. Tags: ${allOutcomeTags.join(', ')}`);
+                }
                 outcome = outcomeMatch[1];
-                aiResponse = aiResponse.replace(/\[OUTCOME:\w+\]/g, '').trim();
+                aiResponse = aiResponse.replace(/\s*\[OUTCOME:\w+\]\s*$/, '').trim();
+              } else {
+                if (allOutcomeTags.length > 0) {
+                  console.log(`::warning::Outcome-like tags present but none matched expected format "[OUTCOME:state]"; defaulting outcome to "gathering". Tags: ${allOutcomeTags.join(', ')}`);
+                } else {
+                  console.log('::warning::No [OUTCOME:...] tag found in AI response; defaulting outcome to "gathering".');
+                }
               }
 
               console.log(`AI response: ${aiResponse.length} chars, outcome: ${outcome}`);
@@ -451,8 +472,20 @@ Keep responses concise (50-150 words). No signatures.`;
               return;
             }
 
-            if (!aiResponse || aiResponse.trim().length < 20) {
-              console.log('::warning::AI response too short');
+            // Trim response once for validation
+            const trimmedResponse = aiResponse ? aiResponse.trim() : '';
+
+            if (!trimmedResponse || trimmedResponse.length < MIN_AI_RESPONSE_LENGTH) {
+              console.log(`::warning::AI response too short (${trimmedResponse.length} chars, min ${MIN_AI_RESPONSE_LENGTH})`);
+              core.setOutput('response', '');
+              core.setOutput('is_valid', 'false');
+              core.setOutput('outcome', 'error');
+              return;
+            }
+
+            // Check maximum length (50-150 words guidance ≈ 1000 chars with formatting)
+            if (trimmedResponse.length > MAX_AI_RESPONSE_LENGTH) {
+              console.log(`::warning::AI response too long (${trimmedResponse.length} chars, max ${MAX_AI_RESPONSE_LENGTH})`);
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
               core.setOutput('outcome', 'error');
@@ -560,6 +593,27 @@ Keep responses concise (50-150 words). No signatures.`;
             };
             const state = stateMap[outcome] || 'gathering';
 
+            // Try to add labels before posting comment
+            let labelAdditionFailed = false;
+            const labelsToAdd = [];
+            if (outcome === 'escalated') {
+              labelsToAdd.push('needs-maintainer');
+            }
+            if (labelsToAdd.length > 0) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: labelsToAdd
+                });
+                console.log('Successfully added labels:', labelsToAdd.join(', '));
+              } catch (e) {
+                console.log('Could not add labels:', e.message);
+                labelAdditionFailed = true;
+              }
+            }
+
             // Build comment with hidden state marker
             let comment = `<!-- msdo-issue-assistant state:${state} -->\n`;
             comment += response + '\n\n';
@@ -574,6 +628,9 @@ Keep responses concise (50-150 words). No signatures.`;
               comment += `<details><summary>🏷️ Escalated to maintainers</summary>\n\n`;
               comment += `A maintainer will review this issue. `;
               comment += `No further bot responses will be sent.\n`;
+              if (labelAdditionFailed) {
+                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. Please add it manually to ensure proper triage.\n`;
+              }
             } else {
               comment += `<details><summary>💬 Gathering info</summary>\n\n`;
               comment += `Reply with the requested information and I'll try to help further.\n`;
@@ -588,24 +645,6 @@ Keep responses concise (50-150 words). No signatures.`;
               issue_number: context.issue.number,
               body: comment
             });
-
-            // Add/update labels based on outcome
-            const labelsToAdd = [];
-            if (outcome === 'escalated') {
-              labelsToAdd.push('needs-maintainer');
-            }
-            if (labelsToAdd.length > 0) {
-              try {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: labelsToAdd
-                });
-              } catch (e) {
-                console.log('Could not add labels:', e.message);
-              }
-            }
 
             console.log(`Posted response with outcome: ${outcome}, state: ${state}`);
 
