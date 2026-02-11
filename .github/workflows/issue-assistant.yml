@@ -476,6 +476,8 @@ Keep responses concise (50-150 words). No signatures.`;
               /sk-[a-zA-Z0-9]{48}/,
               /sk-ant-[a-zA-Z0-9-]{90,}/,
               /AKIA[0-9A-Z]{16}/,
+              /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/,
+              /['"][a-zA-Z0-9]{32,}['"]/,
               /-----BEGIN (RSA |EC )?PRIVATE KEY/,
             ];
 
