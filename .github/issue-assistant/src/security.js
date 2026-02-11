@@ -183,6 +183,7 @@ async function validateRequest({
   context, 
   maxInputLength, 
   rateLimitPerHour,
+  maxBotResponses,
   customInjectionPatterns,
   customSuspiciousPatterns
 }) {
@@ -226,21 +227,9 @@ async function validateRequest({
     errors.push('Rate limit exceeded');
   }
   
-  if (comment) {
-    const { data: comments } = await github.rest.issues.listComments({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: issue.number
-    });
-    
-    const botComments = comments.filter(c => 
-      c.body && c.body.includes('<!-- msdo-issue-assistant -->')
-    );
-    
-    if (botComments.length >= 3) {
-      errors.push('Maximum bot responses reached');
-    }
-  }
+  // Note: Bot response count per issue is now validated in the conversation-state step
+  // of the workflow, not here. This avoids redundant validation and keeps state
+  // management centralized.
   
   return {
     shouldRespond: errors.length === 0,
