@@ -34,7 +34,7 @@ jobs:
       }}
 
     outputs:
-      should_respond: ${{ steps.conversation-state.outputs.should_respond }}
+      should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') ? 'true' : 'false' }}
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
       sanitized_content: ${{ steps.validation.outputs.sanitized_content }}
@@ -246,7 +246,11 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Get the latest user content to validate
+            // IMPORTANT: For issue_comment events, we validate ONLY the new comment content.
+            // For issues events (new issue), we validate the issue body.
+            // This ensures we don't re-validate the original issue body on subsequent comments.
+            // If the original issue had validation issues but a new comment is clean, we allow it.
+            // If a new comment has validation issues, we block it even if the issue body was clean.
             const isComment = context.eventName === 'issue_comment';
             const rawContent = isComment 
               ? context.payload.comment.body 
@@ -256,7 +260,7 @@ jobs:
 
             if (!fs.existsSync(securityPath)) {
               console.log('::warning::security.js not found');
-              core.setOutput('should_respond', 'true');
+              core.setOutput('validation_passed', 'true');
               core.setOutput('sanitized_content', rawContent.slice(0, parseInt(process.env.MAX_INPUT_LENGTH)));
               core.setOutput('issue_type', 'unknown');
               return;
@@ -286,12 +290,13 @@ jobs:
               customInjectionPatterns: injectionPatterns
             });
 
-            core.setOutput('should_respond', result.shouldRespond);
+            core.setOutput('validation_passed', result.shouldRespond ? 'true' : 'false');
             core.setOutput('sanitized_content', result.sanitizedContent || '');
             core.setOutput('issue_type', result.issueType || 'unknown');
 
             if (!result.shouldRespond) {
-              console.log('Validation failed:', result.errors);
+              const contentType = isComment ? 'comment' : 'issue body';
+              console.log(`Validation failed for ${contentType}:`, result.errors);
             }
 
   respond-with-ai:
