@@ -290,7 +290,7 @@ jobs:
               customInjectionPatterns: injectionPatterns
             });
 
-            core.setOutput('validation_passed', result.shouldRespond.toString());
+            core.setOutput('validation_passed', result.shouldRespond ? 'true' : 'false');
             core.setOutput('sanitized_content', result.sanitizedContent || '');
             core.setOutput('issue_type', result.issueType || 'unknown');
 
