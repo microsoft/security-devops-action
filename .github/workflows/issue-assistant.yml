@@ -434,9 +434,20 @@ Keep responses concise (50-150 words). No signatures.`;
 
               // Extract outcome tag
               const outcomeMatch = aiResponse.match(/\[OUTCOME:(\w+)\]/);
+              const allOutcomeTags = aiResponse.match(/\[OUTCOME:[^\]]+\]/g) || [];
+
               if (outcomeMatch) {
+                if (allOutcomeTags.length > 1) {
+                  console.log(`::warning::Multiple outcome tags found in AI response; using first valid tag. Tags: ${allOutcomeTags.join(', ')}`);
+                }
                 outcome = outcomeMatch[1];
                 aiResponse = aiResponse.replace(/\[OUTCOME:\w+\]/g, '').trim();
+              } else {
+                if (allOutcomeTags.length > 0) {
+                  console.log(`::warning::Outcome-like tags present but none matched expected format "[OUTCOME:state]"; defaulting outcome to "gathering". Tags: ${allOutcomeTags.join(', ')}`);
+                } else {
+                  console.log('::warning::No [OUTCOME:...] tag found in AI response; defaulting outcome to "gathering".');
+                }
               }
 
               console.log(`AI response: ${aiResponse.length} chars, outcome: ${outcome}`);
