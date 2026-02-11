@@ -141,7 +141,12 @@ jobs:
             }
 
             // === BUILD CONVERSATION HISTORY ===
-            // Simple sanitization function to prevent injection attacks
+            /**
+             * Sanitizes user input to prevent injection attacks and normalize formatting.
+             * @param {string} content - The raw user input to sanitize
+             * @param {number} maxLength - Maximum allowed length (default: 10000)
+             * @returns {string} Sanitized content, truncated if exceeds maxLength
+             */
             const sanitizeContent = (content, maxLength = 10000) => {
               if (!content) return '';
               let sanitized = content
@@ -208,9 +213,10 @@ jobs:
             } else if (botComments.length >= maxResponses - 1) {
               nextState = 'final_attempt';
             } else if (currentState !== 'final_attempt') {
-              // Keep 'final_attempt' if already set, otherwise use 'gathering'
+              // If not already in final_attempt, transition to gathering state
               nextState = 'gathering';
             }
+            // Otherwise keep the current state (e.g., preserve 'final_attempt')
 
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
