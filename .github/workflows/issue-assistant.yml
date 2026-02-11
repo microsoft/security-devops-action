@@ -65,7 +65,7 @@ jobs:
             );
 
             // Extract state from most recent bot comment
-            const stateRegex = /<!-- msdo-issue-assistant state:(\w+) -->/;
+            const stateRegex = /<!-- msdo-issue-assistant state:(\w+)/;
             let currentState = 'initial';
             let lastBotCommentTime = null;
 
