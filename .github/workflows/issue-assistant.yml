@@ -112,7 +112,7 @@ jobs:
               const timeSinceLastBot = Date.now() - lastBotCommentTime.getTime();
               
               if (timeSinceLastBot < cooldownMs) {
-                console.log(`Cooldown active (${Math.round(timeSinceLastBot/1000)}s < ${cooldownMs/1000}s)`);
+                console.log(`Cooldown active (${Math.floor(timeSinceLastBot/1000)}s < ${cooldownMs/1000}s)`);
                 core.setOutput('should_respond', 'false');
                 core.setOutput('state', 'cooldown');
                 return;
