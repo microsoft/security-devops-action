@@ -34,7 +34,7 @@ jobs:
       }}
 
     outputs:
-      should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') && 'true' || 'false' }}
+      should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') ? 'true' : 'false' }}
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
       sanitized_content: ${{ steps.validation.outputs.sanitized_content }}
@@ -295,7 +295,8 @@ jobs:
             core.setOutput('issue_type', result.issueType || 'unknown');
 
             if (!result.shouldRespond) {
-              console.log('Validation failed for new content:', result.errors);
+              const contentType = isComment ? 'comment' : 'issue body';
+              console.log(`Validation failed for ${contentType}:`, result.errors);
             }
 
   respond-with-ai:
