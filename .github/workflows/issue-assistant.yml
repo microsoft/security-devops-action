@@ -148,10 +148,16 @@ jobs:
              * @returns {string} Sanitized content, truncated if exceeds maxLength
              */
             const sanitizeContent = (content, maxLength = 10000) => {
-              // Return empty string for any falsy value (null, undefined, '', 0, false, NaN)
-              if (!content) return '';
-              let sanitized = content
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
+              // Handle null, undefined, or empty string
+              if (content == null || content === '') return '';
+              
+              // Coerce to string if needed (though content should always be a string)
+              const str = String(content);
+              
+              let sanitized = str
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters (preserves \t, \n, \r)
+                .replace(/\r\n/g, '\n')                           // Normalize Windows line endings
+                .replace(/\r/g, '\n')                             // Normalize old Mac line endings
                 .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace (except newlines)
                 .replace(/\n{3,}/g, '\n\n')                       // Collapse excessive newlines
                 .trim();
