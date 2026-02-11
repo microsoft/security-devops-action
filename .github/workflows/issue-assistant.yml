@@ -441,7 +441,7 @@ Keep responses concise (50-150 words). No signatures.`;
                   console.log(`::warning::Multiple outcome tags found in AI response; using first valid tag. Tags: ${allOutcomeTags.join(', ')}`);
                 }
                 outcome = outcomeMatch[1];
-                aiResponse = aiResponse.replace(/\[OUTCOME:\w+\]/g, '').trim();
+                aiResponse = aiResponse.replace(/\s*\[OUTCOME:\w+\]\s*$/, '').trim();
               } else {
                 if (allOutcomeTags.length > 0) {
                   console.log(`::warning::Outcome-like tags present but none matched expected format "[OUTCOME:state]"; defaulting outcome to "gathering". Tags: ${allOutcomeTags.join(', ')}`);
