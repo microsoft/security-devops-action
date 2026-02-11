@@ -415,7 +415,9 @@ jobs:
 3. Do NOT ask more questions - either answer or escalate`
             };
 
-            // Only append state instructions if we have a system prompt or need to provide one
+            // Build system prompt with state instructions
+            // If SYSTEM_PROMPT exists, append state marker with spacing
+            // If not, start directly with state marker (no leading whitespace)
             if (systemPrompt) {
               systemPrompt += `\n\n--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
             } else {
