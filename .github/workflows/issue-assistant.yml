@@ -34,7 +34,7 @@ jobs:
       }}
 
     outputs:
-      should_respond: ${{ steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true' }}
+      should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') && 'true' || 'false' }}
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
       sanitized_content: ${{ steps.validation.outputs.sanitized_content }}
