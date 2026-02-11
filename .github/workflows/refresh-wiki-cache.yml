@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   refresh-wiki:
@@ -71,18 +72,17 @@ jobs:
           echo "Wiki context file created:"
           wc -c .github/wiki-context.md
 
-      - name: Commit and push if changed
+      - name: Create PR if changed
         if: steps.clone.outputs.success == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: refresh wiki context"
+          title: "chore: refresh wiki context"
+          body: |
+            Auto-generated wiki cache for issue triage bot.
 
-          git add .github/wiki-context.md
-
-          if git diff --staged --quiet; then
-            echo "No changes to wiki context"
-          else
-            git commit -m "chore: refresh wiki context ($(date -u +'%Y-%m-%d')) [skip ci]"
-            git push
-            echo "Wiki context updated successfully"
-          fi
+            Updates `.github/wiki-context.md` with latest wiki content.
+          branch: bot/wiki-cache-update
+          delete-branch: true
+          labels: bot
