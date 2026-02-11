@@ -222,10 +222,8 @@ jobs:
             } else if (botComments.length >= maxResponses - 1) {
               // At the limit - this is the final attempt
               nextState = 'final_attempt';
-            } else {
-              // Normal conversation flow - use 'gathering' state
-              nextState = 'gathering';
             }
+            // else: keep the default 'gathering' state for normal conversation flow
 
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
