@@ -183,6 +183,7 @@ async function validateRequest({
   context, 
   maxInputLength, 
   rateLimitPerHour,
+  maxBotResponses,
   customInjectionPatterns,
   customSuspiciousPatterns
 }) {
@@ -226,7 +227,7 @@ async function validateRequest({
     errors.push('Rate limit exceeded');
   }
   
-  if (comment) {
+  if (comment && maxBotResponses) {
     const { data: comments } = await github.rest.issues.listComments({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -237,7 +238,7 @@ async function validateRequest({
       c.body && c.body.includes('<!-- msdo-issue-assistant -->')
     );
     
-    if (botComments.length >= 3) {
+    if (botComments.length >= maxBotResponses) {
       errors.push('Maximum bot responses reached');
     }
   }

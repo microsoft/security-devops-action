@@ -19,7 +19,7 @@ env:
   MAX_INPUT_LENGTH: 10000
   MAX_BOT_RESPONSES: 4
   MIN_RESPONSE_INTERVAL_SECONDS: 120
-  RATE_LIMIT_PER_USER_PER_HOUR: 10
+  RATE_LIMIT_PER_USER_PER_HOUR: 12
 
 jobs:
   validate-and-triage:
@@ -283,6 +283,7 @@ jobs:
               context,
               maxInputLength: parseInt(process.env.MAX_INPUT_LENGTH),
               rateLimitPerHour: parseInt(process.env.RATE_LIMIT_PER_USER_PER_HOUR),
+              maxBotResponses: parseInt(process.env.MAX_BOT_RESPONSES),
               customInjectionPatterns: injectionPatterns
             });
 
