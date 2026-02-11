@@ -37,7 +37,6 @@ jobs:
       should_respond: ${{ (steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true') ? 'true' : 'false' }}
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
-      sanitized_content: ${{ steps.validation.outputs.sanitized_content }}
       issue_type: ${{ steps.validation.outputs.issue_type }}
       wiki_context: ${{ steps.wiki.outputs.context }}
 
@@ -96,7 +95,7 @@ jobs:
             }
 
             // 2. Terminal states - don't respond further
-            if (['resolved', 'escalated', 'closed'].includes(currentState)) {
+            if (['resolved', 'escalated'].includes(currentState)) {
               console.log(`Terminal state "${currentState}" - no more responses`);
               core.setOutput('should_respond', 'false');
               core.setOutput('state', currentState);
@@ -142,19 +141,52 @@ jobs:
             }
 
             // === BUILD CONVERSATION HISTORY ===
+            /**
+             * Sanitizes user input to prevent injection attacks and normalize formatting.
+             * @param {string} content - The raw user input to sanitize
+             * @param {number} maxLength - Maximum allowed length (default: 10000)
+             * @returns {string} Sanitized content, truncated if exceeds maxLength
+             */
+            const sanitizeContent = (content, maxLength = 10000) => {
+              // Handle null, undefined, or empty string
+              if (content == null || content === '') return '';
+              
+              // Coerce to string if needed (though content should always be a string)
+              const str = String(content);
+              
+              let sanitized = str
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars (preserves \t=tab, \n=newline, \r=CR)
+                .replace(/\r\n/g, '\n')                           // Normalize Windows line endings
+                .replace(/\r/g, '\n')                             // Normalize old Mac line endings
+                .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace (except newlines)
+                .replace(/\n{3,}/g, '\n\n')                       // Collapse excessive newlines
+                .trim();
+              if (sanitized.length > maxLength) {
+                sanitized = sanitized.substring(0, maxLength) + '... [truncated]';
+              }
+              return sanitized;
+            };
+            
             const history = [];
             
-            // Add issue body as first message
+            // Add issue body as first message (sanitize it)
+            const issueContent = `[Issue opened] ${issue.title}\n\n${issue.body || '(no description)'}`;
             history.push({
               role: 'user',
               author: issueAuthor,
-              content: `[Issue opened] ${issue.title}\n\n${issue.body || '(no description)'}`,
+              content: sanitizeContent(issueContent),
               timestamp: issue.created_at
             });
 
-            // Add all comments in order
+            // Add comments from issue author and bot only (filter out other users)
             for (const comment of comments) {
               const isBot = comment.body.includes('<!-- msdo-issue-assistant');
+              const isIssueAuthor = comment.user.login === issueAuthor;
+              
+              // Only include bot comments and comments from the issue author
+              if (!isBot && !isIssueAuthor) {
+                continue;
+              }
               
               // Strip bot metadata from display
               let content = comment.body;
@@ -163,6 +195,11 @@ jobs:
                   .replace(/<!-- msdo-issue-assistant[^-]*-->/g, '')
                   .replace(/<details>[\s\S]*?<\/details>/g, '')
                   .trim();
+              }
+              
+              // Sanitize all user content before adding to history
+              if (!isBot) {
+                content = sanitizeContent(content);
               }
 
               history.push({
@@ -174,12 +211,19 @@ jobs:
             }
 
             // Determine next state based on conversation flow
-            let nextState = 'gathering';
+            // Note: We can only reach this point if currentState is NOT a terminal state,
+            // as terminal states are checked earlier (lines 98-103) and cause an early return.
+            // Note: Issues that are closed don't trigger this workflow (see line 29 condition).
+            let nextState = 'gathering'; // Default to gathering for defensive programming
+            
             if (botComments.length === 0) {
+              // First bot response - always start in 'initial' state
               nextState = 'initial';
             } else if (botComments.length >= maxResponses - 1) {
+              // At the limit - this is the final attempt
               nextState = 'final_attempt';
             }
+            // else: keep the default 'gathering' state for normal conversation flow
 
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
@@ -383,7 +427,14 @@ jobs:
 3. Do NOT ask more questions - either answer or escalate`
             };
 
-            systemPrompt += `\n\n--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
+            // Build system prompt with state instructions
+            // If SYSTEM_PROMPT exists, append state marker with spacing
+            // If not, start directly with state marker (no leading whitespace)
+            if (systemPrompt) {
+              systemPrompt += `\n\n--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
+            } else {
+              systemPrompt = `--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
+            }
             systemPrompt += stateInstructions[conversationState] || stateInstructions.gathering;
             
             systemPrompt += `\n\n--- RESPONSE FORMAT ---
