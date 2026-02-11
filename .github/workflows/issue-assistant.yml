@@ -145,9 +145,9 @@ jobs:
             const sanitizeContent = (content, maxLength = 10000) => {
               if (!content) return '';
               let sanitized = content
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-                .replace(/[^\S\r\n]+/g, ' ')
-                .replace(/\n{3,}/g, '\n\n')
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
+                .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace (except newlines)
+                .replace(/\n{3,}/g, '\n\n')                       // Collapse excessive newlines
                 .trim();
               if (sanitized.length > maxLength) {
                 sanitized = sanitized.substring(0, maxLength) + '... [truncated]';
@@ -201,18 +201,15 @@ jobs:
             // Determine next state based on conversation flow
             // Note: We can only reach this point if currentState is NOT a terminal state,
             // as terminal states are checked earlier (lines 98-103) and cause an early return.
-            // Preserve existing terminal states; only set initial state for new conversations
             let nextState = currentState;
             
             if (botComments.length === 0) {
               nextState = 'initial';
-            } else if (!['resolved', 'escalated'].includes(currentState)) {
-              // Only update state if not already in a terminal state (defensive check)
-              if (botComments.length >= maxResponses - 1) {
-                nextState = 'final_attempt';
-              } else {
-                nextState = 'gathering';
-              }
+            } else if (botComments.length >= maxResponses - 1) {
+              nextState = 'final_attempt';
+            } else if (currentState !== 'final_attempt') {
+              // Keep 'final_attempt' if already set, otherwise use 'gathering'
+              nextState = 'gathering';
             }
 
             console.log(`Will respond. Next state: ${nextState}`);
