@@ -148,6 +148,7 @@ jobs:
              * @returns {string} Sanitized content, truncated if exceeds maxLength
              */
             const sanitizeContent = (content, maxLength = 10000) => {
+              // Return empty string for any falsy value (null, undefined, '', 0, false, NaN)
               if (!content) return '';
               let sanitized = content
                 .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
@@ -206,17 +207,18 @@ jobs:
             // Determine next state based on conversation flow
             // Note: We can only reach this point if currentState is NOT a terminal state,
             // as terminal states are checked earlier (lines 98-103) and cause an early return.
-            let nextState = currentState;
+            let nextState;
             
             if (botComments.length === 0) {
+              // First bot response - always start in 'initial' state
               nextState = 'initial';
             } else if (botComments.length >= maxResponses - 1) {
+              // At the limit - this is the final attempt
               nextState = 'final_attempt';
-            } else if (currentState !== 'final_attempt') {
-              // If not already in final_attempt, transition to gathering state
+            } else {
+              // Normal conversation flow - use 'gathering' state
               nextState = 'gathering';
             }
-            // Otherwise keep the current state (e.g., preserve 'final_attempt')
 
             console.log(`Will respond. Next state: ${nextState}`);
             console.log(`Conversation turns: ${history.length}`);
