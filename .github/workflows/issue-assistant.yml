@@ -34,7 +34,6 @@ jobs:
       }}
 
     outputs:
-      # FIX: Wrapped in quotes to prevent YAML parsing issues with && and ||
       should_respond: "${{ steps.conversation-state.outputs.should_respond == 'true' && steps.validation.outputs.validation_passed == 'true' }}"
       conversation_state: ${{ steps.conversation-state.outputs.state }}
       conversation_history: ${{ steps.conversation-state.outputs.history }}
@@ -52,24 +51,16 @@ jobs:
             const commenter = isComment ? context.payload.comment.user.login : null;
             const issueAuthor = issue.user.login;
 
-            // Get all comments
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue.number
             });
 
-            // Parse bot comments and their states
-            const botComments = comments.filter(c => 
-              c.body && c.body.includes('<!-- msdo-issue-assistant')
-            );
+            const botComments = comments.filter(function(c) {
+              return c.body && c.body.includes('<!-- msdo-issue-assistant');
+            });
 
-            // Extract state from most recent bot comment.
-            // Note: Only states that are actually written into bot comments can be
-            // recovered via this regex (e.g., 'initial', 'gathering', 'final_attempt',
-            // 'resolved', 'escalated', 'closed'). Other defined states such as
-            // 'max_responses', 'wrong_user', and 'no_new_content' are internal/terminal
-            // states used in non-response branches and are never persisted in comments.
             const stateRegex = /<!-- msdo-issue-assistant state:(\w+)/;
             let currentState = 'initial';
             let lastBotCommentTime = null;
@@ -81,97 +72,76 @@ jobs:
               lastBotCommentTime = new Date(lastBot.created_at);
             }
 
-            console.log(`Current state: ${currentState}`);
-            console.log(`Bot responses so far: ${botComments.length}`);
+            console.log('Current state: ' + currentState);
+            console.log('Bot responses so far: ' + botComments.length);
 
-            // === SAFETY CHECKS ===
-
-            // 1. Max responses limit
             const maxResponses = parseInt(process.env.MAX_BOT_RESPONSES) || 4;
             if (botComments.length >= maxResponses) {
-              console.log(`Max responses (${maxResponses}) reached - stopping`);
+              console.log('Max responses reached - stopping');
               core.setOutput('should_respond', 'false');
               core.setOutput('state', 'max_responses');
               return;
             }
 
-            // 2. Terminal states - don't respond further
             if (['resolved', 'escalated'].includes(currentState)) {
-              console.log(`Terminal state "${currentState}" - no more responses`);
+              console.log('Terminal state - no more responses');
               core.setOutput('should_respond', 'false');
               core.setOutput('state', currentState);
               return;
             }
 
-            // 3. For comments: only respond to issue author
             if (isComment && commenter !== issueAuthor) {
-              console.log(`Comment from ${commenter}, but issue author is ${issueAuthor} - skipping`);
+              console.log('Comment not from issue author - skipping');
               core.setOutput('should_respond', 'false');
               core.setOutput('state', 'wrong_user');
               return;
             }
 
-            // 4. Cooldown between responses (prevent rapid loops)
             if (lastBotCommentTime) {
               const cooldownMs = (parseInt(process.env.MIN_RESPONSE_INTERVAL_SECONDS) || 120) * 1000;
               const timeSinceLastBot = Date.now() - lastBotCommentTime.getTime();
-              
               if (timeSinceLastBot < cooldownMs) {
-                console.log(`Cooldown active (${Math.floor(timeSinceLastBot/1000)}s < ${cooldownMs/1000}s)`);
+                console.log('Cooldown active');
                 core.setOutput('should_respond', 'false');
                 core.setOutput('state', 'cooldown');
                 return;
               }
             }
 
-            // 5. For comments: require new content from author since last bot response
             if (isComment && botComments.length > 0) {
               const lastBotTime = new Date(botComments[botComments.length - 1].created_at);
-              const authorCommentsSinceBot = comments.filter(c => 
-                c.user.login === issueAuthor &&
-                new Date(c.created_at) > lastBotTime &&
-                !c.body.includes('<!-- msdo-issue-assistant')
-              );
-
+              const authorCommentsSinceBot = comments.filter(function(c) {
+                return c.user.login === issueAuthor &&
+                  new Date(c.created_at) > lastBotTime &&
+                  !c.body.includes('<!-- msdo-issue-assistant');
+              });
               if (authorCommentsSinceBot.length === 0) {
-                console.log('No new author content since last bot response');
+                console.log('No new author content');
                 core.setOutput('should_respond', 'false');
                 core.setOutput('state', 'no_new_content');
                 return;
               }
             }
 
-            // === BUILD CONVERSATION HISTORY ===
-
-            /**
-             * Sanitizes user input to prevent injection attacks and normalize formatting.
-             * @param {string} content - The raw user input to sanitize
-             * @param {number} maxLength - Maximum allowed length (default: 10000)
-             * @returns {string} Sanitized content, truncated if exceeds maxLength
-             */
-            const sanitizeContent = (content, maxLength = 10000) => {
+            var sanitizeContent = function(content, maxLength) {
+              maxLength = maxLength || 10000;
               if (content == null || content === '') return '';
-              
-              const str = String(content);
-              
-              let sanitized = str
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars
-                .replace(/\r\n/g, '\n')                           // Normalize Windows line endings
-                .replace(/\r/g, '\n')                             // Normalize old Mac line endings
-                .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace
-                .replace(/\n{3,}/g, '\n\n')                       // Collapse excessive newlines
+              var str = String(content);
+              var sanitized = str
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+                .replace(/\r\n/g, '\n')
+                .replace(/\r/g, '\n')
+                .replace(/[^\S\r\n]+/g, ' ')
+                .replace(/\n{3,}/g, '\n\n')
                 .trim();
-
               if (sanitized.length > maxLength) {
                 sanitized = sanitized.substring(0, maxLength) + '... [truncated]';
               }
               return sanitized;
             };
             
-            const history = [];
-            
-            // Add issue body as first message (sanitize it)
-            const issueContent = `[Issue opened] ${issue.title}\n\n${issue.body || '(no description)'}`;
+            var history = [];
+            var issueContent = '[Issue opened] ' + issue.title + '\n\n' + (issue.body || '(no description)');
             history.push({
               role: 'user',
               author: issueAuthor,
@@ -179,27 +149,20 @@ jobs:
               timestamp: issue.created_at
             });
 
-            // Add comments from issue author and bot only (filter out other users)
-            for (const comment of comments) {
-              const isBot = comment.body.includes('<!-- msdo-issue-assistant');
-              const isIssueAuthor = comment.user.login === issueAuthor;
+            for (var i = 0; i < comments.length; i++) {
+              var comment = comments[i];
+              var isBot = comment.body.includes('<!-- msdo-issue-assistant');
+              var isIssueAuthor = comment.user.login === issueAuthor;
               
-              // Only include bot comments and comments from the issue author
-              if (!isBot && !isIssueAuthor) {
-                continue;
-              }
+              if (!isBot && !isIssueAuthor) continue;
               
-              // Strip bot metadata from display
-              let content = comment.body;
+              var content = comment.body;
               if (isBot) {
                 content = content
                   .replace(/<!-- msdo-issue-assistant[^>]*-->/g, '')
                   .replace(/<details>[\s\S]*?<\/details>/g, '')
                   .trim();
-              }
-              
-              // Sanitize all user content before adding to history
-              if (!isBot) {
+              } else {
                 content = sanitizeContent(content);
               }
 
@@ -211,24 +174,17 @@ jobs:
               });
             }
 
-            // Determine next state based on conversation flow
-            let nextState = 'gathering';
-            
+            var nextState = 'gathering';
             if (botComments.length === 0) {
               nextState = 'initial';
             } else if (botComments.length >= maxResponses - 1) {
               nextState = 'final_attempt';
             }
 
-            console.log(`Will respond. Next state: ${nextState}`);
-            console.log(`Conversation turns: ${history.length}`);
+            console.log('Next state: ' + nextState);
 
-            const MAX_HISTORY_TURNS = 10;
-            const trimmedHistory = history.slice(-MAX_HISTORY_TURNS);
-            
-            if (history.length > MAX_HISTORY_TURNS) {
-              console.log(`History trimmed from ${history.length} to ${MAX_HISTORY_TURNS} turns`);
-            }
+            var MAX_HISTORY_TURNS = 10;
+            var trimmedHistory = history.slice(-MAX_HISTORY_TURNS);
 
             core.setOutput('should_respond', 'true');
             core.setOutput('state', nextState);
@@ -243,7 +199,7 @@ jobs:
             .github/wiki-context.md
           sparse-checkout-cone-mode: false
 
-      - name: Load cached wiki context
+      - name: Load wiki context
         if: steps.conversation-state.outputs.should_respond == 'true'
         id: wiki
         shell: bash
@@ -252,32 +208,25 @@ jobs:
             echo "Using cached wiki"
             WIKI_B64=$(base64 -w 0 < .github/wiki-context.md)
             echo "context=$WIKI_B64" >> $GITHUB_OUTPUT
-            echo "available=true" >> $GITHUB_OUTPUT
-            echo "Size: $(wc -c < .github/wiki-context.md) bytes"
             exit 0
           fi
 
           WIKI_URL="https://github.com/${{ github.repository }}.wiki.git"
-
           if git clone --depth 1 "$WIKI_URL" wiki-content 2>/dev/null; then
-            echo "Wiki cloned at runtime"
+            echo "Wiki cloned"
             WIKI_FILE=$(mktemp)
-
             for page in Home FAQ Troubleshooting Configuration Tools; do
               if [ -f "wiki-content/${page}.md" ]; then
                 echo -e "\n## ${page}\n" >> "$WIKI_FILE"
                 head -c 4000 "wiki-content/${page}.md" >> "$WIKI_FILE"
               fi
             done
-
             WIKI_B64=$(base64 -w 0 < "$WIKI_FILE")
             echo "context=$WIKI_B64" >> $GITHUB_OUTPUT
-            echo "available=true" >> $GITHUB_OUTPUT
             rm "$WIKI_FILE"
           else
-            echo "No wiki cache found and wiki not available"
+            echo "No wiki available"
             echo "context=" >> $GITHUB_OUTPUT
-            echo "available=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup Node.js
@@ -297,8 +246,6 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // For issue_comment events, validate ONLY the new comment content.
-            // For issues events (new issue), validate the issue body.
             const isComment = context.eventName === 'issue_comment';
             const rawContent = isComment 
               ? context.payload.comment.body 
@@ -343,11 +290,6 @@ jobs:
             core.setOutput('sanitized_content', result.sanitizedContent || '');
             core.setOutput('issue_type', result.issueType || 'unknown');
 
-            if (!result.shouldRespond) {
-              const contentType = isComment ? 'comment' : 'issue body';
-              console.log(`Validation failed for ${contentType}:`, result.errors);
-            }
-
   respond-with-ai:
     needs: validate-and-triage
     runs-on: ubuntu-latest
@@ -367,12 +309,13 @@ jobs:
             echo "has_wiki=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Conversational AI Response
+      - name: AI Response
         id: ai-analysis
         uses: actions/github-script@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SYSTEM_PROMPT: ${{ secrets.ISSUE_ASSISTANT_SYSTEM_PROMPT }}
+          STATE_PROMPTS: ${{ secrets.ISSUE_ASSISTANT_STATE_PROMPTS }}
           CANARY_TOKEN: ${{ secrets.CANARY_TOKEN }}
           ALLOWED_URLS: ${{ secrets.ALLOWED_URLS }}
           CONVERSATION_STATE: ${{ needs.validate-and-triage.outputs.conversation_state }}
@@ -385,96 +328,62 @@ jobs:
           script: |
             const fs = require('fs');
             
-            // Response validation constants
-            const MIN_AI_RESPONSE_LENGTH = 20;
-            const MAX_AI_RESPONSE_LENGTH = 1500;
+            const MIN_RESPONSE_LENGTH = 20;
+            const MAX_RESPONSE_LENGTH = 1500;
 
-            let wikiContext = '';
+            var wikiContext = '';
             if (process.env.HAS_WIKI === 'true') {
               try {
                 wikiContext = fs.readFileSync('/tmp/wiki_context.txt', 'utf8');
-                console.log('Wiki context loaded: ' + wikiContext.length + ' chars');
+              } catch (e) {}
+            }
+
+            var conversationState = process.env.CONVERSATION_STATE;
+            var conversationHistory = JSON.parse(process.env.CONVERSATION_HISTORY || '[]');
+            var repoOwner = process.env.REPO_OWNER;
+            var repoName = process.env.REPO_NAME;
+            var wikiUrl = 'https://github.com/' + repoOwner + '/' + repoName + '/wiki';
+
+            var systemPrompt = process.env.SYSTEM_PROMPT || '';
+            
+            var statePrompts = {};
+            if (process.env.STATE_PROMPTS) {
+              try {
+                statePrompts = JSON.parse(process.env.STATE_PROMPTS);
               } catch (e) {
-                console.log('Could not read wiki context');
+                console.log('::warning::Could not parse STATE_PROMPTS');
               }
             }
 
-            const conversationState = process.env.CONVERSATION_STATE;
-            const conversationHistory = JSON.parse(process.env.CONVERSATION_HISTORY || '[]');
-            const repoOwner = process.env.REPO_OWNER;
-            const repoName = process.env.REPO_NAME;
-            const wikiUrl = `https://github.com/${repoOwner}/${repoName}/wiki`;
-
-            // Build conversation-aware system prompt
-            let systemPrompt = process.env.SYSTEM_PROMPT || '';
-            
-            const stateInstructions = {
-              initial: `This is a NEW issue. Analyze it and either:
-1. If wiki has the answer → provide the solution directly
-2. If missing critical info → ask specific questions (max 3-4 bullets)
-3. If clearly needs maintainer → acknowledge and escalate`,
-              
-              gathering: `This is an ONGOING conversation. The user has provided more info.
-1. Check if their response + wiki now allows you to answer
-2. If yes → provide the solution, mark as RESOLVED
-3. If still missing info → ask ONE focused follow-up
-4. If stuck or out of scope → escalate to maintainer`,
-              
-              final_attempt: `This is your FINAL response opportunity.
-1. Summarize what you know and any partial solutions from wiki
-2. Clearly state what a maintainer needs to investigate
-3. Do NOT ask more questions - either answer or escalate`
-            };
-
-            if (systemPrompt) {
-              systemPrompt += `\n\n--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
-            } else {
-              systemPrompt = `--- CONVERSATION STATE: ${conversationState.toUpperCase()} ---\n`;
+            if (statePrompts[conversationState]) {
+              systemPrompt += '\n\n' + statePrompts[conversationState];
             }
-            systemPrompt += stateInstructions[conversationState] || stateInstructions.gathering;
+
+            var userPrompt = 'Issue Type: ' + process.env.ISSUE_TYPE + '\n';
+            userPrompt += 'State: ' + conversationState + '\n\n';
+            userPrompt += '--- CONVERSATION ---\n';
             
-            systemPrompt += `\n\n--- RESPONSE FORMAT ---
-End your response with exactly one of these outcome tags (hidden from user):
-- [OUTCOME:resolved] - You answered their question from wiki/knowledge
-- [OUTCOME:gathering] - You asked for more information  
-- [OUTCOME:escalated] - Needs maintainer, you've done what you can
-
-Keep responses concise (50-150 words). No signatures.`;
-
-            // Build the conversation prompt
-            let userPrompt = `ISSUE TRIAGE CONVERSATION\n\n`;
-            userPrompt += `Issue Type: ${process.env.ISSUE_TYPE}\n`;
-            userPrompt += `Conversation State: ${conversationState}\n`;
-            userPrompt += `Turns so far: ${conversationHistory.length}\n\n`;
-
-            userPrompt += `--- CONVERSATION HISTORY ---\n`;
-            for (let i = 0; i < conversationHistory.length; i++) {
-              const turn = conversationHistory[i];
-              const role = turn.role === 'assistant' ? 'BOT' : 'USER';
-              const isLatest = (i === conversationHistory.length - 1);
-              const marker = isLatest ? ' ⬅ RESPOND TO THIS' : '';
-              userPrompt += `[${role}]${marker} ${turn.content}\n\n`;
+            for (var i = 0; i < conversationHistory.length; i++) {
+              var turn = conversationHistory[i];
+              var role = turn.role === 'assistant' ? 'BOT' : 'USER';
+              var marker = (i === conversationHistory.length - 1) ? ' [LATEST]' : '';
+              userPrompt += '[' + role + ']' + marker + ' ' + turn.content + '\n\n';
             }
 
             if (wikiContext) {
-              userPrompt += `--- WIKI KNOWLEDGE BASE ---\n${wikiContext}\n\n`;
+              userPrompt += '--- WIKI ---\n' + wikiContext + '\n\n';
             }
 
-            userPrompt += `--- YOUR TASK ---\n`;
-            userPrompt += `If wiki answers their question, provide the solution. Otherwise, ask for missing info or escalate to maintainers.\n`;
-            userPrompt += `Wiki URL: ${wikiUrl}\n`;
+            userPrompt += '--- TASK ---\nRespond to the latest message. Wiki: ' + wikiUrl;
 
-            let aiResponse = '';
-            let outcome = 'gathering';
+            var aiResponse = '';
+            var outcome = 'gathering';
 
             try {
-              console.log('Calling GitHub Models API...');
-              console.log(`State: ${conversationState}, History turns: ${conversationHistory.length}`);
-
-              const response = await fetch('https://models.github.ai/inference/chat/completions', {
+              var response = await fetch('https://models.github.ai/inference/chat/completions', {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+                  'Authorization': 'Bearer ' + process.env.GITHUB_TOKEN,
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -489,73 +398,47 @@ Keep responses concise (50-150 words). No signatures.`;
               });
 
               if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`API returned ${response.status}: ${errorText}`);
+                throw new Error('API returned ' + response.status);
               }
 
-              const data = await response.json();
-              aiResponse = data.choices?.[0]?.message?.content || '';
+              var data = await response.json();
+              aiResponse = data.choices && data.choices[0] && data.choices[0].message
+                ? data.choices[0].message.content
+                : '';
 
-              // Extract outcome tag
-              const outcomeMatch = aiResponse.match(/\[OUTCOME:(\w+)\]/);
-              const allOutcomeTags = aiResponse.match(/\[OUTCOME:[^\]]+\]/g) || [];
-
+              var outcomeMatch = aiResponse.match(/\[OUTCOME:(\w+)\]/);
               if (outcomeMatch) {
-                if (allOutcomeTags.length > 1) {
-                  console.log(`::warning::Multiple outcome tags found; using first. Tags: ${allOutcomeTags.join(', ')}`);
-                }
                 outcome = outcomeMatch[1];
-                aiResponse = aiResponse.replace(/\s*\[OUTCOME:\w+\]\s*$/, '').trim();
-              } else {
-                if (allOutcomeTags.length > 0) {
-                  console.log(`::warning::Outcome tags present but none matched expected format. Tags: ${allOutcomeTags.join(', ')}`);
-                } else {
-                  console.log('::warning::No [OUTCOME:...] tag found; defaulting to "gathering".');
-                }
+                aiResponse = aiResponse.replace(/\s*\[OUTCOME:\w+\]\s*/g, '').trim();
               }
-
-              console.log(`AI response: ${aiResponse.length} chars, outcome: ${outcome}`);
 
             } catch (error) {
-              console.log(`::warning::AI API failed: ${error.message}`);
+              console.log('::warning::AI API failed: ' + error.message);
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
               core.setOutput('outcome', 'error');
               return;
             }
 
-            // Validate response length
-            const trimmedResponse = aiResponse ? aiResponse.trim() : '';
-
-            if (!trimmedResponse || trimmedResponse.length < MIN_AI_RESPONSE_LENGTH) {
-              console.log(`::warning::AI response too short (${trimmedResponse.length} chars, min ${MIN_AI_RESPONSE_LENGTH})`);
+            var trimmed = aiResponse ? aiResponse.trim() : '';
+            if (!trimmed || trimmed.length < MIN_RESPONSE_LENGTH || trimmed.length > MAX_RESPONSE_LENGTH) {
+              console.log('::warning::Response length invalid');
               core.setOutput('response', '');
               core.setOutput('is_valid', 'false');
               core.setOutput('outcome', 'error');
               return;
             }
 
-            if (trimmedResponse.length > MAX_AI_RESPONSE_LENGTH) {
-              console.log(`::warning::AI response too long (${trimmedResponse.length} chars, max ${MAX_AI_RESPONSE_LENGTH})`);
-              core.setOutput('response', '');
-              core.setOutput('is_valid', 'false');
-              core.setOutput('outcome', 'error');
-              return;
-            }
+            var isValid = true;
+            var issues = [];
 
-            // === RESPONSE VALIDATION ===
-            let isValid = true;
-            const issues = [];
-
-            // Canary token check
-            const canaryToken = process.env.CANARY_TOKEN || '';
+            var canaryToken = process.env.CANARY_TOKEN || '';
             if (canaryToken && aiResponse.includes(canaryToken)) {
-              issues.push('Canary token leaked');
+              issues.push('Canary leaked');
               isValid = false;
             }
 
-            // Secret pattern detection
-            const secretPatterns = [
+            var secretPatterns = [
               /ghp_[a-zA-Z0-9]{36}/,
               /github_pat_[a-zA-Z0-9_]{82}/,
               /gho_[a-zA-Z0-9]{36}/,
@@ -563,20 +446,18 @@ Keep responses concise (50-150 words). No signatures.`;
               /sk-ant-[a-zA-Z0-9-]{90,}/,
               /AKIA[0-9A-Z]{16}/,
               /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/,
-              /['"][a-zA-Z0-9]{32,}['"]/,
-              /-----BEGIN (RSA |EC )?PRIVATE KEY/,
+              /-----BEGIN (RSA |EC )?PRIVATE KEY/
             ];
 
-            for (const pattern of secretPatterns) {
-              if (pattern.test(aiResponse)) {
-                issues.push('Secret pattern detected');
+            for (var p = 0; p < secretPatterns.length; p++) {
+              if (secretPatterns[p].test(aiResponse)) {
+                issues.push('Secret pattern');
                 isValid = false;
                 break;
               }
             }
 
-            // URL allowlist
-            let allowedDomains = [
+            var allowedDomains = [
               'github.com/microsoft/security-devops-action',
               'learn.microsoft.com',
               'docs.microsoft.com',
@@ -588,28 +469,33 @@ Keep responses concise (50-150 words). No signatures.`;
                 allowedDomains = JSON.parse(process.env.ALLOWED_URLS);
               } catch (e) {}
             }
-            allowedDomains.push(`github.com/${repoOwner}/${repoName}`);
+            allowedDomains.push('github.com/' + repoOwner + '/' + repoName);
 
-            const urlRegex = /https?:\/\/[^\s)>\]]+/gi;
-            const foundUrls = aiResponse.match(urlRegex) || [];
-            for (const urlStr of foundUrls) {
+            var urlRegex = /https?:\/\/[^\s)>\]]+/gi;
+            var foundUrls = aiResponse.match(urlRegex) || [];
+            for (var u = 0; u < foundUrls.length; u++) {
               try {
-                const parsedUrl = new URL(urlStr);
-                const fullPath = parsedUrl.hostname + parsedUrl.pathname;
-                
-                const isAllowed = allowedDomains.some(domain => {
+                var parsedUrl = new URL(foundUrls[u]);
+                var fullPath = parsedUrl.hostname + parsedUrl.pathname;
+                var allowed = false;
+                for (var d = 0; d < allowedDomains.length; d++) {
+                  var domain = allowedDomains[d];
                   if (domain.includes('/')) {
-                    return fullPath.startsWith(domain) || fullPath.startsWith(domain.replace(/\/$/, ''));
+                    if (fullPath.startsWith(domain) || fullPath.startsWith(domain.replace(/\/$/, ''))) {
+                      allowed = true;
+                      break;
+                    }
+                  } else if (parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)) {
+                    allowed = true;
+                    break;
                   }
-                  return parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain);
-                });
-                
-                if (!isAllowed) {
-                  issues.push(`Unapproved URL: ${urlStr}`);
+                }
+                if (!allowed) {
+                  issues.push('Unapproved URL');
                   isValid = false;
                 }
               } catch (e) {
-                issues.push(`Invalid URL: ${urlStr}`);
+                issues.push('Invalid URL');
                 isValid = false;
               }
             }
@@ -617,11 +503,6 @@ Keep responses concise (50-150 words). No signatures.`;
             core.setOutput('response', aiResponse);
             core.setOutput('is_valid', isValid.toString());
             core.setOutput('outcome', outcome);
-            core.setOutput('issues', JSON.stringify(issues));
-
-            if (!isValid) {
-              console.log('Validation failed:', issues);
-            }
 
       - name: Post Response
         if: ${{ steps.ai-analysis.outputs.is_valid == 'true' }}
@@ -629,67 +510,46 @@ Keep responses concise (50-150 words). No signatures.`;
         env:
           AI_RESPONSE: ${{ steps.ai-analysis.outputs.response }}
           OUTCOME: ${{ steps.ai-analysis.outputs.outcome }}
+          FOOTER_TEMPLATES: ${{ secrets.ISSUE_ASSISTANT_FOOTERS }}
         with:
           script: |
-            const response = process.env.AI_RESPONSE;
-            const outcome = process.env.OUTCOME;
-            const wikiUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/wiki`;
+            var response = process.env.AI_RESPONSE;
+            var outcome = process.env.OUTCOME;
+            var wikiUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/wiki';
 
-            // Map outcome to stored state
-            const stateMap = {
-              'resolved': 'resolved',
-              'escalated': 'escalated', 
-              'gathering': 'gathering',
-              'error': 'gathering'
-            };
-            const state = stateMap[outcome] || 'gathering';
+            var stateMap = { 'resolved': 'resolved', 'escalated': 'escalated', 'gathering': 'gathering', 'error': 'gathering' };
+            var state = stateMap[outcome] || 'gathering';
 
-            // Try to add labels before posting comment
-            let labelAdditionFailed = false;
-            const labelsToAdd = [];
-            if (outcome === 'escalated') {
-              labelsToAdd.push('needs-maintainer');
+            var footers = {};
+            if (process.env.FOOTER_TEMPLATES) {
+              try {
+                footers = JSON.parse(process.env.FOOTER_TEMPLATES);
+              } catch (e) {}
             }
 
-            if (labelsToAdd.length > 0) {
+            var labelFailed = false;
+            if (outcome === 'escalated') {
               try {
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  labels: labelsToAdd
+                  labels: ['needs-maintainer']
                 });
-                console.log('Successfully added labels:', labelsToAdd.join(', '));
               } catch (e) {
-                console.log('Could not add labels:', e.message);
-                labelAdditionFailed = true;
+                labelFailed = true;
               }
             }
 
-            // Build comment with hidden state marker
-            let comment = `<!-- msdo-issue-assistant state:${state} -->\n`;
-            comment += response + '\n\n';
-            comment += '---\n';
+            var comment = '<!-- msdo-issue-assistant state:' + state + ' -->\n';
+            comment += response + '\n\n---\n';
             
-            // Add contextual footer based on outcome
-            if (outcome === 'resolved') {
-              comment += `<details><summary>✅ Issue assisted</summary>\n\n`;
-              comment += `If this solved your issue, you can close it. `;
-              comment += `Otherwise, reply and a maintainer will follow up.\n`;
-            } else if (outcome === 'escalated') {
-              comment += `<details><summary>🏷️ Escalated to maintainers</summary>\n\n`;
-              comment += `A maintainer will review this issue. `;
-              comment += `No further bot responses will be sent.\n`;
-              if (labelAdditionFailed) {
-                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. A maintainer will need to add this label manually.\n`;
-              }
-            } else {
-              comment += `<details><summary>💬 Gathering info</summary>\n\n`;
-              comment += `Reply with the requested information and I'll try to help further.\n`;
+            var footer = footers[outcome] || footers['default'] || '';
+            footer = footer.replace(/\{wikiUrl\}/g, wikiUrl);
+            if (labelFailed && outcome === 'escalated') {
+              footer += '\n\nNote: Could not add label automatically.';
             }
-            
-            comment += `[Wiki](${wikiUrl}) · [FAQ](${wikiUrl}/FAQ)\n`;
-            comment += `</details>`;
+            comment += footer;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -698,22 +558,16 @@ Keep responses concise (50-150 words). No signatures.`;
               body: comment
             });
 
-            console.log(`Posted response with outcome: ${outcome}, state: ${state}`);
-
-      - name: Post Fallback Comment
+      - name: Post Fallback
         if: ${{ steps.ai-analysis.outputs.is_valid != 'true' }}
         uses: actions/github-script@v7
+        env:
+          FALLBACK_TEMPLATE: ${{ secrets.ISSUE_ASSISTANT_FALLBACK }}
         with:
           script: |
-            const wikiUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/wiki`;
-
-            const comment = `<!-- msdo-issue-assistant state:gathering -->\n` +
-              `To help investigate, please share:\n` +
-              `- MSDO version\n` +
-              `- OS and runner type\n` +
-              `- Error message/logs\n` +
-              `- Workflow YAML\n\n` +
-              `[FAQ](${wikiUrl}/FAQ) · [Troubleshooting](${wikiUrl}/Troubleshooting)`;
+            var wikiUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/wiki';
+            var template = process.env.FALLBACK_TEMPLATE || 'To help investigate, please share:\n- MSDO version\n- OS and runner\n- Error logs\n- Workflow YAML';
+            var comment = '<!-- msdo-issue-assistant state:gathering -->\n' + template.replace(/\{wikiUrl\}/g, wikiUrl);
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -721,5 +575,3 @@ Keep responses concise (50-150 words). No signatures.`;
               issue_number: context.issue.number,
               body: comment
             });
-
-            console.log('Fallback comment posted');
