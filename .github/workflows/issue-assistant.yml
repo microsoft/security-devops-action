@@ -590,6 +590,27 @@ Keep responses concise (50-150 words). No signatures.`;
             };
             const state = stateMap[outcome] || 'gathering';
 
+            // Try to add labels before posting comment
+            let labelAdditionFailed = false;
+            const labelsToAdd = [];
+            if (outcome === 'escalated') {
+              labelsToAdd.push('needs-maintainer');
+            }
+            if (labelsToAdd.length > 0) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: labelsToAdd
+                });
+                console.log('Successfully added labels:', labelsToAdd.join(', '));
+              } catch (e) {
+                console.log('Could not add labels:', e.message);
+                labelAdditionFailed = true;
+              }
+            }
+
             // Build comment with hidden state marker
             let comment = `<!-- msdo-issue-assistant state:${state} -->\n`;
             comment += response + '\n\n';
@@ -604,6 +625,9 @@ Keep responses concise (50-150 words). No signatures.`;
               comment += `<details><summary>🏷️ Escalated to maintainers</summary>\n\n`;
               comment += `A maintainer will review this issue. `;
               comment += `No further bot responses will be sent.\n`;
+              if (labelAdditionFailed) {
+                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. Please add it manually to ensure proper triage.\n`;
+              }
             } else {
               comment += `<details><summary>💬 Gathering info</summary>\n\n`;
               comment += `Reply with the requested information and I'll try to help further.\n`;
@@ -618,24 +642,6 @@ Keep responses concise (50-150 words). No signatures.`;
               issue_number: context.issue.number,
               body: comment
             });
-
-            // Add/update labels based on outcome
-            const labelsToAdd = [];
-            if (outcome === 'escalated') {
-              labelsToAdd.push('needs-maintainer');
-            }
-            if (labelsToAdd.length > 0) {
-              try {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: labelsToAdd
-                });
-              } catch (e) {
-                console.log('Could not add labels:', e.message);
-              }
-            }
 
             console.log(`Posted response with outcome: ${outcome}, state: ${state}`);
 
