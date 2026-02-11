@@ -227,7 +227,7 @@ async function validateRequest({
     errors.push('Rate limit exceeded');
   }
   
-  if (comment && maxBotResponses) {
+  if (comment && maxBotResponses !== undefined) {
     const { data: comments } = await github.rest.issues.listComments({
       owner: context.repo.owner,
       repo: context.repo.repo,
