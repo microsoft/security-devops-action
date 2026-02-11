@@ -64,7 +64,12 @@ jobs:
               c.body && c.body.includes('<!-- msdo-issue-assistant')
             );
 
-            // Extract state from most recent bot comment
+            // Extract state from most recent bot comment.
+            // Note: Only states that are actually written into bot comments can be
+            // recovered via this regex (e.g., 'initial', 'gathering', 'final_attempt',
+            // 'resolved', 'escalated', 'closed'). Other defined states such as
+            // 'max_responses', 'wrong_user', and 'no_new_content' are internal/terminal
+            // states used in non-response branches and are never persisted in comments.
             const stateRegex = /<!-- msdo-issue-assistant state:(\w+)/;
             let currentState = 'initial';
             let lastBotCommentTime = null;
@@ -155,7 +160,7 @@ jobs:
               let content = comment.body;
               if (isBot) {
                 content = content
-                  .replace(/<!-- msdo-issue-assistant[^>]*-->/g, '')
+                  .replace(/<!-- msdo-issue-assistant[^-]*-->/g, '')
                   .replace(/<details>[\s\S]*?<\/details>/g, '')
                   .trim();
               }
@@ -224,7 +229,7 @@ jobs:
             echo "available=true" >> $GITHUB_OUTPUT
             rm "$WIKI_FILE"
           else
-            echo "No wiki available"
+            echo "No wiki cache found and wiki not available"
             echo "context=" >> $GITHUB_OUTPUT
             echo "available=false" >> $GITHUB_OUTPUT
           fi
@@ -409,7 +414,7 @@ Keep responses concise (50-150 words). No signatures.`;
             }
 
             userPrompt += `--- YOUR TASK ---\n`;
-            userPrompt += `If wiki answers their question, provide the solution. `;
+            userPrompt += `If wiki answers their question, provide the solution. Otherwise, ask for missing info or escalate to maintainers.\n`;
             userPrompt += `Wiki URL: ${wikiUrl}\n`;
 
             let aiResponse = '';
@@ -629,7 +634,7 @@ Keep responses concise (50-150 words). No signatures.`;
               comment += `A maintainer will review this issue. `;
               comment += `No further bot responses will be sent.\n`;
               if (labelAdditionFailed) {
-                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. Please add it manually to ensure proper triage.\n`;
+                comment += `\n⚠️ **Note:** Unable to automatically add the \`needs-maintainer\` label. A maintainer will need to add this label manually to ensure proper triage.\n`;
               }
             } else {
               comment += `<details><summary>💬 Gathering info</summary>\n\n`;
