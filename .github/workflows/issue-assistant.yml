@@ -155,7 +155,7 @@ jobs:
               const str = String(content);
               
               let sanitized = str
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters (preserves \t, \n, \r)
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars (preserves \t=tab, \n=newline, \r=CR)
                 .replace(/\r\n/g, '\n')                           // Normalize Windows line endings
                 .replace(/\r/g, '\n')                             // Normalize old Mac line endings
                 .replace(/[^\S\r\n]+/g, ' ')                      // Normalize whitespace (except newlines)
@@ -213,7 +213,8 @@ jobs:
             // Determine next state based on conversation flow
             // Note: We can only reach this point if currentState is NOT a terminal state,
             // as terminal states are checked earlier (lines 98-103) and cause an early return.
-            let nextState;
+            // Note: Issues that are closed don't trigger this workflow (see line 29 condition).
+            let nextState = 'gathering'; // Default to gathering for defensive programming
             
             if (botComments.length === 0) {
               // First bot response - always start in 'initial' state
