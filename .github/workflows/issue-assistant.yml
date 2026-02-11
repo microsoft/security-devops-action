@@ -396,9 +396,12 @@ Keep responses concise (50-150 words). No signatures.`;
             userPrompt += `Turns so far: ${conversationHistory.length}\n\n`;
 
             userPrompt += `--- CONVERSATION HISTORY ---\n`;
-            for (const turn of conversationHistory) {
+            for (let i = 0; i < conversationHistory.length; i++) {
+              const turn = conversationHistory[i];
               const role = turn.role === 'assistant' ? 'BOT' : 'USER';
-              userPrompt += `[${role}] ${turn.content}\n\n`;
+              const isLatest = (i === conversationHistory.length - 1);
+              const marker = isLatest ? ' ⬅ RESPOND TO THIS' : '';
+              userPrompt += `[${role}]${marker} ${turn.content}\n\n`;
             }
 
             if (wikiContext) {
@@ -406,7 +409,6 @@ Keep responses concise (50-150 words). No signatures.`;
             }
 
             userPrompt += `--- YOUR TASK ---\n`;
-            userPrompt += `Continue the conversation based on the history above. `;
             userPrompt += `If wiki answers their question, provide the solution. `;
             userPrompt += `Wiki URL: ${wikiUrl}\n`;
 
