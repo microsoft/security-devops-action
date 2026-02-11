@@ -396,7 +396,7 @@ Keep responses concise (50-150 words). No signatures.`;
             }
 
             userPrompt += `--- YOUR TASK ---\n`;
-            userPrompt += `Respond to the user's latest message. `;
+            userPrompt += `Continue the conversation based on the history above. `;
             userPrompt += `If wiki answers their question, provide the solution. `;
             userPrompt += `Wiki URL: ${wikiUrl}\n`;
 
