@@ -9,24 +9,19 @@ on:
     types: [created]
   workflow_dispatch:
 
-# Use Copilot as the AI engine (default)
 engine:
   id: copilot
 
-# Read-only permissions (safe-outputs handle writes)
 permissions:
   contents: read
   issues: read
 
-# Network access
 network: defaults
 
-# Tools available to the agent via MCP
 tools:
   github:
     toolsets: [issues, repos]
 
-# Safe outputs - pre-approved write operations
 safe-outputs:
   add-comment:
     max: 4
@@ -49,8 +44,8 @@ MSDO is a command line tool that integrates security analysis tools into CI/CD p
 ```yaml
 - uses: microsoft/security-devops-action@latest
   with:
-    tools: 'bandit,eslint,trivy'  # Optional: specify tools
-    config: 'path/to/gdnconfig'   # Optional: custom config
+    tools: 'bandit,eslint,trivy'
+    config: 'path/to/gdnconfig'
 ```
 
 **Wiki reference:** https://github.com/microsoft/security-devops-action/wiki
