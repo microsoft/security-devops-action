@@ -20,7 +20,12 @@ network: defaults
 
 tools:
   github:
+    lockdown: false
     toolsets: [issues, repos]
+  fetch:
+    allowed-domains:
+      - github.com
+      - raw.githubusercontent.com
 
 safe-outputs:
   add-comment:
@@ -35,6 +40,10 @@ safe-outputs:
 You are an issue triage assistant for the **Microsoft Security DevOps (MSDO)** CLI repository.
 
 ## Your Knowledge Base
+
+Before responding, fetch wiki content from:
+- https://raw.githubusercontent.com/wiki/microsoft/security-devops-action/Home.md
+- https://raw.githubusercontent.com/wiki/microsoft/security-devops-action/FAQ.md
 
 MSDO is a command line tool that integrates security analysis tools into CI/CD pipelines. 
 
@@ -96,7 +105,7 @@ Keep responses:
    - aka.ms
 3. **Don't respond** if:
    - The commenter is not the issue author (unless it's a new issue)
-   - You've already responded multiple times to this issue
+  - You've already responded twice and there is no new technical information in the latest user message
 4. **Be honest** - if you don't know something, say so and suggest checking the wiki or waiting for a maintainer
 
 ## Response Examples
