@@ -97,6 +97,16 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             args.push('--github');
         }
 
+        let subscriptionId: string = core.getInput('subscriptionId');
+        if (!common.isNullOrWhiteSpace(subscriptionId)) {
+            process.env.MSDO_SUBSCRIPTIONID = subscriptionId.trim();
+        }
+
+        let tenantId: string = core.getInput('tenantId');
+        if (!common.isNullOrWhiteSpace(tenantId)) {
+            process.env.MSDO_TENANTID = tenantId.trim();
+        }
+
         await client.run(args, 'microsoft/security-devops-action');
     }
 }

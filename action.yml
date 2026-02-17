@@ -20,6 +20,10 @@ inputs:
     description: A comma separated list of analyzer to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
   includeTools:
     description: Deprecated
+  subscriptionId:
+    description: The Azure Subscription ID to include in MSDO CLI telemetry for correlation with Defender for Cloud.
+  tenantId:
+    description: The Azure Tenant ID to include in MSDO CLI telemetry for correlation with Defender for Cloud.
   existingFilename:
     description: A SARIF filename that already exists. If it does, then the normal run will not take place and the file will instead be uploaded to MSDO backend.
 outputs:
