@@ -100,11 +100,13 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
         let subscriptionId: string = core.getInput('subscriptionId');
         if (!common.isNullOrWhiteSpace(subscriptionId)) {
             process.env.MSDO_SUBSCRIPTIONID = subscriptionId.trim();
+            process.env.MSDO_AGENTLESS_SUBSCRIPTION_ID = subscriptionId.trim();
         }
 
         let tenantId: string = core.getInput('tenantId');
         if (!common.isNullOrWhiteSpace(tenantId)) {
             process.env.MSDO_TENANTID = tenantId.trim();
+            process.env.MSDO_AGENTLESS_TENANT_ID = tenantId.trim();
         }
 
         await client.run(args, 'microsoft/security-devops-action');
