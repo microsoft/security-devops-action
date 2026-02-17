@@ -17,22 +17,16 @@ permissions:
   issues: read
 
 network:
-  allowed-domains:
-    - github.com
-    - raw.githubusercontent.com
-    - learn.microsoft.com
-    - docs.microsoft.com
-    - aka.ms
+  allowed:
+    - github
 
 tools:
   github:
-    lockdown: false
+    lockdown: true
     toolsets: [issues]
   fetch:
     allowed-domains:
-      - github.com
       - raw.githubusercontent.com
-      - learn.microsoft.com
 
 safe-outputs:
   add-comment:
