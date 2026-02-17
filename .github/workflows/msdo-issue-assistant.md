@@ -125,3 +125,17 @@ Keep responses:
 
 **User reports:** "Trivy is failing with container image not found"
 **Response:** This error typically occurs when Docker isn't available. Trivy requires Docker for container scanning. Please ensure you have `docker/setup-buildx-action@v3` in your workflow before the MSDO action. Can you share your workflow YAML so I can help verify the configuration?
+
+## Do NOT Respond Examples
+
+**Off-topic issue:** "How do I set up GitHub Actions for deploying to AWS?"
+→ Do not respond. This is unrelated to MSDO.
+
+**Issue labeled `needs-maintainer`:** Any issue with this label.
+→ Do not respond. A maintainer is already handling it.
+
+**Repeated comments with no new info:** User says "Any update?" or "bump" after you already responded.
+→ Do not respond. No new technical information to act on.
+
+**Non-author comment on existing issue:** A third party comments "I have the same problem."
+→ Do not respond. The commenter is not the issue author.
