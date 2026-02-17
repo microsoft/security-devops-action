@@ -16,16 +16,23 @@ permissions:
   contents: read
   issues: read
 
-network: defaults
+network:
+  allowed-domains:
+    - github.com
+    - raw.githubusercontent.com
+    - learn.microsoft.com
+    - docs.microsoft.com
+    - aka.ms
 
 tools:
   github:
     lockdown: false
-    toolsets: [issues, repos]
+    toolsets: [issues]
   fetch:
     allowed-domains:
       - github.com
       - raw.githubusercontent.com
+      - learn.microsoft.com
 
 safe-outputs:
   add-comment:
