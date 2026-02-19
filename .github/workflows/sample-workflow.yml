@@ -35,7 +35,7 @@ jobs:
 
       # Upload alerts file as a workflow artifact
     - name: Upload alerts file as a workflow artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:  
         name: alerts-${{ matrix.os }}
         path: ${{ steps.msdo.outputs.sarifFile }}
