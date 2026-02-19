@@ -22,7 +22,7 @@ jobs:
     steps:
 
       # Checkout your code repository to scan
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
       # Run analyzers
     - uses: ./
