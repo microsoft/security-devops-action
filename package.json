@@ -2,6 +2,10 @@
     "name": "microsoft-security-devops-action",
     "version": "1.12.0",
     "description": "Node dependencies for the microsoft/security-devops-action.",
+    "overrides": {
+        "braces": ">=3.0.3",
+        "micromatch": ">=4.0.8"
+    },
     "scripts": {
         "build": "npx gulp",
         "buildTests": "npx gulp buildTests",
@@ -23,7 +27,6 @@
         "del": "^7.0.0",
         "gulp": "^4.0.2",
         "gulp-cli": "^2.3.0",
-        "gulp-shell": "^0.8.0",
         "gulp-typescript": "^6.0.0-alpha.1",
         "mocha": "^10.2.0",
         "sinon": "^4.1.3",
