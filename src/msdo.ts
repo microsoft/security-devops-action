@@ -97,6 +97,12 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
             args.push('--github');
         }
 
+        let breakOnDetections: string = core.getInput('break-on-detections');
+        if (breakOnDetections && breakOnDetections.trim().toUpperCase() === 'TRUE') {
+            process.env.MSDO_BREAK = 'true';
+            core.debug('break-on-detections is enabled, set MSDO_BREAK=true');
+        }
+
         await client.run(args, 'microsoft/security-devops-action');
     }
 }

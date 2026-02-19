@@ -20,6 +20,9 @@ inputs:
     description: A comma separated list of analyzer to run. Example bandit, binskim, container-mapping, eslint, templateanalyzer, terrascan, trivy.
   includeTools:
     description: Deprecated
+  break-on-detections:
+    description: If true, the action will fail the build when vulnerabilities are detected at or above the configured severity. Requires toolkit support for MSDO_BREAK.
+    default: 'false'
   existingFilename:
     description: A SARIF filename that already exists. If it does, then the normal run will not take place and the file will instead be uploaded to MSDO backend.
 outputs:
