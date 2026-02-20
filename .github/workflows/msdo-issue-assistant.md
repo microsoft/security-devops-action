@@ -22,7 +22,7 @@ network:
 
 tools:
   github:
-    lockdown: true
+    lockdown: false
     toolsets: [issues]
   fetch:
     allowed-domains:
