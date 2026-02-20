@@ -1,5 +1,5 @@
 ---
-# MSDO Issue Assistant - GitHub Agentic Workflow
+# MSDO Issue Assistant - GitHub Agentic Workflow 
 # Automatically triage and respond to issues using wiki knowledge
 
 on:
