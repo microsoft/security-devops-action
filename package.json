@@ -25,7 +25,7 @@
         "@types/q": "^1.0.6",
         "@types/sinon": "^4.1.2",
         "del": "^7.0.0",
-        "gulp": "^4.0.2",
+        "gulp": "^5.0.1",
         "gulp-cli": "^2.3.0",
         "gulp-typescript": "^6.0.0-alpha.1",
         "mocha": "^11.7.5",
