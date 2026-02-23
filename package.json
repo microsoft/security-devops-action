@@ -15,7 +15,7 @@
     "author": "Microsoft Corporation",
     "license": "MIT",
     "dependencies": {
-        "@actions/core": "1.10.0",
+        "@actions/core": "3.0.0",
         "@actions/exec": "1.1.1",
         "@microsoft/security-devops-actions-toolkit": "1.11.0"
     },
