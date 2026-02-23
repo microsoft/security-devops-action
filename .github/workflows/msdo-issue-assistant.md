@@ -4,10 +4,12 @@
 
 on:
   issues:
-    types: [opened, reopened]
+    types: [opened]
   issue_comment:
     types: [created]
   workflow_dispatch:
+
+roles: all
 
 engine:
   id: copilot
@@ -29,6 +31,7 @@ tools:
       - raw.githubusercontent.com
 
 safe-outputs:
+  noop: false
   add-comment:
     max: 4
   add-labels:
@@ -107,6 +110,7 @@ Keep responses:
 3. **Stay on topic** - Only respond to issues related to MSDO, security-devops-action, or the supported security tools. If an issue is unrelated (e.g. general GitHub Actions questions, unrelated security tools, off-topic discussions), do not respond.
 4. **Don't respond** if:
    - The issue is not related to MSDO or security-devops-action
+   - The issue is closed
    - The commenter is not the issue author (unless it's a new issue)
    - You've already responded twice and there is no new technical information in the latest user message
    - The issue has a `needs-maintainer` label (a maintainer is handling it)
