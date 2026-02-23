@@ -22,7 +22,7 @@
     "devDependencies": {
         "@types/mocha": "^2.2.44",
         "@types/node": "^20.3.1",
-        "@types/q": "^1.0.6",
+        "@types/q": "^1.5.8",
         "@types/sinon": "^4.1.2",
         "del": "^7.0.0",
         "gulp": "^4.0.2",
