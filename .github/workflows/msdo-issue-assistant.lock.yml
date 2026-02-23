@@ -54,7 +54,7 @@ jobs:
       comment_repo: ""
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Check workflow file timestamps
@@ -93,7 +93,7 @@ jobs:
       secret_verification_result: ${{ steps.validate-secret.outputs.verification_result }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Checkout repository
@@ -781,7 +781,7 @@ jobs:
       total_count: ${{ steps.missing_tool.outputs.total_count }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Download agent output artifact
@@ -886,7 +886,7 @@ jobs:
       success: ${{ steps.parse_results.outputs.success }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Download agent artifacts
@@ -981,7 +981,7 @@ jobs:
       activated: ${{ steps.check_membership.outputs.is_team_member == 'true' }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Check team membership for workflow
@@ -1020,7 +1020,7 @@ jobs:
       process_safe_outputs_temporary_id_map: ${{ steps.process_safe_outputs.outputs.temporary_id_map }}
     steps:
       - name: Setup Scripts
-        uses: github/gh-aw/actions/setup@9382be3ca9ac18917e111a99d4e6bbff58d0dccc # v0.43.23
+        uses: github/gh-aw/actions/setup@a93e36ea4c3955aa749c6c422eac6b9abf968f12 # v0.49.5
         with:
           destination: /opt/gh-aw/actions
       - name: Download agent output artifact
