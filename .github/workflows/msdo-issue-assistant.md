@@ -9,6 +9,8 @@ on:
     types: [created]
   workflow_dispatch:
 
+roles: all
+
 engine:
   id: copilot
 
