@@ -20,7 +20,7 @@
         "@microsoft/security-devops-actions-toolkit": "1.11.0"
     },
     "devDependencies": {
-        "@types/mocha": "^2.2.44",
+        "@types/mocha": "^10.0.10",
         "@types/node": "^20.3.1",
         "@types/q": "^1.0.6",
         "@types/sinon": "^4.1.2",
