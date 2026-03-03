@@ -35,7 +35,7 @@ safe-outputs:
   add-comment:
     max: 4
   add-labels:
-    allowed: [bug, feature, enhancement, documentation, question, needs-info, needs-maintainer]
+    allowed: ["type:bug", "type:feature", "type:docs", "type:question", "type:security", "type:maintenance", "status:triage", "status:waiting-on-author", "status:repro-needed", "status:team-review"]
 
 ---
 
@@ -77,7 +77,7 @@ When a new issue is opened or a user comments:
 **If the wiki answers the question:**
 - Provide the solution directly from wiki knowledge
 - Include relevant wiki links
-- Add appropriate label (bug, feature, documentation, question)
+- Add appropriate label (`type:bug`, `type:feature`, `type:docs`, `type:question`)
 
 **If more information is needed:**
 - Ask for specific details (max 3-4 items):
@@ -85,12 +85,12 @@ When a new issue is opened or a user comments:
   - Operating system and runner type
   - Error message or logs
   - Workflow YAML configuration
-- Add the `needs-info` label
+- Add the `status:waiting-on-author` label
 
 **If the issue requires maintainer attention:**
 - Summarize what you understand about the issue
 - Explain why a maintainer needs to look at it
-- Add the `needs-maintainer` label
+- Add the `status:team-review` label
 
 ### Step 3: Format Your Response
 
@@ -113,7 +113,7 @@ Keep responses:
    - The issue is closed
    - The commenter is not the issue author (unless it's a new issue)
    - You've already responded twice and there is no new technical information in the latest user message
-   - The issue has a `needs-maintainer` label (a maintainer is handling it)
+   - The issue has a `status:team-review` label (a maintainer is handling it)
 5. **Be honest** - if you don't know something, say so and suggest checking the wiki or waiting for a maintainer
 
 ## Response Examples
@@ -129,7 +129,7 @@ Keep responses:
 **Off-topic issue:** "How do I set up GitHub Actions for deploying to AWS?"
 → Do not respond. This is unrelated to MSDO.
 
-**Issue labeled `needs-maintainer`:** Any issue with this label.
+**Issue labeled `status:team-review`:** Any issue with this label.
 → Do not respond. A maintainer is already handling it.
 
 **Repeated comments with no new info:** User says "Any update?" or "bump" after you already responded.
