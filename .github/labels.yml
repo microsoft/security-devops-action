@@ -1,0 +1,143 @@
+# =============================================================================
+# Label Taxonomy for microsoft/security-devops-action
+# =============================================================================
+# Synced by .github/workflows/sync-labels.yml using micnncim/action-label-syncer
+#
+# Naming convention: <group>:<value> (lowercase, kebab-case)
+# Color convention:  consistent within each group for at-a-glance filtering
+#
+# To propose changes, edit this file and open a PR.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Type — what kind of issue / PR
+# ---------------------------------------------------------------------------
+- name: "type:bug"
+  description: "Something isn't working"
+  color: "d73a4a"
+
+- name: "type:feature"
+  description: "New feature or request"
+  color: "a2eeef"
+
+- name: "type:docs"
+  description: "Improvements or additions to documentation"
+  color: "0075ca"
+
+- name: "type:question"
+  description: "General question or support request"
+  color: "d876e3"
+
+- name: "type:security"
+  description: "Security vulnerability or hardening"
+  color: "e11d48"
+
+- name: "type:maintenance"
+  description: "Dependency updates, refactoring, chores"
+  color: "bfd4f2"
+
+# ---------------------------------------------------------------------------
+# Priority — how urgent
+# ---------------------------------------------------------------------------
+- name: "priority:critical"
+  description: "Blocking issue, needs immediate fix"
+  color: "b60205"
+
+- name: "priority:high"
+  description: "Important, should be addressed soon"
+  color: "d93f0b"
+
+- name: "priority:medium"
+  description: "Normal priority"
+  color: "fbca04"
+
+- name: "priority:low"
+  description: "Nice to have, address when convenient"
+  color: "0e8a16"
+
+# ---------------------------------------------------------------------------
+# Status — where in the workflow
+# ---------------------------------------------------------------------------
+- name: "status:triage"
+  description: "Needs initial triage and classification"
+  color: "f9d0c4"
+
+- name: "status:waiting-on-author"
+  description: "Waiting for more information from author"
+  color: "f9d0c4"
+
+- name: "status:repro-needed"
+  description: "Bug needs reproduction steps"
+  color: "f9d0c4"
+
+- name: "status:team-review"
+  description: "Queued for team review and decision"
+  color: "d93f0b"
+
+- name: "status:approved"
+  description: "Accepted, ready to be worked on"
+  color: "0e8a16"
+
+- name: "status:blocked"
+  description: "Blocked by external dependency or decision"
+  color: "b60205"
+
+- name: "status:inactive"
+  description: "No activity for an extended period"
+  color: "cfd3d7"
+
+# ---------------------------------------------------------------------------
+# Area — what component
+# ---------------------------------------------------------------------------
+- name: "area:action"
+  description: "GitHub Action definition, inputs, and outputs"
+  color: "c5def5"
+
+- name: "area:msdo-cli"
+  description: "MSDO CLI integration and execution"
+  color: "c5def5"
+
+- name: "area:container-mapping"
+  description: "Container image mapping functionality"
+  color: "c5def5"
+
+- name: "area:ci"
+  description: "CI/CD pipeline and workflows"
+  color: "c5def5"
+
+# ---------------------------------------------------------------------------
+# Resolution — how it was closed
+# ---------------------------------------------------------------------------
+- name: "resolution:duplicate"
+  description: "This issue or pull request already exists"
+  color: "cfd3d7"
+
+- name: "resolution:wontfix"
+  description: "This will not be worked on"
+  color: "eeeeee"
+
+- name: "resolution:invalid"
+  description: "Not a valid issue"
+  color: "e4e669"
+
+- name: "resolution:by-design"
+  description: "Working as intended"
+  color: "cfd3d7"
+
+# ---------------------------------------------------------------------------
+# Community
+# ---------------------------------------------------------------------------
+- name: "good first issue"
+  description: "Good for newcomers"
+  color: "7057ff"
+
+- name: "help wanted"
+  description: "Extra attention is needed"
+  color: "008672"
+
+# ---------------------------------------------------------------------------
+# Special
+# ---------------------------------------------------------------------------
+- name: "agentic-workflows"
+  description: "Related to GitHub Agentic Workflows"
+  color: "1d76db"
