@@ -1,27 +1,31 @@
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import { run } from '../lib/pre';
+import { ContainerMapping } from '../lib/container-mapping';
 
 describe('prejob run', () => {
     let saveStateStub: sinon.SinonStub;
-    let dateSub: sinon.SinonStub;
 
     beforeEach(() => {
         saveStateStub = sinon.stub(core, 'saveState');
-        dateSub = sinon.stub(global, 'Date');
+        sinon.stub(core, 'info');
     });
 
     afterEach(() => {
-        saveStateStub.restore();
+        sinon.restore();
     });
 
     it('should save the current time as PreJobStartTime', async () => {
-        dateSub.returns({
-            toISOString: () => '2023-01-23T45:12:34.567Z'
-        });
+        const cm = new ContainerMapping();
+        await cm.runPreJob();
 
-        await run();
+        sinon.assert.calledWith(saveStateStub, 'PreJobStartTime', sinon.match.string);
+    });
 
-        sinon.assert.calledWithExactly(saveStateStub, 'PreJobStartTime', '2023-01-23T45:12:34.567Z');
+    it('should succeed even if runPreJob throws internally', async () => {
+        saveStateStub.throws(new Error('saveState failed'));
+
+        const cm = new ContainerMapping();
+        // Should not throw because errors are caught inside runPreJob
+        await cm.runPreJob();
     });
 });

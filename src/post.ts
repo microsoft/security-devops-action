@@ -2,10 +2,10 @@ import * as core from '@actions/core';
 import { ContainerMapping } from './container-mapping';
 import { getExecutor } from './msdo-interface';
 
-async function runPost() {
+export async function run() {
     await getExecutor(ContainerMapping).runPostJob();
 }
 
-runPost().catch((error) => {
-    core.debug(error);
+run().catch((error) => {
+    core.warning(`Post-job failed: ${error}`);
 });

@@ -4,9 +4,9 @@
 export interface IMicrosoftSecurityDevOps {
     readonly succeedOnError: boolean;
     /* param source - The source of the task: main, pre, or post. */
-    runPreJob(): any;
-    runMain(): any;
-    runPostJob(): any;
+    runPreJob(): Promise<void>;
+    runMain(): Promise<void>;
+    runPostJob(): Promise<void>;
 }
 
 /**

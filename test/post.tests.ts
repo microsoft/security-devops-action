@@ -1,129 +1,75 @@
-import assert from 'assert';
-import https from 'https';
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import { run, sendReport, _sendReport } from '../lib/post';
+import { ContainerMapping } from '../lib/container-mapping';
 
 describe('postjob run', function() {
-    let execStub: sinon.SinonStub;
-    let sendReportStub: sinon.SinonStub;
-
     beforeEach(() => {
-        execStub = sinon.stub(exec, 'exec');
-        sendReportStub = sinon.stub(sendReport);
+        sinon.stub(core, 'info');
+        sinon.stub(core, 'debug');
+        sinon.stub(core, 'warning');
     });
 
     afterEach(() => {
-        execStub.restore();
-        sendReport.restore();
+        sinon.restore();
     });
 
-    it('should run three docker commands and send the report', async () => {
-        await run();
+    it('should not throw even when post-job encounters errors', async () => {
+        sinon.stub(core, 'getState').returns('');
+        sinon.stub(core, 'getIDToken').rejects(new Error('No OIDC token'));
 
-        sinon.assert.callCount(execStub, 3);
-        sinon.assert.calledWith(execStub, 'docker --version');
-        sinon.assert.calledWith(execStub, 'docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}');
+        const cm = new ContainerMapping();
+        // Should not throw because errors are caught inside runPostJob
+        await cm.runPostJob();
+    });
 
-        sinon.assert.calledOnce(sendReport);
+    it('should skip container mapping when client is not onboarded', async () => {
+        sinon.stub(core, 'getState').returns('2023-01-01T00:00:00.000Z');
+        sinon.stub(core, 'getIDToken').resolves('mock-token');
+
+        // Mock _checkCallerIsCustomer to return 403 (not onboarded)
+        const cm = new ContainerMapping();
+        sinon.stub(cm as any, '_checkCallerIsCustomer').resolves(403);
+
+        await cm.runPostJob();
+
+        sinon.assert.calledWith(core.warning as sinon.SinonStub, sinon.match('not onboarded'));
     });
 });
 
 describe('postjob sendReport', function() {
-    let _sendReportStub: sinon.SinonStub;
-    let data: Object;
+    let cm: ContainerMapping;
 
     beforeEach(() => {
-        _sendReportStub = sinon.stub(_sendReport);
-        data = {
-            "key.fake": "value.fake"
-        };
+        sinon.stub(core, 'info');
+        sinon.stub(core, 'debug');
+        cm = new ContainerMapping();
     });
-    
+
     afterEach(() => {
-        _sendReportStub.restore();
+        sinon.restore();
     });
 
-    it('should still call _sendReport once if retryCount < 1', async () => {
-        await sendReport(data, -1);
-        sinon.assert.calledOnce(_sendReport);
+    it('should return false when _sendReport fails and retryCount is 0', async () => {
+        sinon.stub(cm, '_sendReport').rejects(new Error('API error'));
+
+        const result = await cm.sendReport('{}', 'mock-token', 0);
+        sinon.assert.match(result, false);
     });
 
-    it('should succeed if _sendReport succeeds', async () => {
-        _sendReportStub.throws(new Error('_sendReport().Error'));
+    it('should retry when _sendReport fails and retryCount > 0', async () => {
+        const sendReportStub = sinon.stub(cm, '_sendReport');
+        sendReportStub.onFirstCall().rejects(new Error('API error'));
+        sendReportStub.onSecondCall().resolves();
 
-        await sendReport(data, 0);
-        sinon.assert.calledOnce(_sendReport);
+        const result = await cm.sendReport('{}', 'mock-token', 1);
+        sinon.assert.match(result, true);
+        sinon.assert.calledTwice(sendReportStub);
     });
 
-    it('should succeed if _sendReport succeeds', async () => {
+    it('should return true when _sendReport succeeds', async () => {
+        sinon.stub(cm, '_sendReport').resolves();
 
-
-        await sendReport(data, 0);
-        sinon.assert.calledOnce(_sendReport);
-    });
-
-    // should still call _sendReport once if retryCount < 1
-    // should succeed if _sendReport succeeds
-    // should fail if _sendReport fails and retryCount == 0
-    // should succeed if _sendReport fails the first time and succeeds the second if retryCount > 0
-    // should fail if _sendReport fails for all retries
-
-});
-
-
-describe('postjob _sendReport', function() {
-    let core_getIDTokenStub: sinon.SinonStub;
-    let https_requestStub: sinon.SinonStub;
-    let clientRequestStub;
-    let data: Object;
-    const expectedUrl = 'https://dfdinfra-afdendpoint2-dogfood-edb5h5g7gyg7h3hq.z01.azurefd.net/github/v1/container-mappings';
-
-    beforeEach(() => {
-        core_getIDTokenStub = sinon.stub(core, 'getIDToken');
-        https_requestStub = sinon.stub(https, 'request');
-        clientRequestStub = sinon.stub();
-        clientRequestStub.end = sinon.stub();
-
-        core_getIDTokenStub.resolves('bearerToken.mock');
-        https_requestStub
-            .callsArgWith(2, {
-                on: (event, callback) => {
-                    if (event === 'data') {
-                        callback();
-                    } else if (event === 'end') {
-                        callback();
-                    }
-                },
-                end: () => {}
-            })
-            .returns(clientRequestStub);
-
-        data = {
-            "key.fake": "value.fake"
-        };
-    });
-    
-    afterEach(() => {
-        core_getIDTokenStub.restore();
-        https_requestStub.restore();
-        clientRequestStub.restore();
-    });
-
-    it('should still call _sendReport once if retryCount < 1', async () => {
-        await _sendReport(data, -1);
-        sinon.assert.calledOnce(core_getIDTokenStub);
-        sinon.assert.calledOnce(https_requestStub);
-
-        // {
-        //     method: 'POST',
-        //     timeout: 2500,
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': 'Bearer bearerToken.mock'
-        //     },
-        //     data: data
-        // };
+        const result = await cm.sendReport('{}', 'mock-token', 0);
+        sinon.assert.match(result, true);
     });
 });

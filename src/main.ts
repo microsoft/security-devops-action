@@ -26,7 +26,7 @@ function shouldRunMain() {
    let toolsString: string = core.getInput('tools');
    if (!common.isNullOrWhiteSpace(toolsString)) {
         let tools = toolsString.split(',');
-        if (tools.length == 1 && tools[0].trim() == Tools.ContainerMapping) {
+        if (tools.length === 1 && tools[0].trim() === Tools.ContainerMapping) {
             return false;
         }
    }

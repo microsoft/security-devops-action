@@ -25,7 +25,7 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
     public async runMain() {
         core.debug('MicrosoftSecurityDevOps.runMain - Running MSDO...');
 
-        let args: string[] = undefined;
+        let args: string[];
 
         // Check job type - might be existing file
         let existingFilename = core.getInput('existingFilename');
@@ -83,9 +83,9 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
                     let tool = tools[i];
                     let toolTrimmed = tool.trim();
                     if (!common.isNullOrWhiteSpace(tool)
-                        && tool != Tools.ContainerMapping // This tool is not handled by this executor
-                        && includedTools.indexOf(toolTrimmed) == -1) {
-                        if (includedTools.length == 0) {
+                        && tool !== Tools.ContainerMapping // This tool is not handled by this executor
+                        && includedTools.indexOf(toolTrimmed) === -1) {
+                        if (includedTools.length === 0) {
                             args.push('--tool');
                         }
                         args.push(toolTrimmed);
