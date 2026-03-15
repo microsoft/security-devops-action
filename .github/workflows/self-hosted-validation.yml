@@ -1,0 +1,28 @@
+name: Microsoft Security DevOps self-hosted
+on: push
+
+permissions:
+  id-token: write
+  security-events: write
+
+jobs:
+  sample:
+    name: Microsoft Security DevOps
+
+    runs-on: self-hosted
+
+    steps:
+
+      # Checkout your code repository to scan
+    - uses: actions/checkout@v6
+
+    # Run open source static analysis tools
+    - name: Run MSDO
+      uses: microsoft/security-devops-action@v1
+      id: msdo
+
+      # Upload results to the Security tab
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
