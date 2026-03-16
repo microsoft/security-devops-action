@@ -36,10 +36,8 @@ safe-outputs:
     max: 1
   add-labels:
     allowed: [ci-failure, flaky-test, build-failure, dependency-issue, needs-maintainer]
-  add-comment:
-    max: 0
-  create-pull-request:
-    max: 0
+  add-comment: null
+  create-pull-request: null
 
 ---
 
