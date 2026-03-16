@@ -23,9 +23,8 @@ jobs:
       with:
         command: 'image'
         imageName: 'ubuntu:latest'
-        policy: 'azuredevops'
+        policy: 'microsoft'
         break: 'false'
-        debug: 'true'
         pr-summary: 'true'
 
       # Upload results to the Security tab
