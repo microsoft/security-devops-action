@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# frontmatter-hash: 8b82b49dff507c7807bbf642ceb9ec1831a14b37135bb5a23ff85cc67e67c8c9
+# frontmatter-hash: 7396a89eee35dd3034c6c7a015a9459ae192ec5858fd346e43953a501b9ea9c7
 
 name: "CI Doctor"
 "on":
@@ -1110,7 +1110,7 @@ jobs:
         id: check_membership
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          GH_AW_REQUIRED_ROLES: maintainer
+          GH_AW_REQUIRED_ROLES: write
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
