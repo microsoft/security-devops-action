@@ -23,7 +23,7 @@ jobs:
       with:
         command: 'image'
         imageName: 'ubuntu:latest'
-        policy: 'github'
+        policy: 'azuredevops'
         break: 'false'
         debug: 'true'
         pr-summary: 'true'
