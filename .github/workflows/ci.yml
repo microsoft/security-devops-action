@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main, 'release/**']
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Build tests
+      run: npm run buildTests
+
+    - name: Run tests
+      run: npm test
