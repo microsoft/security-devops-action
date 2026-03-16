@@ -75,3 +75,30 @@ jobs:
         policy: 'mdc'
         break: 'false'
         pr-summary: 'true'
+
+  defender-fs-scan:
+    name: Defender CLI v2 - Filesystem Scan
+
+    runs-on: self-hosted
+
+    steps:
+
+      # Checkout your code repository to scan
+    - uses: actions/checkout@v6
+
+    # Run Defender CLI v2 filesystem scan
+    - name: Run Defender CLI - Filesystem Scan
+      uses: ./
+      id: defender
+      with:
+        command: 'fs'
+        policy: 'azuredevops'
+        break: 'false'
+        pr-summary: 'true'
+
+      # Upload results to the Security tab
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: ${{ steps.defender.outputs.sarifFile }}
