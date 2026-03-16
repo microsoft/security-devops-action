@@ -4,14 +4,16 @@ import { ContainerMapping } from '../lib/container-mapping';
 
 describe('prejob run', () => {
     let saveStateStub: sinon.SinonStub;
+    let infoStub: sinon.SinonStub;
 
     beforeEach(() => {
         saveStateStub = sinon.stub(core, 'saveState');
-        sinon.stub(core, 'info');
+        infoStub = sinon.stub(core, 'info');
     });
 
     afterEach(() => {
-        sinon.restore();
+        saveStateStub.restore();
+        infoStub.restore();
     });
 
     it('should save the current time as PreJobStartTime', () => {

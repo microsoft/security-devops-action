@@ -6,16 +6,20 @@ describe('postjob runPostJob', function() {
     let getIDTokenStub: sinon.SinonStub;
     let getStateStub: sinon.SinonStub;
     let debugStub: sinon.SinonStub;
+    let infoStub: sinon.SinonStub;
 
     beforeEach(() => {
-        sinon.stub(core, 'info');
+        infoStub = sinon.stub(core, 'info');
         debugStub = sinon.stub(core, 'debug');
         getStateStub = sinon.stub(core, 'getState').returns('2023-01-23T12:34:56.789Z');
         getIDTokenStub = sinon.stub(core, 'getIDToken');
     });
 
     afterEach(() => {
-        sinon.restore();
+        infoStub.restore();
+        debugStub.restore();
+        getStateStub.restore();
+        getIDTokenStub.restore();
     });
 
     it('should handle missing OIDC token gracefully', async () => {
@@ -50,6 +54,7 @@ describe('postjob runPostJob', function() {
         await cm.runPostJob();
 
         sinon.assert.calledOnce(getIDTokenStub);
+        requestStub.restore();
     });
 
     it('should use fallback start time when PreJobStartTime is not set', async () => {
