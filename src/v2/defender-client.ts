@@ -103,7 +103,7 @@ async function runDefenderCli(
 /**
  * Sets up the environment for the Defender CLI.
  */
-async function setupEnvironment(): Promise<void> {
+export async function setupEnvironment(): Promise<void> {
     const toolCacheDir = process.env['RUNNER_TOOL_CACHE'] || path.join(os.homedir(), '.defender');
     const defenderDir = path.join(toolCacheDir, '_defender');
 

@@ -3,7 +3,7 @@ import * as exec from '@actions/exec';
 import * as path from 'path';
 import { ScanType, Inputs, validateScanType, validateImageName, validateModelPath, validateFileSystemPath, parseAdditionalArgs, setupDebugLogging } from './defender-helpers';
 import { IMicrosoftDefenderCLI } from './defender-interface';
-import { scanDirectory, scanImage } from './defender-client';
+import { scanDirectory, scanImage, setupEnvironment } from './defender-client';
 import { postJobSummary } from './job-summary';
 
 /*
@@ -185,6 +185,8 @@ export class MicrosoftDefenderCLI implements IMicrosoftDefenderCLI {
         successfulExitCodes: number[],
         additionalArgs: string[]
     ): Promise<void> {
+        await setupEnvironment();
+
         const cliFilePath = process.env['DEFENDER_FILEPATH'];
 
         if (!cliFilePath) {
