@@ -25,7 +25,7 @@ network:
 
 tools:
   github:
-    lockdown: true
+    lockdown: false
     toolsets: [issues, actions]
   fetch:
     allowed-domains: []
