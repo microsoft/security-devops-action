@@ -1,129 +1,71 @@
-import assert from 'assert';
-import https from 'https';
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import { run, sendReport, _sendReport } from '../lib/post';
+import { ContainerMapping } from '../lib/container-mapping';
 
-describe('postjob run', function() {
-    let execStub: sinon.SinonStub;
-    let sendReportStub: sinon.SinonStub;
+describe('postjob runPostJob', function() {
+    let getIDTokenStub: sinon.SinonStub;
+    let getStateStub: sinon.SinonStub;
+    let debugStub: sinon.SinonStub;
 
     beforeEach(() => {
-        execStub = sinon.stub(exec, 'exec');
-        sendReportStub = sinon.stub(sendReport);
+        sinon.stub(core, 'info');
+        debugStub = sinon.stub(core, 'debug');
+        getStateStub = sinon.stub(core, 'getState').returns('2023-01-23T12:34:56.789Z');
+        getIDTokenStub = sinon.stub(core, 'getIDToken');
     });
 
     afterEach(() => {
-        execStub.restore();
-        sendReport.restore();
+        sinon.restore();
     });
 
-    it('should run three docker commands and send the report', async () => {
-        await run();
+    it('should handle missing OIDC token gracefully', async () => {
+        getIDTokenStub.rejects(new Error('Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable'));
 
-        sinon.assert.callCount(execStub, 3);
-        sinon.assert.calledWith(execStub, 'docker --version');
-        sinon.assert.calledWith(execStub, 'docker images --format CreatedAt={{.CreatedAt}}::Repo={{.Repository}}::Tag={{.Tag}}::Digest={{.Digest}}');
+        const cm = new ContainerMapping();
+        // runPostJob catches all errors internally
+        await cm.runPostJob();
 
-        sinon.assert.calledOnce(sendReport);
+        sinon.assert.calledOnce(getIDTokenStub);
+    });
+
+    it('should skip container mapping if caller is not onboarded', async () => {
+        getIDTokenStub.resolves('mock-token');
+
+        // Stub the https request for checkCallerIsCustomer to return 403 (not onboarded)
+        const https = require('https');
+        const requestStub = sinon.stub(https, 'request');
+        requestStub.callsFake((_url: string, _options: any, callback: any) => {
+            const res = {
+                statusCode: 403,
+                on: (event: string, handler: any) => {
+                    if (event === 'end') handler();
+                    if (event === 'data') { /* no data */ }
+                }
+            };
+            callback(res);
+            return { on: sinon.stub(), end: sinon.stub(), write: sinon.stub() };
+        });
+
+        const cm = new ContainerMapping();
+        await cm.runPostJob();
+
+        sinon.assert.calledOnce(getIDTokenStub);
+    });
+
+    it('should use fallback start time when PreJobStartTime is not set', async () => {
+        getStateStub.returns('');
+        getIDTokenStub.rejects(new Error('no token'));
+
+        const cm = new ContainerMapping();
+        await cm.runPostJob();
+
+        sinon.assert.calledWith(debugStub, sinon.match('PreJobStartTime not defined'));
     });
 });
 
-describe('postjob sendReport', function() {
-    let _sendReportStub: sinon.SinonStub;
-    let data: Object;
-
-    beforeEach(() => {
-        _sendReportStub = sinon.stub(_sendReport);
-        data = {
-            "key.fake": "value.fake"
-        };
-    });
-    
-    afterEach(() => {
-        _sendReportStub.restore();
-    });
-
-    it('should still call _sendReport once if retryCount < 1', async () => {
-        await sendReport(data, -1);
-        sinon.assert.calledOnce(_sendReport);
-    });
-
-    it('should succeed if _sendReport succeeds', async () => {
-        _sendReportStub.throws(new Error('_sendReport().Error'));
-
-        await sendReport(data, 0);
-        sinon.assert.calledOnce(_sendReport);
-    });
-
-    it('should succeed if _sendReport succeeds', async () => {
-
-
-        await sendReport(data, 0);
-        sinon.assert.calledOnce(_sendReport);
-    });
-
-    // should still call _sendReport once if retryCount < 1
-    // should succeed if _sendReport succeeds
-    // should fail if _sendReport fails and retryCount == 0
-    // should succeed if _sendReport fails the first time and succeeds the second if retryCount > 0
-    // should fail if _sendReport fails for all retries
-
-});
-
-
-describe('postjob _sendReport', function() {
-    let core_getIDTokenStub: sinon.SinonStub;
-    let https_requestStub: sinon.SinonStub;
-    let clientRequestStub;
-    let data: Object;
-    const expectedUrl = 'https://dfdinfra-afdendpoint2-dogfood-edb5h5g7gyg7h3hq.z01.azurefd.net/github/v1/container-mappings';
-
-    beforeEach(() => {
-        core_getIDTokenStub = sinon.stub(core, 'getIDToken');
-        https_requestStub = sinon.stub(https, 'request');
-        clientRequestStub = sinon.stub();
-        clientRequestStub.end = sinon.stub();
-
-        core_getIDTokenStub.resolves('bearerToken.mock');
-        https_requestStub
-            .callsArgWith(2, {
-                on: (event, callback) => {
-                    if (event === 'data') {
-                        callback();
-                    } else if (event === 'end') {
-                        callback();
-                    }
-                },
-                end: () => {}
-            })
-            .returns(clientRequestStub);
-
-        data = {
-            "key.fake": "value.fake"
-        };
-    });
-    
-    afterEach(() => {
-        core_getIDTokenStub.restore();
-        https_requestStub.restore();
-        clientRequestStub.restore();
-    });
-
-    it('should still call _sendReport once if retryCount < 1', async () => {
-        await _sendReport(data, -1);
-        sinon.assert.calledOnce(core_getIDTokenStub);
-        sinon.assert.calledOnce(https_requestStub);
-
-        // {
-        //     method: 'POST',
-        //     timeout: 2500,
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': 'Bearer bearerToken.mock'
-        //     },
-        //     data: data
-        // };
+describe('postjob ContainerMapping properties', function() {
+    it('should have succeedOnError set to true', () => {
+        const cm = new ContainerMapping();
+        sinon.assert.match(cm.succeedOnError, true);
     });
 });
