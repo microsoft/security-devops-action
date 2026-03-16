@@ -9,7 +9,7 @@ on:
     branches: [main, 'release/**']
   workflow_dispatch:
 
-roles: [maintainer]
+roles: [write]
 
 engine:
   id: copilot
