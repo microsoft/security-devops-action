@@ -29,7 +29,7 @@ outputs:
   sarifFile:
     description: A file path to a SARIF results file.
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'lib/main.js'
   pre: 'lib/pre.js'
   post: 'lib/post.js'
