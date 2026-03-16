@@ -61,3 +61,31 @@ jobs:
       if: always()
       with:
         sarif_file: ${{ steps.defender.outputs.sarifFile }}
+
+  defender-model-scan-vuln:
+    name: Defender CLI v2 - Model Scan (Vulnerable)
+
+    runs-on: self-hosted
+
+    steps:
+
+      # Checkout your code repository to scan
+    - uses: actions/checkout@v6
+
+    # Run Defender CLI v2 model scan on vulnerable model
+    - name: Run Defender CLI - Model Scan (bert-tiny-torch-vuln)
+      uses: ./
+      id: defender
+      with:
+        command: 'model'
+        modelPath: 'https://huggingface.co/drhyrum/bert-tiny-torch-vuln'
+        policy: 'mdc'
+        break: 'false'
+        pr-summary: 'true'
+
+      # Upload results to the Security tab
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: ${{ steps.defender.outputs.sarifFile }}
