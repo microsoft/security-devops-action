@@ -135,6 +135,11 @@ export class MicrosoftDefenderCLI implements IMicrosoftDefenderCLI {
         process.env['Defender_Extension'] = 'true';
         core.debug('Environment variable set: Defender_Extension=true');
 
+        // Set the sarifFile output so downstream steps can reference it
+        core.setOutput('sarifFile', outputPath);
+        core.exportVariable('DEFENDER_SARIF_FILE', outputPath);
+        core.debug(`sarifFile output set to: ${outputPath}`);
+
         try {
             switch (scanType) {
                 case ScanType.FileSystem:
