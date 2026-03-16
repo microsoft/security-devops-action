@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import { run } from '../lib/pre';
+import { run } from '../lib/v1/pre';
 
 describe('prejob run', () => {
     let saveStateStub: sinon.SinonStub;

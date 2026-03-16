@@ -1,4 +1,4 @@
-name: Microsoft Security DevOps self-hosted
+name: Microsoft Defender CLI v2 self-hosted validation
 on: push
 
 permissions:
@@ -6,8 +6,8 @@ permissions:
   security-events: write
 
 jobs:
-  sample:
-    name: Microsoft Security DevOps
+  defender-image-scan:
+    name: Defender CLI v2 - Image Scan
 
     runs-on: self-hosted
 
@@ -16,13 +16,21 @@ jobs:
       # Checkout your code repository to scan
     - uses: actions/checkout@v6
 
-    # Run open source static analysis tools
-    - name: Run MSDO
-      uses: microsoft/security-devops-action@v1
-      id: msdo
+    # Run Defender CLI v2 image scan
+    - name: Run Defender CLI - Image Scan
+      uses: ./
+      id: defender
+      with:
+        command: 'image'
+        imageName: 'ubuntu:latest'
+        policy: 'github'
+        break: 'false'
+        debug: 'true'
+        pr-summary: 'true'
 
       # Upload results to the Security tab
     - name: Upload results to Security tab
       uses: github/codeql-action/upload-sarif@v3
+      if: always()
       with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+        sarif_file: ${{ steps.defender.outputs.sarifFile }}

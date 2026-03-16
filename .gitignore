@@ -329,3 +329,6 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+
+# GitHub Actions Runner
+actions-runner/

@@ -3,7 +3,7 @@ import https from 'https';
 import sinon from 'sinon';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { run, sendReport, _sendReport } from '../lib/post';
+import { run, sendReport, _sendReport } from '../lib/v1/post';
 
 describe('postjob run', function() {
     let execStub: sinon.SinonStub;
