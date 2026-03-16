@@ -23,7 +23,7 @@ jobs:
       with:
         command: 'image'
         imageName: 'ubuntu:latest'
-        policy: 'microsoft'
+        policy: 'mdc'
         break: 'false'
         pr-summary: 'true'
 
