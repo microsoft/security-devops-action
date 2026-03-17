@@ -1,4 +1,4 @@
-name: Microsoft Defender CLI v2 self-hosted validation
+name: Defender CLI v2 self-hosted validation
 on: push
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
 
     # Run Defender CLI v2 image scan
     - name: Run Defender CLI - Image Scan
-      uses: ./
+      uses: ./v2/
       id: defender
       with:
         command: 'image'
@@ -46,7 +46,7 @@ jobs:
 
     # Run Defender CLI v2 model scan
     - name: Run Defender CLI - Model Scan
-      uses: ./
+      uses: ./v2/
       id: defender
       with:
         command: 'model'
@@ -67,7 +67,7 @@ jobs:
 
     # Run Defender CLI v2 model scan on vulnerable model
     - name: Run Defender CLI - Model Scan (bert-tiny-torch-vuln)
-      uses: ./
+      uses: ./v2/
       id: defender
       with:
         command: 'model'
@@ -88,7 +88,7 @@ jobs:
 
     # Run Defender CLI v2 filesystem scan
     - name: Run Defender CLI - Filesystem Scan
-      uses: ./
+      uses: ./v2/
       id: defender
       with:
         command: 'fs'

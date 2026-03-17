@@ -1,0 +1,41 @@
+name: 'security-devops-action-v2'
+description: 'Run Microsoft Defender for DevOps security scans.'
+author: 'Microsoft'
+branding:
+  icon: 'shield'
+  color: 'black'
+inputs:
+  command:
+    description: 'The scan type to perform. Options: fs (filesystem), image (container image), model (AI model).'
+    default: 'fs'
+  fileSystemPath:
+    description: 'The filesystem path to scan. Used when command is fs.'
+    default: ${{ github.workspace }}
+  imageName:
+    description: 'The container image name to scan. Used when command is image. Example: nginx:latest'
+  modelPath:
+    description: 'The AI model path or URL to scan. Used when command is model. Supports local paths and http:// or https:// URLs.'
+  policy:
+    description: 'The name of the well known policy to use. Options: github, microsoft, none.'
+    default: 'github'
+  break:
+    description: 'If true, the action will fail the build when critical vulnerabilities are detected.'
+    default: 'false'
+  debug:
+    description: 'Enable debug logging for verbose output.'
+    default: 'false'
+  pr-summary:
+    description: 'Post a vulnerability summary to the GitHub Job Summary.'
+    default: 'true'
+  args:
+    description: 'Additional arguments to pass to the Defender CLI.'
+  tools:
+    description: 'A comma separated list of tools. Used for container-mapping backward compatibility.'
+outputs:
+  sarifFile:
+    description: A file path to a SARIF results file.
+runs:
+  using: 'node20'
+  main: '../lib/v2/defender-main.js'
+  pre: '../lib/v2/pre.js'
+  post: '../lib/v2/post.js'
