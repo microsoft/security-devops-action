@@ -332,3 +332,6 @@ ASALocalRun/
 
 # GitHub Actions Runner
 actions-runner/
+
+# Copilot instructions
+.github/copilot-instructions.md
