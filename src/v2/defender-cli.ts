@@ -113,8 +113,8 @@ export class MicrosoftDefenderCLI implements IMicrosoftDefenderCLI {
             'defender.sarif'
         );
 
-        // Get policy from input, default to 'github'
-        const policyInput: string = core.getInput(Inputs.Policy) || 'github';
+        // Get policy from input, default to 'mdc'
+        const policyInput: string = core.getInput(Inputs.Policy) || 'mdc';
         let policy: string;
         if (policyInput === 'none') {
             policy = '';
