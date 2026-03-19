@@ -153,7 +153,7 @@ export function resolveFileName(): string {
     switch (platform) {
         case 'win32':
             if (arch === 'arm64') return 'Defender_win-arm64.exe';
-            if (arch === 'ia32' || arch === 'x32') return 'Defender_win-x86.exe';
+            if (arch === 'ia32') return 'Defender_win-x86.exe';
             return 'Defender_win-x64.exe';
         case 'linux':
             if (arch === 'arm64') return 'Defender_linux-arm64';
