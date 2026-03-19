@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import * as core from '@actions/core';
 import { run } from '../lib/v1/pre';
+import { ContainerMapping } from '../lib/v1/container-mapping';
 
 describe('prejob run', () => {
     let saveStateStub: sinon.SinonStub;
