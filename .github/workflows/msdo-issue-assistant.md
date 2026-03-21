@@ -8,8 +8,7 @@ on:
   issue_comment:
     types: [created]
   workflow_dispatch:
-
-roles: all
+  roles: all
 
 engine:
   id: copilot
@@ -27,7 +26,7 @@ tools:
     lockdown: false
     toolsets: [issues]
   fetch:
-    allowed-domains:
+    allowed:
       - raw.githubusercontent.com
 
 safe-outputs:
