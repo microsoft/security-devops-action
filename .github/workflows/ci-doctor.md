@@ -8,8 +8,7 @@ on:
     types: [completed]
     branches: [main, 'release/**']
   workflow_dispatch:
-
-roles: [write]
+  roles: [write]
 
 engine:
   id: copilot
@@ -28,7 +27,7 @@ tools:
     lockdown: false
     toolsets: [issues, actions]
   fetch:
-    allowed-domains: []
+    allowed: []
 
 safe-outputs:
   noop: false
