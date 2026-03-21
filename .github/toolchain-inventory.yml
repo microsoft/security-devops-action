@@ -1,0 +1,52 @@
+# MSDO Toolchain Inventory
+# Source of truth for tools monitored by the breach monitor workflow
+# Derived from src/msdo-helpers.ts Tools enum
+#
+# All versions are noted as "latest (runtime-resolved)" because the MSDO CLI
+# resolves tool versions dynamically via NuGet at runtime.
+
+tools:
+  - name: bandit
+    description: Python security linter (finds common security issues in Python code)
+    ecosystem: pypi
+    version: latest (runtime-resolved)
+
+  - name: binskim
+    description: Binary static analysis tool for Windows/Linux binaries
+    ecosystem: nuget
+    version: latest (runtime-resolved)
+
+  - name: checkov
+    description: Infrastructure-as-code security scanner
+    ecosystem: pypi
+    version: latest (runtime-resolved)
+
+  - name: container-mapping
+    description: Container image mapping and inventory
+    ecosystem: nuget
+    version: latest (runtime-resolved)
+
+  - name: eslint
+    description: JavaScript/TypeScript linter with security rules
+    ecosystem: npm
+    version: latest (runtime-resolved)
+
+  - name: templateanalyzer
+    description: ARM/Bicep template security analyzer
+    ecosystem: nuget
+    version: latest (runtime-resolved)
+
+  - name: terrascan
+    description: Terraform/IaC security scanner
+    ecosystem: github
+    version: latest (runtime-resolved)
+
+  - name: trivy
+    description: Comprehensive vulnerability scanner (containers, filesystems, repos)
+    ecosystem: github
+    version: latest (runtime-resolved)
+
+  - name: antimalware
+    description: Windows antimalware scanner (Windows runners only)
+    platform: windows-only
+    version: latest (runtime-resolved)
