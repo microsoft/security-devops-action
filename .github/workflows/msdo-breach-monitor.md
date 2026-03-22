@@ -68,18 +68,23 @@ The MSDO CLI resolves tool versions dynamically at runtime. The tools and their 
 
 Monitor for supply chain security incidents affecting any tool in the MSDO toolchain.
 
-### Step 0: Resolve current "latest" versions
+### Step 0: Load resolved tool versions
 
-Before checking advisories, resolve what version MSDO would download today. This makes vulnerability checks version-specific rather than generic.
+The `toolchain-version-probe` workflow runs weekly, installs every tool through the real MSDO CLI, and records exactly which package version was resolved into `.github/toolchain-versions.json`. These are the versions MSDO users actually download — not registry "latest", but the version pinned in MSDO's `.gdntool` configs.
 
-Fetch these endpoints and extract the latest release version for each tool:
+**Read the file from this repository:**
+```
+GET https://api.github.com/repos/microsoft/security-devops-action/contents/.github/toolchain-versions.json
+```
+Decode the base64 `content` field. The `tools` object maps each tool name to its resolved version. The `generated_at` field tells you when the probe last ran.
 
+**If the file is missing or older than 14 days**, fall back to registry queries:
 - **trivy**: `GET https://api.github.com/repos/aquasecurity/trivy/releases/latest` → `.tag_name`
 - **terrascan**: `GET https://api.github.com/repos/tenable/terrascan/releases/latest` → `.tag_name`
 - **bandit**: `GET https://pypi.org/pypi/bandit/json` → `.info.version`
 - **checkov**: `GET https://pypi.org/pypi/checkov/json` → `.info.version`
 - **eslint**: `GET https://registry.npmjs.org/eslint/latest` → `.version`
-- **binskim**: `GET https://api.nuget.org/v3/registration5/microsoft.cst.binskim/index.json` → last page, last item `.catalogEntry.version`
+- **binskim**: `GET https://api.nuget.org/v3/registration5/microsoft.codeanalysis.binskim/index.json` → last page, last item `.catalogEntry.version`
 - **templateanalyzer**: `GET https://api.nuget.org/v3/registration5/microsoft.azure.templates.analyzer/index.json` → last page, last item `.catalogEntry.version`
 
 Record the resolved versions — you will reference them in your advisory checks below.
