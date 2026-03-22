@@ -61,7 +61,7 @@ jobs:
       - name: Run guardian init (cache hit)
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          guardian=$(find /home/runner/work/_msdo/versions -maxdepth 4 -name 'guardian' -type f 2>/dev/null | sort | tail -1)
+          guardian=$(find /home/runner/work/_msdo/versions -maxdepth 4 -name 'guardian' -type f 2>/dev/null | sort -V | tail -1)
           if [[ -z "$guardian" ]]; then
             echo "::error::guardian binary not found in cache — cache may be corrupt"
             exit 1
@@ -83,7 +83,12 @@ jobs:
 
           # Tools.Configuration is installed inside the CLI package directory:
           # _msdo/versions/Microsoft.Security.Devops.Cli.linux-x64.{ver}/tools/Config/Tools/
-          config_dirs = sorted(versions_base.glob('*/tools/Config/Tools'))
+          def cli_version(p):
+              # Extract semver tuple from path e.g. .../Cli.linux-x64.0.215.0/tools/Config/Tools
+              m = re.search(r'\.(\d+)\.(\d+)\.(\d+)[/\\]', str(p))
+              return tuple(int(x) for x in m.groups()) if m else (0, 0, 0)
+
+          config_dirs = sorted(versions_base.glob('*/tools/Config/Tools'), key=cli_version)
           if not config_dirs:
               print('ERROR: Config/Tools not found — guardian init may not have run', file=sys.stderr)
               gh_out = os.environ.get('GITHUB_OUTPUT', '')
@@ -154,21 +159,20 @@ jobs:
               except ET.ParseError:
                   pass
 
-              # --- Strategy 3: regex fallback on raw XML text ---
-              # Handles malformed XML or unexpected schemas
-              if not any(t in tools for t in PKG_TO_TOOL.values()):
-                  for pkg_lower, canonical in PKG_TO_TOOL.items():
-                      if canonical in tools:
-                          continue
-                      # Look for the package name (case-insensitive) near a version
-                      if pkg_lower in content.lower():
-                          m = re.search(
-                              re.escape(pkg_lower) + r'[^"\'<>]*["\'>][\s\S]{0,200}?' +
-                              r'(\d+\.\d+(?:\.\d+)*)',
-                              content.lower()
-                          )
-                          if m:
-                              tools[canonical] = m.group(1)
+              # --- Strategy 3: regex fallback on raw XML text (per-tool) ---
+              # Runs for each tool not yet resolved, regardless of other tools.
+              # Handles malformed XML or unexpected schemas.
+              for pkg_lower, canonical in PKG_TO_TOOL.items():
+                  if canonical in tools:
+                      continue
+                  if pkg_lower in content.lower():
+                      m = re.search(
+                          re.escape(pkg_lower) + r'[^"\'<>]*["\'>][\s\S]{0,200}?' +
+                          r'(\d+\.\d+(?:\.\d+)*)',
+                          content.lower()
+                      )
+                      if m:
+                          tools[canonical] = m.group(1)
 
           # eslint: installed via npm — version is in the npm package spec inside
           # the .gdntool for eslint. Try to find it from the raw XML dump.
