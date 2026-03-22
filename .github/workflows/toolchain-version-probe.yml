@@ -13,11 +13,12 @@ name: MSDO Toolchain Version Probe
 
 on:
   schedule:
-    - cron: '50 10 * * *'  # Daily 10:50 UTC — 12 min before breach monitor (11:02)
+    - cron: '0 11 * * *'  # Daily 11:00 UTC
   workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write   # needed to dispatch the breach monitor after committing versions
 
 jobs:
   probe:
@@ -220,3 +221,14 @@ jobs:
             git commit -m "chore(ci): update toolchain-versions.json [skip ci]"
             git push
           fi
+
+      # Trigger the breach monitor only after versions are committed.
+      # This guarantees the monitor always reads fresh versions — no schedule
+      # race condition between the two workflows.
+      - name: Trigger breach monitor
+        if: steps.collect.outputs.skip_commit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run msdo-breach-monitor.lock.yml --ref main
+          echo "Breach monitor dispatched — will read freshly committed toolchain-versions.json"
