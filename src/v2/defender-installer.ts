@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as https from 'https';
 import * as http from 'http';
@@ -85,6 +86,8 @@ async function downloadDefenderCli(
 
     await downloadFile(downloadUrl, filePath);
 
+    await verifyIntegrity(filePath, downloadUrl);
+
     // Make executable on non-Windows platforms
     if (process.platform !== 'win32') {
         fs.chmodSync(filePath, 0o755);
@@ -105,6 +108,12 @@ function downloadFile(url: string, filePath: string): Promise<void> {
                 const redirectUrl = response.headers.location;
                 if (!redirectUrl) {
                     return reject(new Error('Redirect without location header'));
+                }
+                // Validate redirect stays on trusted host
+                const allowedHost = new URL(downloadBaseUrl).hostname;
+                const redirectHost = new URL(redirectUrl).hostname;
+                if (redirectHost !== allowedHost) {
+                    return reject(new Error(`Redirect to untrusted host: ${redirectHost}. Expected: ${allowedHost}`));
                 }
                 core.debug(`Following redirect to: ${redirectUrl}`);
                 downloadFile(redirectUrl, filePath).then(resolve).catch(reject);
@@ -138,6 +147,66 @@ function downloadFile(url: string, filePath: string): Promise<void> {
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
+            reject(new Error('Download timed out'));
+        });
+    });
+}
+
+/**
+ * Verifies the SHA-256 integrity of a downloaded file against a checksum sidecar.
+ */
+async function verifyIntegrity(filePath: string, downloadUrl: string): Promise<void> {
+    const checksumUrl = `${downloadUrl}.sha256`;
+    const expectedHash = await downloadString(checksumUrl);
+    const expected = expectedHash.trim().split(/\s+/)[0].toLowerCase();
+    const fileBuffer = fs.readFileSync(filePath);
+    const actualHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    if (actualHash !== expected) {
+        fs.unlinkSync(filePath);
+        throw new Error(`Integrity check failed for ${path.basename(filePath)}: expected ${expected}, got ${actualHash}`);
+    }
+    core.debug(`Integrity verified: ${actualHash}`);
+}
+
+/**
+ * Downloads a URL and returns the response body as a string, following redirects with origin pinning.
+ */
+function downloadString(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const request = https.get(url, { timeout: downloadTimeoutMs }, (response) => {
+            // Follow redirects (301, 302)
+            if (response.statusCode === 301 || response.statusCode === 302) {
+                const redirectUrl = response.headers.location;
+                if (!redirectUrl) {
+                    return reject(new Error('Redirect without location header'));
+                }
+                // Validate redirect stays on trusted host
+                const allowedHost = new URL(downloadBaseUrl).hostname;
+                const redirectHost = new URL(redirectUrl).hostname;
+                if (redirectHost !== allowedHost) {
+                    return reject(new Error(`Redirect to untrusted host: ${redirectHost}. Expected: ${allowedHost}`));
+                }
+                core.debug(`Following redirect to: ${redirectUrl}`);
+                downloadString(redirectUrl).then(resolve).catch(reject);
+                return;
+            }
+
+            if (response.statusCode !== 200) {
+                return reject(new Error(`Download failed with status code: ${response.statusCode}`));
+            }
+
+            const chunks: Buffer[] = [];
+            response.on('data', (chunk: Buffer) => chunks.push(chunk));
+            response.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+            response.on('error', (error) => reject(new Error(`Download error: ${error.message}`)));
+        });
+
+        request.on('error', (error) => {
+            reject(new Error(`Download error: ${error.message}`));
+        });
+
+        request.on('timeout', () => {
+            request.destroy();
             reject(new Error('Download timed out'));
         });
     });

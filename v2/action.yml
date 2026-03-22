@@ -16,7 +16,7 @@ inputs:
   modelPath:
     description: 'The AI model path or URL to scan. Used when command is model. Supports local paths and http:// or https:// URLs.'
   policy:
-    description: 'The name of the well known policy to use. Options: github, microsoft, none.'
+    description: 'Policy to apply. Options: mdc (default), github, microsoft, azuredevops, none.'
     default: 'mdc'
   break:
     description: 'If true, the action will fail the build when critical vulnerabilities are detected.'

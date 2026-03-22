@@ -183,7 +183,7 @@ export class ContainerMapping implements IMicrosoftDefenderCLI {
      * @returns a Promise
      */
     private async _sendReport(data: string, bearerToken: string): Promise<void> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let apiTime = new Date().getMilliseconds();
             let options = {
                 method: 'POST',
@@ -261,7 +261,7 @@ export class ContainerMapping implements IMicrosoftDefenderCLI {
     }
 
     private async _checkCallerIsCustomer(bearerToken: string): Promise<number> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let options = {
                 method: 'GET',
                 timeout: 2500,

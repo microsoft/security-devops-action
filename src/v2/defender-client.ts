@@ -32,6 +32,19 @@ export async function scanImage(
 }
 
 /**
+ * Scans an AI model for security vulnerabilities.
+ */
+export async function scanModel(
+    modelPath: string,
+    policy?: string,
+    outputPath?: string,
+    successfulExitCodes?: number[],
+    additionalArgs?: string[]
+): Promise<void> {
+    await scan('model', modelPath, policy, outputPath, successfulExitCodes, additionalArgs);
+}
+
+/**
  * Generic scan function used by scanDirectory and scanImage.
  */
 async function scan(

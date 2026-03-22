@@ -3,7 +3,7 @@ import * as exec from '@actions/exec';
 import * as path from 'path';
 import { ScanType, Inputs, validateScanType, validateImageName, validateModelPath, validateFileSystemPath, parseAdditionalArgs, setupDebugLogging } from './defender-helpers';
 import { IMicrosoftDefenderCLI } from './defender-interface';
-import { scanDirectory, scanImage, setupEnvironment } from './defender-client';
+import { scanDirectory, scanImage, scanModel, setupEnvironment } from './defender-client';
 import { postJobSummary } from './job-summary';
 
 /*
@@ -151,7 +151,7 @@ export class MicrosoftDefenderCLI implements IMicrosoftDefenderCLI {
                     break;
 
                 case ScanType.Model:
-                    await this.runModelScan(target, policy, outputPath, successfulExitCodes, additionalArgs);
+                    await scanModel(target, policy, outputPath, successfulExitCodes, additionalArgs);
                     break;
             }
 
@@ -174,63 +174,4 @@ export class MicrosoftDefenderCLI implements IMicrosoftDefenderCLI {
         }
     }
 
-    /**
-     * Runs a model scan using the Defender CLI directly.
-     * This is needed because the defender-client doesn't export a scanModel() function.
-     */
-    private async runModelScan(
-        modelPath: string,
-        policy: string,
-        outputPath: string,
-        successfulExitCodes: number[],
-        additionalArgs: string[]
-    ): Promise<void> {
-        await setupEnvironment();
-
-        const cliFilePath = process.env['DEFENDER_FILEPATH'];
-
-        if (!cliFilePath) {
-            throw new Error('DEFENDER_FILEPATH environment variable is not set. Defender CLI may not be installed.');
-        }
-
-        const args = [
-            'scan',
-            'model',
-            modelPath,
-        ];
-
-        if (policy) {
-            args.push('--defender-policy', policy);
-        }
-
-        args.push('--defender-output', outputPath);
-
-        if (additionalArgs && additionalArgs.length > 0) {
-            args.push(...additionalArgs);
-            core.debug(`Appending additional arguments: ${additionalArgs.join(' ')}`);
-        }
-
-        // Check if debug is enabled
-        const isDebug = process.env['RUNNER_DEBUG'] === '1' || core.isDebug();
-        if (isDebug && !args.includes('--defender-debug')) {
-            args.push('--defender-debug');
-        }
-
-        core.debug('Running Microsoft Defender CLI for model scan...');
-        const exitCode = await exec.exec(cliFilePath, args, {
-            ignoreReturnCode: true
-        });
-
-        let success = false;
-        for (const successCode of successfulExitCodes) {
-            if (exitCode === successCode) {
-                success = true;
-                break;
-            }
-        }
-
-        if (!success) {
-            throw new Error(`Defender CLI exited with an error exit code: ${exitCode}`);
-        }
-    }
 }
