@@ -1,7 +1,5 @@
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import { run, sendReport, _sendReport } from '../lib/v1/post';
 import { ContainerMapping } from '../lib/v1/container-mapping';
 
 describe('postjob runPostJob', function() {

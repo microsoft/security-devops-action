@@ -184,14 +184,14 @@ export class ContainerMapping implements IMicrosoftDefenderCLI {
      */
     private async _sendReport(data: string, bearerToken: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            let apiTime = new Date().getMilliseconds();
+            let apiTime = Date.now();
             let options = {
                 method: 'POST',
                 timeout: 2500,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + bearerToken,
-                    'Content-Length': data.length
+                    'Content-Length': Buffer.byteLength(data, 'utf8')
                 }
             };
             core.debug(`${options['method'].toUpperCase()} ${ContainerMappingURL}`);
@@ -203,7 +203,7 @@ export class ContainerMapping implements IMicrosoftDefenderCLI {
                 });
 
                 res.on('end', () => {
-                    core.debug('API calls finished. Time taken: ' + (new Date().getMilliseconds() - apiTime) + "ms");
+                    core.debug('API calls finished. Time taken: ' + (Date.now() - apiTime) + "ms");
                     core.debug(`Status code: ${res.statusCode} ${res.statusMessage}`);
                     core.debug('Response headers: ' + JSON.stringify(res.headers));
                     if (resData.length > 0) {

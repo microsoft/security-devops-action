@@ -1,9 +1,8 @@
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as path from 'path';
 import { ScanType, Inputs, validateScanType, validateImageName, validateModelPath, validateFileSystemPath, parseAdditionalArgs, setupDebugLogging } from './defender-helpers';
 import { IMicrosoftDefenderCLI } from './defender-interface';
-import { scanDirectory, scanImage, scanModel, setupEnvironment } from './defender-client';
+import { scanDirectory, scanImage, scanModel } from './defender-client';
 import { postJobSummary } from './job-summary';
 
 /*

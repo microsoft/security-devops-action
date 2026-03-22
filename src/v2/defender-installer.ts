@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as https from 'https';
-import * as http from 'http';
 import * as path from 'path';
 import * as os from 'os';
 
