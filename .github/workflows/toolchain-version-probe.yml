@@ -40,7 +40,7 @@ jobs:
           # ZipClient / Pip3Client   → same pattern via PackageInstaller
           GDN_I = pathlib.Path('.gdn/i')
 
-          VER_PAT = re.compile(r'^(.+?)\.(\d+\.\d+(?:\.\d+)*)$', re.IGNORECASE)
+          VER_PAT = re.compile(r'^(.+?)\.(v?\d+\.\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?)$', re.IGNORECASE)
 
           # Map installed package names → canonical tool names used in our inventory.
           # Keys are lowercase. Add new entries after the first probe run reveals
@@ -84,15 +84,24 @@ jobs:
                   version   = m.group(2)
                   if pkg_lower in CLI_PKGS:
                       continue
-                  canonical = PKG_TO_TOOL.get(pkg_lower, pkg_lower)
+                  canonical = PKG_TO_TOOL.get(pkg_lower)
+                  if canonical is None:
+                      continue
                   tools[canonical] = version
 
           output = {
-              'generated_at':    datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+              'generated_at':    datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
               'msdo_cli_version': os.environ.get('MSDO_INSTALLEDVERSION', 'unknown'),
               'tools':           tools,
               'raw_dirs':        raw_dirs,
           }
+
+          expected = set(PKG_TO_TOOL.values())
+          missing = expected - set(tools.keys())
+          if not tools:
+              raise SystemExit('ERROR: no tool versions resolved — .gdn/i/ may be empty. Aborting to avoid poisoning toolchain-versions.json.')
+          if missing:
+              print(f'WARNING: expected tools not found in install dirs: {sorted(missing)}')
 
           out = pathlib.Path('.github/toolchain-versions.json')
           out.parent.mkdir(parents=True, exist_ok=True)

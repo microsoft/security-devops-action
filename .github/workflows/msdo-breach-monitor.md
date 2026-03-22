@@ -31,9 +31,11 @@ tools:
     allowed:
       - raw.githubusercontent.com
       - nvd.nist.gov
+      - services.nvd.nist.gov
       - osv.dev
       - pypi.org
       - api.nuget.org
+      - registry.npmjs.org
 
 safe-outputs:
   noop: false
@@ -142,9 +144,14 @@ Flag a tool if **any** of the following are true:
 
 ### Step 3: Assess impact
 
-For each finding, determine:
-- **Severity**: critical, high, or medium
-- **Affected version**: Is the resolved version from Step 0 within the vulnerable range?
+For each finding, determine severity using the resolved version from Step 0 and the advisory's affected range:
+
+- **CRITICAL** — our pinned version exactly equals a known-bad version (e.g. the advisory names `trivy 0.69.3` and we have `0.69.3`), OR the supply chain was directly compromised (hijacked package, malicious release artifact).
+- **HIGH** — our pinned version falls within the advisory's affected range but is not the exact named version (e.g. advisory says `>= 0.68.0, < 0.69.4` and we have `0.69.3`); or our pinned version is older than the version where the fix was released, even if no exact match.
+- **MEDIUM** — theoretical / low-exploitability / version not confirmed in range.
+
+Also determine:
+- **Triage — are we actually exposed?** Cross-reference the advisory description with how MSDO uses the tool. Note whether the vulnerable code path (e.g. a specific CLI flag, network listener, or parser) is reachable via normal MSDO execution.
 - **Impact on MSDO**: Does this affect users of `microsoft/security-devops-action`?
 - **Exploitability**: Active exploitation, PoC available, or theoretical?
 
@@ -172,12 +179,14 @@ For each finding, check whether the **specific CVE ID or GHSA ID** appears in an
 
 **Body:**
 - **Affected tool(s)**: Name and resolved version from Step 0
-- **Severity**: Critical / High / Medium
+- **Severity**: Critical / High / Medium (with rationale — exact match vs. range match)
 - **Summary**: What happened (2–3 sentences)
-- **CVE/Advisory IDs**: GHSA-XXXX or CVE-XXXX links
-- **Vulnerable version range**: Which versions are affected
+- **CVE/Advisory IDs**: GHSA-XXXX or CVE-XXXX — include full NVD link and CVSS base score
+- **Vulnerability description**: What the CVE actually does — attack vector, what an attacker can achieve
+- **Vulnerable version range**: Which versions are affected and which version contains the fix
+- **Triage — are MSDO users exposed?**: Explain whether the vulnerable code path is reachable via normal MSDO usage. State explicitly: *"Exposed"* / *"Likely not exposed"* / *"Cannot determine"* with reasoning.
 - **Impact on MSDO**: How this affects users of `microsoft/security-devops-action`
-- **Recommended action**: Concrete steps for maintainers
+- **Recommended action**: Concrete steps for maintainers (e.g. bump pinned version in `.gdntool`, block the release)
 - **Sources**: Links to advisories, NVD entries, upstream repo issues
 
 **Labels:**
