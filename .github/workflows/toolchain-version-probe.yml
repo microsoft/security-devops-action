@@ -99,7 +99,12 @@ jobs:
           expected = set(PKG_TO_TOOL.values())
           missing = expected - set(tools.keys())
           if not tools:
-              raise SystemExit('ERROR: no tool versions resolved — .gdn/i/ may be empty. Aborting to avoid poisoning toolchain-versions.json.')
+              print('WARNING: no tool versions resolved — .gdn/i/ may be empty or MSDO failed. Skipping commit to preserve last known-good state.')
+              gh_env = os.environ.get('GITHUB_ENV', '')
+              if gh_env:
+                  with open(gh_env, 'a') as f:
+                      f.write('PROBE_SKIP_COMMIT=true\n')
+              import sys; sys.exit(0)
           if missing:
               print(f'WARNING: expected tools not found in install dirs: {sorted(missing)}')
 
@@ -110,6 +115,7 @@ jobs:
           PYEOF
 
       - name: Commit updated versions
+        if: env.PROBE_SKIP_COMMIT != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
