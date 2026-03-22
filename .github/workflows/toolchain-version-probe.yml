@@ -31,63 +31,59 @@ jobs:
           tools: bandit,binskim,checkov,eslint,templateanalyzer,terrascan,trivy
 
       - name: Collect resolved tool versions from install dirs
+        id: collect
         run: |
           python3 - <<'PYEOF'
           import os, json, re, pathlib, datetime
 
-          # MSDO installs packages into .gdn/i/{type}/{PackageName}.{version}/
-          # DotNetToolClient.cs:244  → nuget dirs  are PackageName.Version
-          # ZipClient / Pip3Client   → same pattern via PackageInstaller
-          GDN_I = pathlib.Path('.gdn/i')
+          # MSDO installs packages into $RUNNER_TEMP/../_msdo/packages/nuget/{PackageName}.{version}/
+          # and npm tools into $RUNNER_TEMP/../_msdo/packages/node_modules/{tool}/package.json
+          runner_temp = pathlib.Path(os.environ.get('RUNNER_TEMP', '/tmp'))
+          MSDO_PACKAGES = runner_temp.parent / '_msdo' / 'packages'
 
           VER_PAT = re.compile(r'^(.+?)\.(v?\d+\.\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?)$', re.IGNORECASE)
 
-          # Map installed package names → canonical tool names used in our inventory.
-          # Keys are lowercase. Add new entries after the first probe run reveals
-          # the exact package names for terrascan, trivy, eslint, bandit, checkov.
+          # Actual Guardian NuGet package names → canonical tool names.
+          # Pattern: Microsoft.Guardian.{Tool}Redist_{platform}.{version}
           PKG_TO_TOOL = {
-              # NuGet
-              'microsoft.codeanalysis.binskim':          'binskim',
-              'microsoft.azure.templates.analyzer':      'templateanalyzer',
-              # pip (package name == tool name for these)
-              'bandit':                                  'bandit',
-              'checkov':                                 'checkov',
-              # npm
-              'eslint':                                  'eslint',
-              # zip / GitHub releases (names TBD from first run — check raw_dirs)
-              'trivy':                                   'trivy',
-              'terrascan':                               'terrascan',
-          }
-
-          # Internal CLI package — skip in output
-          CLI_PKGS = {
-              'microsoft.security.devops.cli',
-              'microsoft.security.devops.cli.linux-x64',
-              'microsoft.security.devops.cli.linux-arm64',
-              'microsoft.security.devops.cli.win-x64',
+              'microsoft.guardian.banditredist_linux_amd64':     'bandit',
+              'microsoft.guardian.banditredist_win_amd64':       'bandit',
+              'microsoft.codeanalysis.binskim':                  'binskim',
+              'microsoft.guardian.checkovredist_linux_amd64':    'checkov',
+              'microsoft.guardian.checkovredist_win_amd64':      'checkov',
+              'azure.templates.analyzer.commandline.linux-x64':  'templateanalyzer',
+              'azure.templates.analyzer.commandline.win-x64':    'templateanalyzer',
+              'microsoft.guardian.terrascanredist_linux_amd64':  'terrascan',
+              'microsoft.guardian.terrascanredist_win_amd64':    'terrascan',
+              'microsoft.guardian.trivyredist_linux_amd64':      'trivy',
+              'microsoft.guardian.trivyredist_win_amd64':        'trivy',
           }
 
           tools = {}
           raw_dirs = {}
 
-          for pkg_type in ('nuget', 'pip', 'npm', 'zip'):
-              type_dir = GDN_I / pkg_type
-              if not type_dir.exists():
-                  continue
-              entries = sorted(d.name for d in type_dir.iterdir() if d.is_dir())
-              raw_dirs[pkg_type] = entries
+          # NuGet packages (all tools except eslint)
+          nuget_dir = MSDO_PACKAGES / 'nuget'
+          if nuget_dir.exists():
+              entries = sorted(d.name for d in nuget_dir.iterdir() if d.is_dir())
+              raw_dirs['nuget'] = entries
               for name in entries:
                   m = VER_PAT.match(name)
                   if not m:
                       continue
                   pkg_lower = m.group(1).lower()
                   version   = m.group(2)
-                  if pkg_lower in CLI_PKGS:
-                      continue
                   canonical = PKG_TO_TOOL.get(pkg_lower)
                   if canonical is None:
                       continue
                   tools[canonical] = version
+
+          # eslint is installed via npm into node_modules/eslint/package.json
+          eslint_pkg = MSDO_PACKAGES / 'node_modules' / 'eslint' / 'package.json'
+          if eslint_pkg.exists():
+              eslint_version = json.loads(eslint_pkg.read_text()).get('version')
+              if eslint_version:
+                  tools['eslint'] = eslint_version
 
           output = {
               'generated_at':    datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -99,11 +95,11 @@ jobs:
           expected = set(PKG_TO_TOOL.values())
           missing = expected - set(tools.keys())
           if not tools:
-              print('WARNING: no tool versions resolved — .gdn/i/ may be empty or MSDO failed. Skipping commit to preserve last known-good state.')
-              gh_env = os.environ.get('GITHUB_ENV', '')
-              if gh_env:
-                  with open(gh_env, 'a') as f:
-                      f.write('PROBE_SKIP_COMMIT=true\n')
+              print('WARNING: no tool versions resolved — MSDO packages dir empty or MSDO failed. Skipping commit to preserve last known-good state.')
+              gh_out = os.environ.get('GITHUB_OUTPUT', '')
+              if gh_out:
+                  with open(gh_out, 'a') as f:
+                      f.write('skip_commit=true\n')
               import sys; sys.exit(0)
           if missing:
               print(f'WARNING: expected tools not found in install dirs: {sorted(missing)}')
@@ -115,7 +111,7 @@ jobs:
           PYEOF
 
       - name: Commit updated versions
-        if: env.PROBE_SKIP_COMMIT != 'true'
+        if: steps.collect.outputs.skip_commit != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
