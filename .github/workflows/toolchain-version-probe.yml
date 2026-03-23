@@ -102,17 +102,25 @@ jobs:
 
           # Map Guardian NuGet package names (lowercase) → canonical tool names
           PKG_TO_TOOL = {
-              'microsoft.guardian.banditredist_linux_amd64':     'bandit',
-              'microsoft.guardian.banditredist_win_amd64':       'bandit',
-              'microsoft.codeanalysis.binskim':                  'binskim',
-              'microsoft.guardian.checkovredist_linux_amd64':    'checkov',
-              'microsoft.guardian.checkovredist_win_amd64':      'checkov',
-              'azure.templates.analyzer.commandline.linux-x64':  'templateanalyzer',
-              'azure.templates.analyzer.commandline.win-x64':    'templateanalyzer',
-              'microsoft.guardian.terrascanredist_linux_amd64':  'terrascan',
-              'microsoft.guardian.terrascanredist_win_amd64':    'terrascan',
-              'microsoft.guardian.trivyredist_linux_amd64':      'trivy',
-              'microsoft.guardian.trivyredist_win_amd64':        'trivy',
+              # NuGet
+              'microsoft.codeanalysis.binskim':          'binskim',
+              'microsoft.azure.templates.analyzer':      'templateanalyzer',
+              # pip (package name == tool name for these)
+              'bandit':                                  'bandit',
+              'checkov':                                 'checkov',
+              # npm
+              'eslint':                                  'eslint',
+              # zip / GitHub releases (names TBD from first run — check raw_dirs)
+              'trivy':                                   'trivy',
+              'terrascan':                               'terrascan',
+          }
+
+          # Internal CLI package — skip in output
+          CLI_PKGS = {
+              'microsoft.security.devops.cli',
+              'microsoft.security.devops.cli.linux-x64',
+              'microsoft.security.devops.cli.linux-arm64',
+              'microsoft.security.devops.cli.win-x64',
           }
 
           tools = {}
@@ -214,7 +222,6 @@ jobs:
           PYEOF
 
       - name: Commit updated versions
-        if: steps.collect.outputs.skip_commit != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

@@ -1,0 +1,35 @@
+name: Defender CLI v2 self-hosted validation
+on:
+  push:
+    branches: [main, 'release/**']
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  security-events: write
+
+jobs:
+  defender-image-scan:
+    name: Image Scan (mdc policy)
+
+    runs-on: self-hosted
+
+    steps:
+
+    - uses: actions/checkout@v6
+
+    - name: Run Defender CLI - Image Scan
+      uses: ./v2/
+      id: defender
+      with:
+        command: 'image'
+        imageName: 'ubuntu:latest'
+        policy: 'mdc'
+        break: 'false'
+        pr-summary: 'true'
+
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: ${{ steps.defender.outputs.sarifFile }}
