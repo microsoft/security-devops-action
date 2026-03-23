@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import * as core from '@actions/core';
-import { ContainerMapping } from '../lib/container-mapping';
+import { ContainerMapping } from '../lib/v1/container-mapping';
 
 describe('postjob runPostJob', function() {
     let getIDTokenStub: sinon.SinonStub;
