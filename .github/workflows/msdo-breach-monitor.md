@@ -75,9 +75,9 @@ Monitor for supply chain security incidents affecting any tool in the MSDO toolc
 
 The `toolchain-version-probe` workflow runs weekly, installs every tool through the real MSDO CLI, and records exactly which package version was resolved into `.github/toolchain-versions.json`. These are the versions MSDO users actually download — not registry "latest", but the version pinned in MSDO's `.gdntool` configs.
 
-**Read the file from this repository:**
+**Read the file from this repository (the probe pushes to a dedicated branch to avoid branch protection on main):**
 ```
-GET https://api.github.com/repos/microsoft/security-devops-action/contents/.github/toolchain-versions.json
+GET https://api.github.com/repos/microsoft/security-devops-action/contents/.github/toolchain-versions.json?ref=bot/toolchain-versions
 ```
 Decode the base64 `content` field. The `tools` object maps each tool name to its resolved version. The `generated_at` field tells you when the probe last ran.
 
