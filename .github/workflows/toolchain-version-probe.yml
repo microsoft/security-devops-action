@@ -120,5 +120,7 @@ jobs:
             echo "toolchain-versions.json unchanged — nothing to commit"
           else
             git commit -m "chore(ci): update toolchain-versions.json [skip ci]"
-            git push
+            # Push to dedicated unprotected branch — main has branch protection
+            # requiring PRs. The breach monitor reads from this branch via API.
+            git push origin HEAD:bot/toolchain-versions --force
           fi
