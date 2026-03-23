@@ -21,15 +21,12 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"148a5936b737a9676ee587cb8bd30999bfe4eae2d76dcfda6a8a6bddbe501b9b","compiler_version":"v0.61.0","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"8aff8c918da79899626a7f1870cfdc2c94bba2f747ff53f3abfd9892ab61aaf7","compiler_version":"v0.61.0","strict":true}
 
 name: "MSDO Toolchain Breach Monitor"
 "on":
   # roles: # Roles processed as role check in pre-activation job
   # - write # Roles processed as role check in pre-activation job
-  schedule:
-  - cron: "2 11 * * *"
-    # Friendly format: daily (scattered)
   workflow_dispatch:
 
 permissions: {}
@@ -232,8 +229,6 @@ jobs:
     permissions:
       contents: read
       issues: read
-    concurrency:
-      group: "gh-aw-copilot-${{ github.workflow }}"
     env:
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       GH_AW_ASSETS_ALLOWED_EXTS: ""

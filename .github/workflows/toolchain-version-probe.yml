@@ -1,24 +1,22 @@
 name: MSDO Toolchain Version Probe
 
-# Resolves the exact tool versions pinned by MSDO's .gdntool configs and writes
-# them to .github/toolchain-versions.json before the breach monitor runs.
+# Runs MSDO to install tools as a side effect, then scrapes the install
+# directories to record exact resolved versions into toolchain-versions.json.
+# The breach monitor reads this file instead of guessing "latest" from registries.
 #
-# Design: uses 'guardian init' only (via existingFilename to skip full scan).
-# guardian init downloads Microsoft.Security.DevOps.Tools.Configuration — a tiny
-# NuGet package containing the .gdntool XML files that define pinned versions.
-# No tool binaries are downloaded or executed. Runs in ~15 seconds.
-#
-# Cache: keyed by OS + week. Cold start once per week; warm runs re-use the
-# cached CLI + Tools.Configuration and just call 'guardian init --force' directly.
+# Guardian installs all tool wrappers as NuGet packages into:
+#   /home/runner/work/_msdo/packages/nuget/{PackageName}.{version}/
+# ESLint is installed via npm into:
+#   /home/runner/work/_msdo/packages/node_modules/eslint/
+# Package names confirmed from run 23433052319.
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # Daily 11:00 UTC
+    - cron: '0 4 * * 1'  # Weekly Monday 04:00 UTC
   workflow_dispatch:
 
 permissions:
   contents: write
-  actions: write   # needed to dispatch the breach monitor after committing versions
 
 jobs:
   probe:
@@ -28,197 +26,89 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Compute weekly cache key
-        id: week
-        run: echo "key=$(date +%Y-%W)" >> "$GITHUB_OUTPUT"
-
-      # Cache the MSDO CLI + Tools.Configuration (~10 MB, contains .gdntool files).
-      # Keyed by week: busts every Monday so version pins stay fresh.
-      - name: Restore MSDO CLI cache
-        id: cache
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c6158d # v4.2.2
-        with:
-          path: /home/runner/work/_msdo/versions
-          key: msdo-cli-linux-x64-${{ steps.week.outputs.key }}
-
-      # Cache miss path: use the MSDO action with a dummy SARIF to trigger
-      # 'guardian init' (which downloads the CLI + Tools.Configuration) without
-      # running any scan tools. 'guardian upload' will fail gracefully — that's fine.
-      - name: Create dummy SARIF (skip-scan sentinel)
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          echo '{"version":"2.1.0","runs":[]}' > /tmp/dummy.sarif
-
-      - name: Install MSDO CLI via guardian init (cache miss)
-        if: steps.cache.outputs.cache-hit != 'true'
+      # Run MSDO — scan may find nothing (no real targets), that's fine.
+      # Side effect: Guardian downloads all tool packages into _msdo/packages/nuget/.
+      - name: Install MSDO tools
         uses: microsoft/security-devops-action@main
-        continue-on-error: true   # guardian upload will fail — that's expected
+        continue-on-error: true
         with:
-          existingFilename: /tmp/dummy.sarif
+          tools: bandit,binskim,checkov,eslint,templateanalyzer,terrascan,trivy
 
-      # Cache hit path: guardian binary already exists. Re-run 'guardian init'
-      # to refresh the workspace .gdn config pointing at the cached CLI.
-      - name: Run guardian init (cache hit)
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: |
-          guardian=$(find /home/runner/work/_msdo/versions -maxdepth 4 -name 'guardian' -type f 2>/dev/null | sort -V | tail -1)
-          if [[ -z "$guardian" ]]; then
-            echo "::error::guardian binary not found in cache — cache may be corrupt"
-            exit 1
-          fi
-          echo "Guardian binary: $guardian"
-          "$guardian" init --force
-
-      # Parse pinned versions from .gdntool XML files in the Tools.Configuration package.
-      # These files define EXACTLY which NuGet/npm package version guardian will download
-      # for each tool — no tool binaries are needed to read them.
-      - name: Parse tool versions from .gdntool configs
-        id: collect
+      - name: Collect resolved tool versions from install dirs
         run: |
           python3 - <<'PYEOF'
-          import os, json, re, pathlib, datetime, sys
-          import xml.etree.ElementTree as ET
+          import os, json, re, pathlib, datetime
 
-          versions_base = pathlib.Path('/home/runner/work/_msdo/versions')
+          NUGET_DIR = pathlib.Path('/home/runner/work/_msdo/packages/nuget')
+          NPM_DIR   = pathlib.Path('/home/runner/work/_msdo/packages/node_modules')
 
-          # Tools.Configuration is installed inside the CLI package directory:
-          # _msdo/versions/Microsoft.Security.Devops.Cli.linux-x64.{ver}/tools/Config/Tools/
-          def cli_version(p):
-              # Extract semver tuple from path e.g. .../Cli.linux-x64.0.215.0/tools/Config/Tools
-              m = re.search(r'\.(\d+)\.(\d+)\.(\d+)[/\\]', str(p))
-              return tuple(int(x) for x in m.groups()) if m else (0, 0, 0)
+          VER_PAT = re.compile(r'^(.+?)\.(v?\d+\.\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?)$', re.IGNORECASE)
 
-          config_dirs = sorted(versions_base.glob('*/tools/Config/Tools'), key=cli_version)
-          if not config_dirs:
-              print('ERROR: Config/Tools not found — guardian init may not have run', file=sys.stderr)
-              gh_out = os.environ.get('GITHUB_OUTPUT', '')
-              if gh_out:
-                  open(gh_out, 'a').write('skip_commit=true\n')
-              sys.exit(0)
-
-          config_tools = config_dirs[-1]
-          gdntool_files = sorted(config_tools.glob('**/*.gdntool'))
-          print(f'Found {len(gdntool_files)} .gdntool files in {config_tools}')
-
-          # Map Guardian NuGet package names (lowercase) → canonical tool names
+          # Guardian NuGet wrapper package names → canonical tool names.
+          # Confirmed from run 23433052319 (_msdo/packages/nuget/ directory listing).
           PKG_TO_TOOL = {
-              # NuGet
-              'microsoft.codeanalysis.binskim':          'binskim',
-              'microsoft.azure.templates.analyzer':      'templateanalyzer',
-              # pip (package name == tool name for these)
-              'bandit':                                  'bandit',
-              'checkov':                                 'checkov',
-              # npm
-              'eslint':                                  'eslint',
-              # zip / GitHub releases (names TBD from first run — check raw_dirs)
-              'trivy':                                   'trivy',
-              'terrascan':                               'terrascan',
+              'microsoft.guardian.banditredist_linux_amd64':    'bandit',
+              'microsoft.codeanalysis.binskim':                 'binskim',
+              'microsoft.guardian.checkovredist_linux_amd64':   'checkov',
+              'azure.templates.analyzer.commandline.linux-x64': 'templateanalyzer',
+              'microsoft.guardian.terrascanredist_linux_amd64': 'terrascan',
+              'microsoft.guardian.trivyredist_linux_amd64':     'trivy',
           }
 
-          # Internal CLI package — skip in output
-          CLI_PKGS = {
+          # Internal packages — skip
+          SKIP_PKGS = {
               'microsoft.security.devops.cli',
               'microsoft.security.devops.cli.linux-x64',
               'microsoft.security.devops.cli.linux-arm64',
               'microsoft.security.devops.cli.win-x64',
+              'microsoft.security.devops.policy.names',
+              'microsoft.security.devops.policy.github',
           }
 
           tools = {}
-          raw_gdntools = {}
-          VER_RE = re.compile(r'\d+\.\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?')
+          raw_dirs = []
 
-          for f in gdntool_files:
-              content = f.read_text(encoding='utf-8', errors='replace')
-              raw_gdntools[f.name] = content
-
-              # --- Strategy 1: standard XML attribute scan ---
-              # Look for elements with Name/PackageName + Version attributes
-              try:
-                  root = ET.fromstring(content)
-                  for elem in root.iter():
-                      for name_key in ('Name', 'PackageName', 'package', 'id'):
-                          pkg = (elem.get(name_key) or '').strip().lower()
-                          if not pkg:
-                              continue
-                          canonical = PKG_TO_TOOL.get(pkg)
-                          if not canonical:
-                              continue
-                          for ver_key in ('Version', 'version', 'PackageVersion'):
-                              ver = (elem.get(ver_key) or '').strip()
-                              if ver and VER_RE.match(ver):
-                                  tools[canonical] = ver
-                                  break
-              except ET.ParseError:
-                  pass
-
-              # --- Strategy 2: child element text scan ---
-              # <PackageName>Microsoft.Guardian.TrivyRedist_linux_amd64</PackageName>
-              # <Version>0.69.3</Version>
-              try:
-                  root = ET.fromstring(content)
-                  for elem in root.iter():
-                      children = {c.tag: (c.text or '').strip() for c in elem}
-                      pkg = children.get('PackageName', children.get('Name', children.get('Id', ''))).lower()
-                      ver = children.get('Version', children.get('PackageVersion', ''))
-                      if pkg and ver:
-                          canonical = PKG_TO_TOOL.get(pkg)
-                          if canonical and VER_RE.match(ver):
-                              tools[canonical] = ver
-              except ET.ParseError:
-                  pass
-
-              # --- Strategy 3: regex fallback on raw XML text (per-tool) ---
-              # Runs for each tool not yet resolved, regardless of other tools.
-              # Handles malformed XML or unexpected schemas.
-              for pkg_lower, canonical in PKG_TO_TOOL.items():
-                  if canonical in tools:
+          if NUGET_DIR.exists():
+              entries = sorted(d.name for d in NUGET_DIR.iterdir() if d.is_dir())
+              raw_dirs = entries
+              for name in entries:
+                  m = VER_PAT.match(name)
+                  if not m:
                       continue
-                  if pkg_lower in content.lower():
-                      m = re.search(
-                          re.escape(pkg_lower) + r'[^"\'<>]*["\'>][\s\S]{0,200}?' +
-                          r'(\d+\.\d+(?:\.\d+)*)',
-                          content.lower()
-                      )
-                      if m:
-                          tools[canonical] = m.group(1)
-
-          # eslint: installed via npm — version is in the npm package spec inside
-          # the .gdntool for eslint. Try to find it from the raw XML dump.
-          if 'eslint' not in tools:
-              for fname, content in raw_gdntools.items():
-                  if 'eslint' not in fname.lower() and 'eslint' not in content.lower():
+                  pkg_lower = m.group(1).lower()
+                  version   = m.group(2)
+                  if pkg_lower in SKIP_PKGS:
                       continue
-                  m = re.search(r'eslint[@=](\d+\.\d+(?:\.\d+)*)', content, re.IGNORECASE)
-                  if m:
-                      tools['eslint'] = m.group(1)
-                      break
+                  canonical = PKG_TO_TOOL.get(pkg_lower)
+                  if canonical:
+                      tools[canonical] = version
 
-          # Dump raw .gdntool content so we can inspect the schema on first run
-          print('\n=== RAW .gdntool FILES (schema discovery) ===')
-          for fname, content in raw_gdntools.items():
-              print(f'\n--- {fname} ---')
-              print(content[:2000])  # first 2KB per file
+          # ESLint: installed via npm, read version from package.json
+          eslint_pkg = NPM_DIR / 'eslint' / 'package.json'
+          if eslint_pkg.exists():
+              tools['eslint'] = json.loads(eslint_pkg.read_text())['version']
 
-          print(f'\n=== RESOLVED VERSIONS ===')
-          print(json.dumps(tools, indent=2))
+          print('raw_dirs:', raw_dirs)
+          print('resolved:', tools)
 
           if not tools:
-              print('\nWARNING: no versions resolved from .gdntool files — check raw output above')
-              gh_out = os.environ.get('GITHUB_OUTPUT', '')
-              if gh_out:
-                  open(gh_out, 'a').write('skip_commit=true\n')
-              sys.exit(0)
+              raise SystemExit('ERROR: no versions resolved — _msdo/packages/nuget/ empty or missing. Aborting.')
+
+          missing = (set(PKG_TO_TOOL.values()) | {'eslint'}) - set(tools.keys())
+          if missing:
+              print(f'WARNING: expected tools not found: {sorted(missing)}')
 
           output = {
               'generated_at':     datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
               'msdo_cli_version': os.environ.get('MSDO_INSTALLEDVERSION', 'unknown'),
               'tools':            tools,
-              'raw_gdntools':     list(raw_gdntools.keys()),
+              'raw_dirs':         raw_dirs,
           }
 
           out = pathlib.Path('.github/toolchain-versions.json')
           out.parent.mkdir(parents=True, exist_ok=True)
           out.write_text(json.dumps(output, indent=2) + '\n')
+          print(json.dumps(output, indent=2))
           PYEOF
 
       - name: Commit updated versions
@@ -232,14 +122,3 @@ jobs:
             git commit -m "chore(ci): update toolchain-versions.json [skip ci]"
             git push
           fi
-
-      # Trigger the breach monitor only after versions are committed.
-      # This guarantees the monitor always reads fresh versions — no schedule
-      # race condition between the two workflows.
-      - name: Trigger breach monitor
-        if: steps.collect.outputs.skip_commit != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run msdo-breach-monitor.lock.yml --ref main
-          echo "Breach monitor dispatched — will read freshly committed toolchain-versions.json"
