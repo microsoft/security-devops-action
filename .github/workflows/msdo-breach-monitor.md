@@ -3,9 +3,10 @@
 # Nightly supply chain breach monitor for MSDO toolchain dependencies
 
 on:
-  schedule:
-    - cron: daily
   workflow_dispatch:
+  # Triggered by toolchain-version-probe after committing fresh versions.
+  # No schedule here — the probe owns the daily cadence and guarantees
+  # toolchain-versions.json is fresh before this workflow reads it.
   roles: [write]
 
 engine:
