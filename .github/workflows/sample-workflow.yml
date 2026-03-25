@@ -20,7 +20,7 @@ jobs:
     steps:
       
       # Checkout your code repository to scan
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v6.0.2
 
       # Run analyzers
     - name: Run Microsoft Security DevOps Analysis
