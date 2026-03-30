@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-03-30T04:56:45Z",
+  "msdo_cli_version": "unknown",
+  "tools": {
+    "templateanalyzer": "0.8.6",
+    "binskim": "4.4.1",
+    "bandit": "1.8.6.12",
+    "checkov": "3.2.497",
+    "terrascan": "1.19.9",
+    "trivy": "0.69.3"
+  },
+  "raw_dirs": [
+    "Azure.Templates.Analyzer.CommandLine.linux-x64.0.8.6",
+    "Microsoft.CodeAnalysis.BinSkim.4.4.1",
+    "Microsoft.Guardian.BanditRedist_linux_amd64.1.8.6.12",
+    "Microsoft.Guardian.CheckovRedist_linux_amd64.3.2.497",
+    "Microsoft.Guardian.TerrascanRedist_linux_amd64.1.19.9",
+    "Microsoft.Guardian.TrivyRedist_linux_amd64.0.69.3",
+    "Microsoft.Security.DevOps.Policy.GitHub.2.0.3",
+    "Microsoft.Security.DevOps.Policy.Names.2.0.1"
+  ]
+}
