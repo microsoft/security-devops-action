@@ -15,7 +15,7 @@ engine:
 
 permissions:
   contents: read
-  issues: write
+  issues: read
 
 network:
   allowed:

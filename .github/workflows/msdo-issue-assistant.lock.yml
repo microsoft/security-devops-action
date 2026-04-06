@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"be9d9a34c65ac1897e69366960562c46d72ff703a7ca2bcec2adf25f114a1707","compiler_version":"v0.61.0","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"b9853605bc6fd41a4d81ec4728106d1ffdc01e2dbcf460d6aaea1620c94a3367","compiler_version":"v0.61.0","strict":true}
 
 name: "MSDO Issue Triage Assistant"
 "on":
@@ -251,7 +251,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
+      issues: read
     env:
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       GH_AW_ASSETS_ALLOWED_EXTS: ""
@@ -336,7 +336,7 @@ jobs:
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
           cat > /opt/gh-aw/safeoutputs/config.json << 'GH_AW_SAFE_OUTPUTS_CONFIG_EOF'
-          {"add_comment":{"max":4},"add_labels":{"allowed":["type:bug","type:feature","type:docs","type:question","type:security","type:maintenance","status:triage","status:waiting-on-author","status:repro-needed","status:team-review"],"max":3},"missing_data":{},"missing_tool":{}}
+          {"add_comment":{"max":4},"add_labels":{"allowed":["type:bug","type:feature","type:docs","type:question","type:security","type:maintenance","status:triage","status:waiting-on-author","status:repro-needed","status:team-review","area:action","area:msdo-cli","area:ci","area:container-mapping"],"max":3},"missing_data":{},"missing_tool":{}}
           GH_AW_SAFE_OUTPUTS_CONFIG_EOF
       - name: Write Safe Outputs Tools
         run: |
@@ -344,7 +344,7 @@ jobs:
           {
             "description_suffixes": {
               "add_comment": " CONSTRAINTS: Maximum 4 comment(s) can be added.",
-              "add_labels": " CONSTRAINTS: Only these labels are allowed: [\"type:bug\" \"type:feature\" \"type:docs\" \"type:question\" \"type:security\" \"type:maintenance\" \"status:triage\" \"status:waiting-on-author\" \"status:repro-needed\" \"status:team-review\"]."
+              "add_labels": " CONSTRAINTS: Only these labels are allowed: [\"type:bug\" \"type:feature\" \"type:docs\" \"type:question\" \"type:security\" \"type:maintenance\" \"status:triage\" \"status:waiting-on-author\" \"status:repro-needed\" \"status:team-review\" \"area:action\" \"area:msdo-cli\" \"area:ci\" \"area:container-mapping\"]."
             },
             "repo_params": {},
             "dynamic_tools": []
@@ -981,7 +981,7 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,api.business.githubcopilot.com,api.enterprise.githubcopilot.com,api.github.com,api.githubcopilot.com,api.individual.githubcopilot.com,codeload.github.com,docs.github.com,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,lfs.github.com,objects.githubusercontent.com,raw.githubusercontent.com,registry.npmjs.org,telemetry.enterprise.githubcopilot.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":4},\"add_labels\":{\"allowed\":[\"type:bug\",\"type:feature\",\"type:docs\",\"type:question\",\"type:security\",\"type:maintenance\",\"status:triage\",\"status:waiting-on-author\",\"status:repro-needed\",\"status:team-review\"]},\"missing_data\":{},\"missing_tool\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":4},\"add_labels\":{\"allowed\":[\"type:bug\",\"type:feature\",\"type:docs\",\"type:question\",\"type:security\",\"type:maintenance\",\"status:triage\",\"status:waiting-on-author\",\"status:repro-needed\",\"status:team-review\",\"area:action\",\"area:msdo-cli\",\"area:ci\",\"area:container-mapping\"]},\"missing_data\":{},\"missing_tool\":{}}"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
