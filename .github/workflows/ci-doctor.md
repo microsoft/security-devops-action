@@ -30,6 +30,7 @@ tools:
     allowed: []
 
 safe-outputs:
+  report-failure-as-issue: false
   noop: false
   create-issue:
     max: 1

@@ -30,6 +30,7 @@ tools:
       - raw.githubusercontent.com
 
 safe-outputs:
+  report-failure-as-issue: false
   noop: false
   add-comment:
     max: 4
