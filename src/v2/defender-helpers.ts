@@ -136,7 +136,7 @@ export function validateImageName(imageName: string): string {
 
     const trimmedImageName = imageName.trim();
 
-    const imageNameRegex = /^(?:(?:[a-zA-Z0-9._-]+(?:\.[a-zA-Z0-9._-]+)*(?::[0-9]+)?\/)?[a-zA-Z0-9._-]+(?:\/[a-zA-Z0-9._-]+)*)(?::[a-zA-Z0-9._-]+|@sha256:[a-fA-F0-9]{64})?$/;
+    const imageNameRegex = /^(?:(?:[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*(?::[0-9]+)?\/)?[a-zA-Z0-9._-]+(?:\/[a-zA-Z0-9._-]+)*)(?::[a-zA-Z0-9._-]+|@sha256:[a-fA-F0-9]{64})?$/;
 
     if (!imageNameRegex.test(trimmedImageName)) {
         throw new Error(`Invalid image name format: ${trimmedImageName}. Image name should follow container image naming conventions.`);
