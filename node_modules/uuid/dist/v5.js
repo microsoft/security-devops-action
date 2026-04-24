@@ -1,16 +1,9 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _v = _interopRequireDefault(require("./v35.js"));
-
-var _sha = _interopRequireDefault(require("./sha1.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const v5 = (0, _v.default)('v5', 0x50, _sha.default);
-var _default = v5;
-exports.default = _default;
+import sha1 from './sha1.js';
+import v35, { DNS, URL } from './v35.js';
+export { DNS, URL } from './v35.js';
+function v5(value, namespace, buf, offset) {
+    return v35(0x50, sha1, value, namespace, buf, offset);
+}
+v5.DNS = DNS;
+v5.URL = URL;
+export default v5;
