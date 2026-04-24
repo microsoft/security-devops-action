@@ -19,13 +19,13 @@
     "author": "Microsoft Corporation",
     "license": "MIT",
     "dependencies": {
-        "@actions/core": "2.0.3",
+        "@actions/core": "^2.0.3",
         "@actions/exec": "2.0.0",
         "@microsoft/security-devops-actions-toolkit": "1.11.0"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.10",
-        "@types/node": "^25.5.2",
+        "@types/node": "^25.6.0",
         "@types/q": "^1.5.8",
         "@types/sinon": "^21.0.1",
         "del": "^8.0.1",
@@ -33,7 +33,7 @@
         "gulp-cli": "^3.1.0",
         "gulp-typescript": "^6.0.0-alpha.1",
         "mocha": "^11.7.5",
-        "sinon": "^21.0.3",
+        "sinon": "^21.1.2",
         "typescript": "^5.9.3"
     }
 }
