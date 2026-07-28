@@ -1,6 +1,6 @@
 # microsoft/security-devops-action (Preview)
 
-Microsoft Security DevOps (MSDO) is a command line application which integrates static analysis tools into the development cycle. MSDO installs, configures and runs the latest versions of static analysis tools (including, but not limited to, SDL/security and compliance tools). MSDO is data-driven with portable configurations that enable deterministic execution across multiple environments. For tools that output results in or MSDO can convert their results to SARIF, MSDO imports into a normalized file database for seamlessly reporting and responding to results across tools, such as forcing build breaks.
+Microsoft Security DevOps (MSDO) is a command line application which integrates static analysis tools into the development cycle. MSDO installs, configures and runs static analysis tools (including, but not limited to, SDL/security and compliance tools). MSDO is data-driven with portable configurations that enable deterministic execution across multiple environments. For tools that output results in or MSDO can convert their results to SARIF, MSDO imports into a normalized file database for seamlessly reporting and responding to results across tools, such as forcing build breaks.
 
 Run locally. Run remotely.
 
@@ -10,7 +10,7 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 
 * Installs the Microsoft Security DevOps CLI
 * Installs the latest Microsoft security policy
-* Installs the latest Microsoft and 3rd party security tools
+* Installs the Microsoft and 3rd party security tools bundled with that CLI release
 * Automatic or user-provided configuration of security tools
 * Execution of a full suite of security tools
 * Normalized processing of results into the SARIF format
@@ -72,6 +72,8 @@ To only run specific analyzers, use the `tools` command. This command is a comma
 | [Terrascan](https://github.com/accurics/terrascan) | Infrastructure-as-code (IaC), Terraform (HCL2), Kubernetes (JSON/YAML), Helm v3, Kustomize, Dockerfiles, Cloudformation | [Apache License 2.0](https://github.com/accurics/terrascan/blob/master/LICENSE) |
 | [Trivy](https://github.com/aquasecurity/trivy) | container images, file systems, and git repositories | [Apache License 2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) |
 | [container-mapping](https://learn.microsoft.com/en-us/azure/defender-for-cloud/container-image-mapping) | container images and registries (only available for DevOps security enabled CSPM plans) | [MIT License](https://github.com/microsoft/security-devops-action/blob/main/LICENSE) |
+
+Tool versions are pinned to the installed Microsoft Security DevOps CLI release rather than resolved independently, so a version published upstream is only picked up once a CLI release that bundles it is available.
 
 # More Information
 
