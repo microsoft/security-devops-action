@@ -48,6 +48,22 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
+## Publish results from another tool
+
+To send SARIF produced by a tool this action does not run, set `existingFilename` to that file. The analyzers are skipped and the file is uploaded to the MSDO backend instead.
+
+```yaml
+- name: Run a third party scanner
+  run: my-scanner --sarif-output results.sarif
+
+- name: Publish existing SARIF
+  uses: microsoft/security-devops-action@latest
+  with:
+    existingFilename: results.sarif
+```
+
+Run this as its own step. When `existingFilename` is set no analyzers run, so it cannot be combined with a scanning step, and the `sarifFile` output is not set. To also surface the file in the Security tab, pass it to `github/codeql-action/upload-sarif` directly.
+
 ## Advanced
 
 To only run specific analyzers, use the `tools` command. This command is a comma-seperated list of tools to run. For example, to run only the `container-mapping` tool, configure this action as follows:
