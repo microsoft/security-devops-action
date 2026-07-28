@@ -81,7 +81,7 @@ If `tools` is not set, the MSDO CLI decides which analyzers to run by inspecting
 
 Use `categories` or `languages` to narrow a run while still letting the CLI select the tools.
 
-`container-mapping` behaves differently from the other entries in the table below. It is implemented by this action's `pre` and `post` steps rather than by the CLI, so it is never passed to the CLI as an analyzer, and its pre and post steps run on every use of this action regardless of `tools`. Listing it as the only value of `tools` is therefore how you skip the analyzer run and keep container mapping on its own.
+`container-mapping` behaves differently from the other entries in the table below. It is implemented by this action's `pre` and `post` steps rather than by the CLI, and those steps run on every use of this action regardless of `tools`. Listing it as the only value of `tools` is therefore how you skip the analyzer run and keep container mapping on its own.
 
 # Tools
 
