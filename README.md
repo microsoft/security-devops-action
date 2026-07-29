@@ -1,6 +1,6 @@
 # microsoft/security-devops-action (Preview)
 
-Microsoft Security DevOps (MSDO) is a command line application which integrates static analysis tools into the development cycle. MSDO installs, configures and runs the latest versions of static analysis tools (including, but not limited to, SDL/security and compliance tools). MSDO is data-driven with portable configurations that enable deterministic execution across multiple environments. For tools that output results in or MSDO can convert their results to SARIF, MSDO imports into a normalized file database for seamlessly reporting and responding to results across tools, such as forcing build breaks.
+Microsoft Security DevOps (MSDO) is a command line application which integrates static analysis tools into the development cycle. MSDO installs, configures and runs static analysis tools (including, but not limited to, SDL/security and compliance tools). MSDO is data-driven with portable configurations that enable deterministic execution across multiple environments. For tools that output results in SARIF, or whose results MSDO can convert to SARIF, MSDO imports them into a normalized file database for seamlessly reporting and responding to results across tools, such as forcing build breaks.
 
 Run locally. Run remotely.
 
@@ -10,7 +10,7 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 
 * Installs the Microsoft Security DevOps CLI
 * Installs the latest Microsoft security policy
-* Installs the latest Microsoft and 3rd party security tools
+* Installs the Microsoft and 3rd party security tools bundled with that CLI release
 * Automatic or user-provided configuration of security tools
 * Execution of a full suite of security tools
 * Normalized processing of results into the SARIF format
@@ -48,6 +48,22 @@ To upload results to the Security tab of your repo, run the `github/codeql-actio
     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 ```
 
+## Publish results from another tool
+
+To send SARIF produced by a tool this action does not run, set `existingFilename` to that file. The analyzers are skipped and the file is uploaded to the MSDO backend instead.
+
+```yaml
+- name: Run a third party scanner
+  run: my-scanner --sarif-output results.sarif
+
+- name: Publish existing SARIF
+  uses: microsoft/security-devops-action@latest
+  with:
+    existingFilename: results.sarif
+```
+
+Run this as its own step. When `existingFilename` is set no analyzers run, so it cannot be combined with a scanning step, and the `sarifFile` output is not set. To also surface the file in the Security tab, pass it to `github/codeql-action/upload-sarif` directly.
+
 ## Advanced
 
 To only run specific analyzers, use the `tools` command. This command is a comma-seperated list of tools to run. For example, to run only the `container-mapping` tool, configure this action as follows:
@@ -58,6 +74,14 @@ To only run specific analyzers, use the `tools` command. This command is a comma
   with:
     tools: container-mapping
 ```
+
+## How tools are selected
+
+If `tools` is not set, the MSDO CLI decides which analyzers to run by inspecting the repository contents. That selection logic lives in the CLI, not in this action. If `tools` is set, only the listed analyzers run and no content based selection takes place.
+
+Use `categories` or `languages` to narrow a run while still letting the CLI select the tools.
+
+`container-mapping` behaves differently from the other entries in the table below. It is implemented by this action's `pre` and `post` steps rather than by the CLI, and those steps run on every use of this action regardless of `tools`. Listing it as the only value of `tools` is therefore how you skip the analyzer run and keep container mapping on its own.
 
 # Tools
 
@@ -72,6 +96,8 @@ To only run specific analyzers, use the `tools` command. This command is a comma
 | [Terrascan](https://github.com/accurics/terrascan) | Infrastructure-as-code (IaC), Terraform (HCL2), Kubernetes (JSON/YAML), Helm v3, Kustomize, Dockerfiles, Cloudformation | [Apache License 2.0](https://github.com/accurics/terrascan/blob/master/LICENSE) |
 | [Trivy](https://github.com/aquasecurity/trivy) | container images, file systems, and git repositories | [Apache License 2.0](https://github.com/aquasecurity/trivy/blob/main/LICENSE) |
 | [container-mapping](https://learn.microsoft.com/en-us/azure/defender-for-cloud/container-image-mapping) | container images and registries (only available for DevOps security enabled CSPM plans) | [MIT License](https://github.com/microsoft/security-devops-action/blob/main/LICENSE) |
+
+Tool versions are pinned to the installed Microsoft Security DevOps CLI release rather than resolved independently, so a version published upstream is only picked up once a CLI release that bundles it is available.
 
 # More Information
 
