@@ -2,10 +2,10 @@
 # CI Doctor - GitHub Agentic Workflow
 # Investigates failed CI workflows and opens diagnostic issues
 #
-# MAINTENANCE NOTE: after running `gh aw compile` with gh-aw v0.61.0, verify
-# that the `actions/github-script` SHA in the generated .lock.yml stays pinned
-# to v9.0.0 (`3a2844b7e9c422d3c10d287c895573f7108da1b3`). v0.61.0's bundled
-# scaffolding emits the older v8 SHA and would silently revert PR #244. See
+# MAINTENANCE NOTE: after running `gh aw compile`, verify that the
+# `actions/github-script` SHA in the generated .lock.yml stays pinned
+# to v9.0.0 (`3a2844b7e9c422d3c10d287c895573f7108da1b3`). Older gh-aw
+# scaffolding emitted the v8 SHA and would silently revert PR #244. See
 # PR #252 for context.
 
 on:
@@ -23,6 +23,7 @@ permissions:
   contents: read
   actions: read
   issues: read
+  copilot-requests: write
 
 network:
   allowed:
@@ -32,8 +33,6 @@ tools:
   github:
     lockdown: false
     toolsets: [issues, actions]
-  fetch:
-    allowed: []
 
 safe-outputs:
   noop:
