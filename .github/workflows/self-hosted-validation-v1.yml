@@ -14,7 +14,7 @@ jobs:
     steps:
 
       # Checkout your code repository to scan
-    - uses: actions/checkout@v6.0.2
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     # Run MSDO v1
     - name: Run MSDO
@@ -23,7 +23,7 @@ jobs:
 
       # Upload results to the Security tab
     - name: Upload results to Security tab
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b # v3.37.6
       if: always()
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
