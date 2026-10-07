@@ -29,7 +29,7 @@ jobs:
       # Run MSDO — scan may find nothing (no real targets), that's fine.
       # Side effect: Guardian downloads all tool packages into _msdo/packages/nuget/.
       - name: Install MSDO tools
-        uses: microsoft/security-devops-action@main
+        uses: microsoft/security-devops-action@08976cb623803b1b36d7112d4ff9f59eae704de0 # v1.12.0
         continue-on-error: true
         with:
           tools: bandit,binskim,checkov,eslint,templateanalyzer,terrascan,trivy
