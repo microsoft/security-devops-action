@@ -20,6 +20,18 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 
 See [action.yml](action.yml)
 
+## Node.js runtime security
+
+The action uses the GitHub Actions runner's `node24` interpreter, not the Node.js selected by `actions/setup-node` or the shell `PATH`.
+
+The CLI installer can decode Brotli-compressed NuGet metadata through its dependencies. [CVE-2026-111497](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) affects the native Brotli decoder in Node.js, so updating only JavaScript dependencies does not patch the interpreter.
+
+Before CLI installation, the action logs its actual Node.js version, executable path, and Brotli version. It then rejects unpatched or unverified runtimes. The accepted stable upstream release lines start at Node.js **22.23.4**, **24.22.1**, and **26.12.1**, respectively. Older, end-of-life, prerelease, and unrecognized release lines are rejected. Vendor backports with older version numbers require a reviewed update to this policy; they are not accepted automatically.
+
+For GitHub-hosted runners, the hosted provider must supply the patched action interpreter. For self-hosted runners, the runner operator must update the runner and its bundled `node24` interpreter. Installing a patched Node.js elsewhere on the host is insufficient.
+
+After rollout, verify the executable and version reported by a subsequent legitimate action run, and confirm that the action completes successfully. Record the action ref and runner identity with that evidence. A local test, a `node --version` shell step, or the `node24` metadata declaration alone does not verify the deployed action interpreter.
+
 ## Basic
 
 Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
