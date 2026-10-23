@@ -3,6 +3,7 @@ import { IMicrosoftSecurityDevOps } from './msdo-interface';
 import { Tools } from './msdo-helpers';
 import * as client from '@microsoft/security-devops-actions-toolkit/msdo-client';
 import * as common from '@microsoft/security-devops-actions-toolkit/msdo-common';
+import { assertPatchedNodeRuntime } from './node-runtime';
 
 /*
 * Microsoft Security DevOps analyzers runner.
@@ -23,6 +24,9 @@ export class MicrosoftSecurityDevOps implements IMicrosoftSecurityDevOps {
     }
 
     public async runMain() {
+        core.info(`Node.js action runtime: ${process.versions.node}; executable: ${process.execPath}; Brotli: ${process.versions.brotli}`);
+        assertPatchedNodeRuntime(process.versions.node);
+
         core.debug('MicrosoftSecurityDevOps.runMain - Running MSDO...');
 
         let args: string[] = undefined;
