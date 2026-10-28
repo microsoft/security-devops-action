@@ -1,0 +1,38 @@
+name: NuGet Response Security
+
+on:
+  push:
+    branches: [main, latest, fix/brotli-metadata-main, fix/brotli-metadata-latest]
+    paths:
+      - 'node_modules/@microsoft/security-devops-actions-toolkit/**'
+      - 'test/nuget-response.security.cjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/nuget-response-security.yml'
+  pull_request:
+    branches: [main, latest]
+    paths:
+      - 'node_modules/@microsoft/security-devops-actions-toolkit/**'
+      - 'test/nuget-response.security.cjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/nuget-response-security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-shipped-toolkit:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        node: ['20.13.1', '24.22.1']
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify vendored NuGet response handling
+        run: npm run test:nuget-responses

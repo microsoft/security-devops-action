@@ -20,6 +20,14 @@ This action runs the [Microsoft Security DevOps CLI](https://aka.ms/msdo-nuget) 
 
 See [action.yml](action.yml)
 
+## NuGet response safety
+
+The checked-in toolkit includes the Brotli response rejection from [toolkit PR #24](https://github.com/microsoft/security-devops-actions-toolkit/pull/24), merged as `433e1090696fec074f5fe066e209ece22a50102c`. NuGet metadata requests decline Brotli and reject unsupported encodings before decompression. Existing gzip/deflate decoding, package transfer, authentication, and proxy behavior are preserved.
+
+This is a targeted patch to the vendored runtime, not a new toolkit package or Node.js release. Reinstalling toolkit version `1.11.0` or replacing the vendored files can remove it; future package adoption must retain this mitigation and the existing proxy fix.
+
+Run `npm run test:nuget-responses` to test the actual checked-in dependency with local fixtures, without package-feed credentials or a remote NuGet service. The dedicated CI checks Windows and Linux on Node.js 20.13.1 and 24.22.1. Node 20 is a compatibility-test target, not a recommendation to deploy an end-of-life runtime.
+
 ## Basic
 
 Run **Microsoft Security DevOps (MSDO)** with the default policy and recommended tools.
