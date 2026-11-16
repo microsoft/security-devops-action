@@ -17,3 +17,5 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "fix(ci)"
+    cooldown:
+      default-days: 7
